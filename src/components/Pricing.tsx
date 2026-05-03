@@ -18,7 +18,7 @@ export default function Pricing() {
         <ScrollReveal>
           <div className="mb-12 text-center">
             <span className="text-sm uppercase tracking-wider text-[#A855F7]">Pricing</span>
-            <h2 className="mt-2 text-4xl font-bold md:text-5xl">Simple. Transparent.</h2>
+            <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">Simple. Transparent.</h2>
             <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#A855F7] to-[#3B82F6]" />
           </div>
         </ScrollReveal>
@@ -34,7 +34,7 @@ export default function Pricing() {
                         POPULAR
                       </span>
                     )}
-                    <h3 className="text-2xl font-bold text-[#FFFFFF]">{plan.name}</h3>
+                    <h3 className="font-heading text-2xl font-bold text-[#FFFFFF]">{plan.name}</h3>
                     <div className="mt-4">
                       <span className="text-4xl font-bold text-[#A855F7]">₹{plan.price}</span>
                       <span className="text-[#A1A1AA]">/hr</span>

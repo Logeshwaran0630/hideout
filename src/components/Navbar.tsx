@@ -77,7 +77,7 @@ export default function Navbar() {
             style={{ width: "auto", height: "28px" }}
             priority
           />
-          <span className="hidden bg-gradient-to-r from-[#A855F7] to-[#3B82F6] bg-clip-text text-lg font-bold text-transparent sm:inline">
+          <span className="hidden bg-gradient-to-r from-[#A855F7] to-[#3B82F6] bg-clip-text font-display text-base font-black tracking-tight text-transparent sm:inline">
             THE HIDEOUT
           </span>
         </Link>

@@ -11,7 +11,7 @@ export default function About() {
         <ScrollReveal>
           <div className="mb-12 text-center">
             <span className="text-sm uppercase tracking-wider text-[#A855F7]">About Us</span>
-            <h2 className="mt-2 text-4xl font-bold md:text-5xl">Welcome to The Hideout</h2>
+            <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">Welcome to The Hideout</h2>
             <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#A855F7] to-[#3B82F6]" />
           </div>
         </ScrollReveal>

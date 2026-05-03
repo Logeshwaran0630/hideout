@@ -21,9 +21,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        display: ["Bungee", "system-ui", "sans-serif"],
-        heading: ["Bebas Neue", "system-ui", "sans-serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-orbitron)", "system-ui", "sans-serif"],
+        heading: ["var(--font-rajdhani)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       boxShadow: {

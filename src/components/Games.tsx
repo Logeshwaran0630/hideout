@@ -21,7 +21,7 @@ export default function Games() {
         <ScrollReveal>
           <div className="mb-12 text-center">
             <span className="text-sm uppercase tracking-wider text-[#A855F7]">Game Library</span>
-            <h2 className="mt-2 text-4xl font-bold md:text-5xl">Choose Your Battle</h2>
+            <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">Choose Your Battle</h2>
             <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#A855F7] to-[#EC4899]" />
             <p className="mx-auto mt-4 max-w-2xl text-[#A1A1AA]">50+ titles available across all consoles</p>
           </div>

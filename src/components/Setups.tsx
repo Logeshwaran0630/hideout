@@ -42,7 +42,7 @@ export default function Setups() {
         <ScrollReveal>
           <div className="mb-12 text-center">
             <span className="text-sm uppercase tracking-wider text-[#A855F7]">Premium Setups</span>
-            <h2 className="mt-2 text-4xl font-bold md:text-5xl">SETUPS BUILT TO IMPRESS</h2>
+            <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">SETUPS BUILT TO IMPRESS</h2>
             <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#A855F7] to-[#3B82F6]" />
             <p className="mx-auto mt-4 max-w-2xl text-[#A1A1AA]">
               Four fully-kitted zones, every one with premium gear. Walk in, sit down, press start.
@@ -62,7 +62,7 @@ export default function Setups() {
                     <div className="flex items-start justify-between">
                       <div>
                         <span className="text-xs font-mono tracking-wider text-[#A855F7]">{setup.title}</span>
-                        <h3 className="mt-1 text-xl font-bold text-[#FFFFFF]">{setup.name}</h3>
+                        <h3 className="mt-1 font-heading text-xl font-bold text-[#FFFFFF]">{setup.name}</h3>
                       </div>
                     </div>
                     <p className="mt-4 text-sm leading-relaxed text-[#A1A1AA]">{setup.description}</p>

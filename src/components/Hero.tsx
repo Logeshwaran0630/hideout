@@ -56,7 +56,7 @@ export default function Hero() {
           </ScrollReveal>
 
           <ScrollReveal delay={220}>
-            <h1 className="fade-up delay-2 mt-5 max-w-5xl font-display text-[56px] uppercase leading-[0.95] text-[#FFFFFF] md:text-[80px]">
+            <h1 className="fade-up delay-2 mt-5 max-w-5xl font-display text-[48px] font-black uppercase leading-[1.05] tracking-tight text-[#FFFFFF] md:text-[72px]">
               ESCAPE THE ORDINARY.
               <br />
               ENTER THE <GlitchText text="HIDEOUT" highlight />.

@@ -38,7 +38,7 @@ export default function Features() {
         <ScrollReveal>
           <div className="mb-12 text-center">
             <span className="text-sm uppercase tracking-wider text-[#EC4899]">Why Choose Us</span>
-            <h2 className="mt-2 text-4xl font-bold md:text-5xl">MORE THAN JUST GAMING</h2>
+            <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">MORE THAN JUST GAMING</h2>
             <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#A855F7] to-[#EC4899]" />
             <p className="mx-auto mt-4 max-w-2xl text-[#A1A1AA]">
               We sweat the details so your session is flawless from the moment you walk in.
@@ -54,7 +54,7 @@ export default function Features() {
                   <div className="card-premium rounded-xl p-6 transition-all hover:glow-blue">
                     <div className="mb-3 flex items-center gap-3">
                       <span className="text-xl font-bold text-[#3B82F6]">{(index + 1).toString().padStart(2, "0")}</span>
-                      <h3 className="text-lg font-bold text-[#FFFFFF]">{feature.title}</h3>
+                      <h3 className="font-heading text-lg font-bold text-[#FFFFFF]">{feature.title}</h3>
                     </div>
                     <p className="text-sm leading-relaxed text-[#A1A1AA]">{feature.description}</p>
                   </div>
