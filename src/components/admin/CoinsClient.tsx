@@ -24,14 +24,14 @@ export default function CoinsClient({ ledger, totalEarned, totalRedeemed }: { le
   return (
     <div>
       <div className="mb-6">
-        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">LEDGER</div>
+        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">LEDGER</div>
         <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">H COIN LEDGER</h1>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-6">
           <div className="text-[13px] text-[#A1A1AA]">Total Earned</div>
-          <div className="mt-3 font-heading text-[40px] uppercase text-[#FF3A3A]">{totalEarned}</div>
+          <div className="mt-3 font-heading text-[40px] uppercase text-[#A855F7]">{totalEarned}</div>
         </div>
         <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-6">
           <div className="text-[13px] text-[#A1A1AA]">Total Redeemed</div>
@@ -45,7 +45,7 @@ export default function CoinsClient({ ledger, totalEarned, totalRedeemed }: { le
 
       <div className="mt-8 overflow-x-auto rounded-xl border border-[#27272A] bg-[#18181B]">
         <table className="w-full border-collapse">
-          <thead className="bg-[#09090B]">
+          <thead className="bg-[#0A0A0A]">
             <tr className="border-b border-[#27272A]">
               {['Date', 'User', 'Type', 'Amount', 'Booking', 'Balance Effect'].map((heading) => (
                 <th key={heading} className="px-4 py-3 text-left text-[12px] font-medium uppercase tracking-[0.1em] text-[#A1A1AA]">{heading}</th>
@@ -57,11 +57,11 @@ export default function CoinsClient({ ledger, totalEarned, totalRedeemed }: { le
               <tr key={row.id} className="border-b border-[#27272A]">
                 <td className="px-4 py-4 text-[13px] text-[#A1A1AA]">{formatTimestamp(row.created_at)}</td>
                 <td className="px-4 py-4">
-                  <div className="font-mono text-[12px] text-[#FF3A3A]">{row.users?.h_id}</div>
+                  <div className="font-mono text-[12px] text-[#A855F7]">{row.users?.h_id}</div>
                   <div className="text-[12px] text-[#71717A]">{row.users?.email}</div>
                 </td>
                 <td className="px-4 py-4">
-                  <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${row.type === 'earn' ? 'border-[rgba(74,222,128,0.3)] bg-[rgba(74,222,128,0.1)] text-[#4ADE80]' : row.type === 'redeem' ? 'border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] text-[#EF4444]' : 'border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] text-[#FF3A3A]'}`}>{row.type}</span>
+                  <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${row.type === 'earn' ? 'border-[rgba(74,222,128,0.3)] bg-[rgba(74,222,128,0.1)] text-[#4ADE80]' : row.type === 'redeem' ? 'border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] text-[#EF4444]' : 'border-[rgba(168,85,247,0.3)] bg-[rgba(168,85,247,0.1)] text-[#A855F7]'}`}>{row.type}</span>
                 </td>
                 <td className={`px-4 py-4 text-[14px] font-semibold ${row.amount >= 0 ? 'text-[#4ADE80]' : 'text-[#EF4444]'}`}>{row.amount >= 0 ? `+${row.amount}` : row.amount}</td>
                 <td className="px-4 py-4 font-mono text-[12px] text-[#A1A1AA]">{row.bookings?.booking_code ?? '—'}</td>

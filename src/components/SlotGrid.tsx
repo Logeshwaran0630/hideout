@@ -16,7 +16,7 @@ export default function SlotGrid() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   return (
-    <div className="space-y-0 bg-[#09090B]">
+    <div className="space-y-0 bg-[#0A0A0A]">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {slots.map(({ label, state }) => {
           const isSelected = selectedSlot === label;
@@ -51,7 +51,7 @@ export default function SlotGrid() {
         }}
         className={`mt-4 rounded-lg px-6 py-3 font-semibold transition duration-200 ${
           selectedSlot
-            ? "bg-[#FF3A3A] text-[#09090B] hover:shadow-[0_0_12px_rgba(255,58,58,0.4)]"
+            ? "bg-gradient-to-r from-[#A855F7] to-[#7C3AED] text-white hover:shadow-lg hover:shadow-[#A855F7]/50"
             : "cursor-not-allowed bg-[#3A3F48] text-[#A1A1AA]"
         }`}
       >

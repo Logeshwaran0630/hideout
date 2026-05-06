@@ -1,10 +1,9 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import About from "@/components/About";
 import Setups from "@/components/Setups";
 import Games from "@/components/Games";
 import Features from "@/components/Features";
-import Pricing from "@/components/Pricing";
+import PricingSection from "@/components/PricingSection";
 import Footer from "@/components/Footer";
 
 export default function HomePage() {
@@ -13,11 +12,10 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
-        <About />
         <Setups />
         <Games />
         <Features />
-        <Pricing />
+        <PricingSection />
       </main>
       <Footer />
     </>

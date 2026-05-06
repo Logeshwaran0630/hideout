@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CalendarDays, Eye, Search, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { cancelCalendarEvent } from "@/lib/googleCalendarClient";
 
 type BookingRow = {
   id: string;
@@ -11,6 +12,7 @@ type BookingRow = {
   booking_date: string;
   total_price: number;
   status: string;
+  calendar_event_id?: string | null;
   users?: { h_id: string; display_name: string | null; email: string | null } | null;
   time_slots?: { label: string; start_time: string } | null;
   session_types?: { name: string; price_per_hour: number } | null;
@@ -54,7 +56,7 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">BOOKINGS</div>
+          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">BOOKINGS</div>
           <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">ALL BOOKINGS</h1>
         </div>
         <div className="text-[14px] text-[#A1A1AA]">{bookings.length} bookings</div>
@@ -66,12 +68,12 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
             type="date"
             value={date}
             onChange={(e) => updateParams({ date: e.target.value || undefined })}
-            className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]"
+            className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]"
           />
           <select
             value={status}
             onChange={(e) => updateParams({ status: e.target.value || undefined })}
-            className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]"
+            className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]"
           >
             <option value="">All</option>
             <option value="confirmed">Confirmed</option>
@@ -84,7 +86,7 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
               value={search}
               onChange={(e) => updateParams({ search: e.target.value || undefined })}
               placeholder="Search H-ID or booking code..."
-              className="w-full rounded-lg border border-[#27272A] bg-[#09090B] py-3 pl-9 pr-4 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]"
+              className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0A] py-3 pl-9 pr-4 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]"
             />
           </div>
         </div>
@@ -92,7 +94,7 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
 
       <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#18181B]">
         <table className="w-full border-collapse">
-          <thead className="bg-[#09090B]">
+          <thead className="bg-[#0A0A0A]">
             <tr className="border-b border-[#27272A]">
               {['Code', 'Date', 'Time', 'User', 'Session', 'Price', 'Status', 'Actions'].map((heading) => (
                 <th key={heading} className="px-4 py-3 text-left text-[12px] font-medium uppercase tracking-widest text-[#A1A1AA]">{heading}</th>
@@ -102,15 +104,15 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking.id} className="border-b border-[#27272A] transition-colors hover:bg-[#18181B]">
-                <td className="px-4 py-4 font-mono text-[13px] text-[#FF3A3A]">{booking.booking_code}</td>
+                <td className="px-4 py-4 font-mono text-[13px] text-[#A855F7]">{booking.booking_code}</td>
                 <td className="px-4 py-4 text-[14px] text-[#FAFAFA]">{formatDate(booking.booking_date)}</td>
                 <td className="px-4 py-4 text-[14px] text-[#A1A1AA]">{booking.time_slots?.label}</td>
                 <td className="px-4 py-4">
-                  <div className="font-mono text-[12px] text-[#FF3A3A]">{booking.users?.h_id}</div>
+                  <div className="font-mono text-[12px] text-[#A855F7]">{booking.users?.h_id}</div>
                   <div className="text-[12px] text-[#71717A]">{booking.users?.display_name || booking.users?.email}</div>
                 </td>
                 <td className="px-4 py-4">
-                  <span className="rounded-full border border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#FF3A3A]">{booking.session_types?.name}</span>
+                  <span className="rounded-full border border-[rgba(168,85,247,0.3)] bg-[rgba(168,85,247,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#A855F7]">{booking.session_types?.name}</span>
                 </td>
                 <td className="px-4 py-4 text-[14px] font-semibold text-[#FAFAFA]">₹{booking.total_price}</td>
                 <td className="px-4 py-4">
@@ -118,7 +120,7 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => setViewTarget(booking)} className="rounded-md border border-[#27272A] p-2 text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]" aria-label="View booking">
+                    <button type="button" onClick={() => setViewTarget(booking)} className="rounded-md border border-[#27272A] p-2 text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]" aria-label="View booking">
                       <Eye className="h-4 w-4" />
                     </button>
                     {booking.status === 'confirmed' ? (
@@ -140,6 +142,14 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
 
       {cancelTarget ? (
         <CancelModal booking={cancelTarget} onClose={() => setCancelTarget(null)} onCancelled={async () => {
+          // First, delete the calendar event if it exists
+          if (cancelTarget.calendar_event_id) {
+            const deleted = await cancelCalendarEvent(cancelTarget.calendar_event_id);
+            if (!deleted) {
+              console.error("Failed to delete calendar event, but continuing with booking cancellation");
+            }
+          }
+          // Then delete the booking
           await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', cancelTarget.id);
           setCancelTarget(null);
           router.refresh();
@@ -158,11 +168,11 @@ function ViewModal({ booking, onClose }: { booking: BookingRow; onClose: () => v
           <button type="button" onClick={onClose} className="rounded-md p-2 text-[#A1A1AA] hover:text-[#FAFAFA]"><X className="h-4 w-4" /></button>
         </div>
         <div className="mt-4 space-y-3 text-[14px] text-[#A1A1AA]">
-          <div><span className="text-[#FAFAFA]">Code:</span> <span className="font-mono text-[#FF3A3A]">{booking.booking_code}</span></div>
+          <div><span className="text-[#FAFAFA]">Code:</span> <span className="font-mono text-[#A855F7]">{booking.booking_code}</span></div>
           <div><span className="text-[#FAFAFA]">Date:</span> {booking.booking_date}</div>
           <div><span className="text-[#FAFAFA]">Time:</span> {booking.time_slots?.label}</div>
           <div><span className="text-[#FAFAFA]">User:</span> {booking.users?.display_name || booking.users?.email}</div>
-          <div><span className="text-[#FAFAFA]">H-ID:</span> <span className="font-mono text-[#FF3A3A]">{booking.users?.h_id}</span></div>
+          <div><span className="text-[#FAFAFA]">H-ID:</span> <span className="font-mono text-[#A855F7]">{booking.users?.h_id}</span></div>
           <div><span className="text-[#FAFAFA]">Session:</span> {booking.session_types?.name}</div>
           <div><span className="text-[#FAFAFA]">Price:</span> ₹{booking.total_price}</div>
           <div><span className="text-[#FAFAFA]">Status:</span> {booking.status}</div>
@@ -184,7 +194,7 @@ function CancelModal({ booking, onClose, onCancelled }: { booking: BookingRow; o
           </button>
         </div>
         <p className="mt-4 text-[15px] text-[#A1A1AA]">
-          This will cancel booking <span className="font-mono text-[#FF3A3A]">{booking.booking_code}</span>. The slot will be freed. This cannot be undone.
+          This will cancel booking <span className="font-mono text-[#A855F7]">{booking.booking_code}</span>. The slot will be freed. This cannot be undone.
         </p>
         <div className="mt-6 flex gap-3">
           <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-[#27272A] px-4 py-3 text-[14px] text-[#A1A1AA] hover:text-[#FAFAFA]">Keep Booking</button>

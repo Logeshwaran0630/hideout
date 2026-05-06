@@ -39,7 +39,7 @@ export default function About() {
                 <TiltCard>
                   <AnimatedBorder>
                     <div className="card-premium rounded-xl p-6 text-center">
-                      <div className="mb-2 flex h-16 items-center justify-center rounded-lg bg-[#1A1A1A] text-[#6B6B6B]">
+                      <div className="mb-2 flex h-16 items-center justify-center rounded-lg bg-[#18181B] text-[#6B6B6B]">
                         <img src={item.image} alt={item.label} className="h-full w-full rounded-lg object-cover" />
                       </div>
                       <div className="text-sm text-[#A1A1AA]">{item.label}</div>

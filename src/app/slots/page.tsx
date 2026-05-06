@@ -11,10 +11,20 @@ export default async function SlotsPage() {
 
   if (!user) redirect("/login?redirectTo=/slots");
 
-  const { data: sessionTypes } = await supabase
+  let { data: sessionTypes, error: sessionTypesError } = await supabase
     .from("session_types")
     .select("*")
-    .order("price_per_hour", { ascending: true });
+    .order("sort_order", { ascending: true });
+
+  if (sessionTypesError) {
+    const fallback = await supabase
+      .from("session_types")
+      .select("*")
+      .order("price_per_hour", { ascending: true });
+
+    sessionTypes = fallback.data;
+    sessionTypesError = fallback.error;
+  }
 
   const { data: profile } = await supabase
     .from("users")
@@ -23,7 +33,7 @@ export default async function SlotsPage() {
     .single();
 
   return (
-    <div className="min-h-screen bg-[#09090B] pt-18">
+    <div className="min-h-screen bg-[#0A0A0A] pt-18">
       <BookingWizard
         sessionTypes={sessionTypes || []}
         user={{ id: user.id, email: user.email! }}

@@ -54,7 +54,8 @@ export default function UsersClient({ users, bookingCounts, coinLedger }: { user
       user_id: selectedUser.id,
       amount: numericAmount,
       type: numericAmount > 0 ? "earn" : "redeem",
-      ref_booking_id: null,
+      reference_id: null,
+      description: reason || (numericAmount > 0 ? "Admin awarded coins" : "Admin deducted coins"),
     });
 
     setSelectedUser(null);
@@ -66,17 +67,17 @@ export default function UsersClient({ users, bookingCounts, coinLedger }: { user
   return (
     <div>
       <div className="mb-6">
-        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">USERS</div>
+        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">USERS</div>
         <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">ALL USERS</h1>
       </div>
 
       <div className="mb-6 rounded-xl border border-[#27272A] bg-[#18181B] p-4">
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by H-ID, name, or email..." className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by H-ID, name, or email..." className="w-full rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]" />
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-[#27272A] bg-[#18181B]">
         <table className="w-full border-collapse">
-          <thead className="bg-[#09090B]">
+          <thead className="bg-[#0A0A0A]">
             <tr className="border-b border-[#27272A]">
               {['H-ID', 'Name / Email', 'Joined', 'Bookings', 'H Coins', 'Role', 'Actions'].map((heading) => (
                 <th key={heading} className="px-4 py-3 text-left text-[12px] font-medium uppercase tracking-[0.1em] text-[#A1A1AA]">{heading}</th>
@@ -85,20 +86,20 @@ export default function UsersClient({ users, bookingCounts, coinLedger }: { user
           </thead>
           <tbody>
             {derived.map((user) => (
-              <tr key={user.id} className="border-b border-[#27272A] transition-colors hover:bg-[#09090B]">
-                <td className="px-4 py-4 font-mono text-[13px] text-[#FF3A3A]">{user.h_id}</td>
+              <tr key={user.id} className="border-b border-[#27272A] transition-colors hover:bg-[#0A0A0A]">
+                <td className="px-4 py-4 font-mono text-[13px] text-[#A855F7]">{user.h_id}</td>
                 <td className="px-4 py-4">
                   <div className="text-[14px] font-semibold text-[#FAFAFA]">{user.display_name || 'Hideout Player'}</div>
                   <div className="text-[12px] text-[#A1A1AA]">{user.email}</div>
                 </td>
                 <td className="px-4 py-4 text-[13px] text-[#A1A1AA]">{formatDate(user.created_at)}</td>
                 <td className="px-4 py-4 text-[14px] font-semibold text-[#FAFAFA]">{user.bookings}</td>
-                <td className="px-4 py-4 text-[14px] font-semibold text-[#FF3A3A]">{user.coins}</td>
+                <td className="px-4 py-4 text-[14px] font-semibold text-[#A855F7]">{user.coins}</td>
                 <td className="px-4 py-4">
-                  <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${user.role === 'admin' ? 'border-[#FF3A3A] bg-[rgba(255,58,58,0.15)] text-[#FF3A3A]' : 'border-[#27272A] bg-[#18181B] text-[#A1A1AA]'}`}>{user.role === 'admin' ? 'ADMIN' : 'USER'}</span>
+                  <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${user.role === 'admin' ? 'border-[#A855F7] bg-[rgba(168,85,247,0.15)] text-[#A855F7]' : 'border-[#27272A] bg-[#18181B] text-[#A1A1AA]'}`}>{user.role === 'admin' ? 'ADMIN' : 'USER'}</span>
                 </td>
                 <td className="px-4 py-4">
-                  <button type="button" onClick={() => setSelectedUser(user)} className="rounded-md border border-[#27272A] p-2 text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]" aria-label="Adjust coins">
+                  <button type="button" onClick={() => setSelectedUser(user)} className="rounded-md border border-[#27272A] p-2 text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]" aria-label="Adjust coins">
                     <CircleDollarSign className="h-4 w-4" />
                   </button>
                 </td>
@@ -110,26 +111,26 @@ export default function UsersClient({ users, bookingCounts, coinLedger }: { user
 
       {selectedUser ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-          <div className="w-full max-w-[420px] rounded-xl border border-[#FF3A3A] bg-[#18181B] p-8">
+          <div className="w-full max-w-[420px] rounded-xl border border-[#A855F7] bg-[#18181B] p-8">
             <div className="flex items-start justify-between gap-4">
               <h2 className="font-heading text-[32px] uppercase text-[#FAFAFA]">ADJUST H COINS</h2>
               <button type="button" onClick={() => setSelectedUser(null)} className="rounded-md p-2 text-[#A1A1AA] hover:text-[#FAFAFA]"><X className="h-4 w-4" /></button>
             </div>
-            <div className="mt-4 font-mono text-[13px] text-[#FF3A3A]">{selectedUser.h_id}</div>
+            <div className="mt-4 font-mono text-[13px] text-[#A855F7]">{selectedUser.h_id}</div>
             <div className="text-[14px] text-[#FAFAFA]">{selectedUser.display_name || selectedUser.email}</div>
-            <div className="mt-4 font-heading text-[48px] uppercase text-[#FF3A3A]">{derived.find((entry) => entry.id === selectedUser.id)?.coins ?? 0}<span className="text-[18px] text-[#A1A1AA]"> H Coins</span></div>
+            <div className="mt-4 font-heading text-[48px] uppercase text-[#A855F7]">{derived.find((entry) => entry.id === selectedUser.id)?.coins ?? 0}<span className="text-[18px] text-[#A1A1AA]"> H Coins</span></div>
             <label className="mt-6 block">
               <div className="text-[13px] font-medium text-[#FAFAFA]">Amount to add or deduct</div>
-              <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="e.g. 10 or -10" className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#FF3A3A]" />
+              <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="e.g. 10 or -10" className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#A855F7]" />
             </label>
             <div className="mt-2 text-[12px] text-[#71717A]">Use positive number to add, negative to deduct.</div>
             <label className="mt-4 block">
               <div className="text-[13px] font-medium text-[#FAFAFA]">Reason (optional)</div>
-              <input value={reason} onChange={(e) => setReason(e.target.value)} type="text" placeholder="e.g. Compensation for technical issue" className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#FF3A3A]" />
+              <input value={reason} onChange={(e) => setReason(e.target.value)} type="text" placeholder="e.g. Compensation for technical issue" className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#A855F7]" />
             </label>
             <div className="mt-6 flex gap-3">
               <button type="button" onClick={() => setSelectedUser(null)} className="flex-1 rounded-lg border border-[#27272A] px-4 py-3 text-[14px] text-[#A1A1AA] hover:text-[#FAFAFA]">Cancel</button>
-              <button type="button" onClick={applyAdjustment} className="flex-1 rounded-lg bg-[#FF3A3A] px-4 py-3 text-[14px] font-semibold text-[#09090B]">Apply Adjustment</button>
+              <button type="button" onClick={applyAdjustment} className="flex-1 rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-4 py-3 text-[14px] font-semibold text-white">Apply Adjustment</button>
             </div>
           </div>
         </div>

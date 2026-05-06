@@ -33,7 +33,7 @@ export default function Games() {
               <TiltCard>
                 <AnimatedBorder>
                   <div className="card-premium rounded-xl p-6 text-center transition-all hover:glow-purple">
-                    <div className="mb-3 flex h-24 items-center justify-center overflow-hidden rounded-lg bg-[#1A1A1A]">
+                    <div className="mb-3 flex h-24 items-center justify-center overflow-hidden rounded-lg bg-[#18181B]">
                       <Image
                         src={game.image}
                         alt={game.name}

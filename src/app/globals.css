@@ -319,3 +319,207 @@ html {
     display: none;
   }
 }
+
+/* ========== RESPONSIVE UTILITIES ========== */
+
+/* Fluid Typography - Mobile First */
+:root {
+  --font-size-base: 16px;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --font-size-base: 18px;
+    --font-size-4xl: 3rem;
+    --font-size-5xl: 4rem;
+  }
+}
+
+/* Touch-friendly tap targets */
+button, 
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent horizontal scroll on mobile */
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Update scroll padding for fixed navbar */
+html {
+  scroll-padding-top: 80px;
+}
+
+/* ========== SCROLL ANIMATIONS ========== */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-right {
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
+/* Animation Classes */
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards;
+}
+
+.animate-slide-left {
+  animation: slide-in-left 0.5s ease-out forwards;
+}
+
+.animate-slide-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in forwards;
+}
+
+/* Stagger children animations */
+.stagger-children > * {
+  opacity: 0;
+}
+
+.stagger-children.animate > *:nth-child(1) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0s; }
+.stagger-children.animate > *:nth-child(2) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.1s; }
+.stagger-children.animate > *:nth-child(3) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.2s; }
+.stagger-children.animate > *:nth-child(4) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.3s; }
+.stagger-children.animate > *:nth-child(5) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.4s; }
+.stagger-children.animate > *:nth-child(6) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.5s; }
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========== LOADING SKELETON ========== */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #18181B 0%,
+    #27272A 50%,
+    #18181B 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ========== PRINT STYLES ========== */
+
+@media print {
+  .no-print,
+  .navbar,
+  button,
+  a[href^="#"] {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  a {
+    text-decoration: underline;
+    color: black;
+  }
+}

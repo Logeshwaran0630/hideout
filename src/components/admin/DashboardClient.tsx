@@ -67,13 +67,13 @@ export default function DashboardClient({
   return (
     <div>
       <div className="mb-8">
-        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">OVERVIEW</div>
+        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">OVERVIEW</div>
         <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">DASHBOARD</h1>
         <div className="mt-2 text-[14px] text-[#A1A1AA]">{todayLabel}</div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Today's Bookings" value={stats.todays_bookings} bottom="Confirmed slots for today" icon={CalendarDays} valueColor="text-[#FF3A3A]" />
+        <StatCard label="Today's Bookings" value={stats.todays_bookings} bottom="Confirmed slots for today" icon={CalendarDays} valueColor="text-[#A855F7]" />
         <StatCard label="Today's Revenue" value={`₹${stats.todays_revenue}`} bottom="From confirmed bookings" icon={IndianRupee} valueColor="text-[#4ADE80]" />
         <StatCard label="Total Bookings" value={stats.total_confirmed} bottom={`${stats.total_cancelled} cancelled`} icon={Hash} valueColor="text-[#FAFAFA]" />
         <StatCard label="Total Revenue" value={`₹${stats.total_revenue}`} bottom="All time confirmed" icon={TrendingUp} valueColor="text-[#4ADE80]" />
@@ -87,13 +87,13 @@ export default function DashboardClient({
               <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr_auto] md:items-center">
                 <div>
                   <div className="text-[15px] font-semibold text-[#FAFAFA]">{booking.time_slots?.label}</div>
-                  <span className="mt-2 inline-flex rounded-full border border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#FF3A3A]">
+                  <span className="mt-2 inline-flex rounded-full border border-[rgba(168,85,247,0.3)] bg-[rgba(168,85,247,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#A855F7]">
                     {booking.session_types?.name}
                   </span>
                 </div>
                 <div className="hidden h-10 w-px bg-[#27272A] md:block" />
                 <div>
-                  <div className="font-mono text-[13px] text-[#FF3A3A]">{booking.users?.h_id}</div>
+                  <div className="font-mono text-[13px] text-[#A855F7]">{booking.users?.h_id}</div>
                   <div className="text-[14px] text-[#A1A1AA]">{booking.users?.display_name || booking.users?.email}</div>
                 </div>
                 <div className="hidden h-10 w-px bg-[#27272A] md:block" />
@@ -123,19 +123,19 @@ export default function DashboardClient({
               <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr_auto] md:items-center">
                 <div>
                   <div className="text-[15px] font-semibold text-[#FAFAFA]">{booking.time_slots?.label ?? booking.booking_date}</div>
-                  <span className="mt-2 inline-flex rounded-full border border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#FF3A3A]">
+                  <span className="mt-2 inline-flex rounded-full border border-[rgba(168,85,247,0.3)] bg-[rgba(168,85,247,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#A855F7]">
                     {booking.session_types?.name}
                   </span>
                 </div>
                 <div className="hidden h-10 w-px bg-[#27272A] md:block" />
                 <div>
-                  <div className="font-mono text-[13px] text-[#FF3A3A]">{booking.users?.h_id}</div>
+                  <div className="font-mono text-[13px] text-[#A855F7]">{booking.users?.h_id}</div>
                   <div className="text-[14px] text-[#A1A1AA]">{booking.users?.display_name || booking.users?.email}</div>
                 </div>
                 <div className="hidden h-10 w-px bg-[#27272A] md:block" />
                 <div className="flex items-center justify-between gap-3 md:justify-end">
                   <div className="text-[15px] font-semibold text-[#FAFAFA]">₹{booking.total_price}</div>
-                  <Link href={`/admin/bookings?id=${booking.id}`} className="rounded-md border border-[#27272A] px-3 py-1 text-[13px] text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]">View</Link>
+                  <Link href={`/admin/bookings?id=${booking.id}`} className="rounded-md border border-[#27272A] px-3 py-1 text-[13px] text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]">View</Link>
                 </div>
               </div>
             </div>

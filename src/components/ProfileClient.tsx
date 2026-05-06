@@ -10,10 +10,11 @@ import {
   CircleDollarSign,
   Copy,
   Gamepad2,
+  Gift,
   LogOut,
-  Sparkles,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import RedeemModal from './RedeemModal';
 
 interface Profile {
   id: string;
@@ -30,43 +31,51 @@ interface Booking {
   booking_date: string;
   status: string;
   total_price: number;
-  time_slots: { label: string }[] | null;
-  session_types: { name: string }[] | null;
+  time_slots: { label: string }[] | { label: string } | null;
+  session_types: { name: string }[] | { name: string } | null;
+}
+
+interface Redemption {
+  id: string;
+  amount: number;
+  created_at: string;
+  booking_code: string | null;
+  booking_date: string | null;
+  time_slot_label: string | null;
+}
+
+function getRelatedValue<T, K extends keyof T>(value: T[] | T | null, key: K): T[K] | null {
+  if (!value) return null;
+  const record = Array.isArray(value) ? value[0] : value;
+  return record?.[key] ?? null;
 }
 
 export default function ProfileClient({ profile }: { profile: Profile | null }) {
   const router = useRouter();
+  const profileData = profile ? { ...profile, role: profile.role || "user" } : null;
 
   const [copied, setCopied] = useState(false);
   const [coinBalance, setCoinBalance] = useState(0);
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-[#A1A1AA] text-sm mb-4">Setting up your profile...</p>
-          <a href="/profile" className="text-[#A855F7] text-sm underline underline-offset-4">
-            Refresh
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  const profileData = { ...profile, role: profile.role || "user" };
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
 
   useEffect(() => {
+    if (!profileData) {
+      return;
+    }
+
+    const profileId = profileData.id;
     let active = true;
 
     async function fetchData() {
       const { data: ledger } = await supabase
         .from('h_coin_ledger')
         .select('amount')
-        .eq('user_id', profileData.id);
+        .eq('user_id', profileId);
 
-      const balance = ledger?.reduce((sum: number, row: any) => sum + row.amount, 0) || 0;
+      const balance = ledger?.reduce((sum, row) => sum + row.amount, 0) || 0;
 
       if (!active) {
         return;
@@ -86,17 +95,22 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
           time_slots ( label ),
           session_types ( name )
         `)
-        .eq('user_id', profileData.id)
+        .eq('user_id', profileId)
         .eq('status', 'confirmed')
         .gte('booking_date', today)
         .order('booking_date', { ascending: true })
-        .limit(3);
+        .limit(5);
+
+      const { data: redemptionRows } = await supabase.rpc('get_user_redemptions', {
+        p_user_id: profileId,
+      });
 
       if (!active) {
         return;
       }
 
       setUpcomingBookings((bookings || []) as Booking[]);
+      setRedemptions((redemptionRows || []) as Redemption[]);
       setLoadingBookings(false);
     }
 
@@ -105,9 +119,23 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
     return () => {
       active = false;
     };
-  }, [profileData.id, supabase]);
+  }, [profileData?.id]);
+
+  if (!profileData) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-[#A1A1AA] text-sm mb-4">Setting up your profile...</p>
+          <a href="/profile" className="text-[#A855F7] text-sm underline underline-offset-4">
+            Refresh
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   function copyHId() {
+    if (!profileData) return;
     void navigator.clipboard.writeText(profileData.h_id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -118,7 +146,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
     router.push('/');
   }
 
-  const memberSince = new Date(profile.created_at).toLocaleDateString('en-IN', {
+  const memberSince = new Date(profileData.created_at).toLocaleDateString('en-IN', {
     month: 'long',
     year: 'numeric',
   });
@@ -195,11 +223,11 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
         <div className="flex flex-col gap-6">
           <div className="bg-[#18181B] border border-[#27272A] rounded-xl p-6">
             <div className="flex items-center gap-2 mb-4">
-              <CircleDollarSign size={20} className="text-[#3B82F6]" />
+              <CircleDollarSign size={20} className="text-[#A855F7]" />
               <span className="text-[#FFFFFF] font-semibold text-base">H Coins</span>
             </div>
             <div className="flex items-end gap-2 mb-4">
-              <span className="font-heading text-5xl text-[#3B82F6]">{coinBalance}</span>
+              <span className="font-heading text-5xl text-[#A855F7]">{coinBalance}</span>
               <span className="text-[#A1A1AA] text-lg mb-1">coins</span>
             </div>
             <div className="mb-2">
@@ -207,20 +235,26 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                 <span className="text-[#A1A1AA] text-xs">
                   {coinBalance} / 100 coins to free session
                 </span>
-                <span className="text-[#3B82F6] text-xs font-medium">
+                <span className="text-[#A855F7] text-xs font-medium">
                   {Math.round(coinProgress)}%
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-[#27272A] rounded-full">
+              <div className="w-full h-2 bg-[#27272A] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#A855F7] rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-[#A855F7] to-[#EC4899] rounded-full transition-all duration-500"
                   style={{ width: `${coinProgress}%` }}
                 />
               </div>
             </div>
-            <p className="text-[#6B6B6B] text-xs mt-3">
-              Earn H Coins every time you book a session.
-            </p>
+            {coinBalance < 100 ? (
+              <p className="text-[#6B6B6B] text-xs mt-3">
+                Need {100 - coinBalance} more coins to unlock a free session.
+              </p>
+            ) : (
+              <p className="text-[#A855F7] text-xs mt-3 font-medium">
+                Ready to redeem: claim a free solo hour from Quick Actions.
+              </p>
+            )}
           </div>
 
           <div className="bg-[#18181B] border border-[#27272A] rounded-xl p-6 flex-1">
@@ -243,7 +277,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                 {[1, 2].map((i) => (
                   <div
                     key={i}
-                    className="h-16 bg-[#09090B] border border-[#27272A] rounded-lg animate-pulse"
+                    className="h-16 bg-[#0A0A0A] border border-[#27272A] rounded-lg animate-pulse"
                   />
                 ))}
               </div>
@@ -271,7 +305,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                 {upcomingBookings.map((booking) => (
                   <div
                     key={booking.id}
-                    className="bg-[#09090B] border border-[#27272A] rounded-lg px-4 py-3"
+                    className="bg-[#0A0A0A] border border-[#27272A] rounded-lg px-4 py-3"
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[#FFFFFF] text-sm font-semibold">
@@ -282,13 +316,13 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                         })}
                       </span>
                       <span className="bg-[rgba(168,85,247,0.1)] border border-[rgba(168,85,247,0.3)] text-[#A855F7] text-xs font-medium px-2 py-0.5 rounded">
-                        {booking.session_types?.[0]?.name || 'Session'}
+                        {getRelatedValue(booking.session_types, 'name') || 'Session'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-[#A1A1AA] text-xs">
                         <Clock size={11} />
-                        {booking.time_slots?.[0]?.label || '—'}
+                        {getRelatedValue(booking.time_slots, 'label') || '-'}
                       </div>
                       <span className="font-mono text-xs text-[#6B6B6B]">
                         {booking.booking_code}
@@ -320,15 +354,86 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                 <Gamepad2 size={20} className="text-[#A855F7]" />
                 <span className="text-[#FFFFFF] text-xs font-medium">Book a Slot</span>
               </Link>
-              <div className="flex cursor-not-allowed flex-col items-center gap-2 rounded-lg border border-[#27272A] bg-[#0A0A0A] p-4 text-center opacity-50">
-                <Sparkles size={20} className="text-[#A1A1AA]" />
-                <span className="text-[#A1A1AA] text-xs font-medium">Redeem Coins</span>
-                <span className="text-[#6B6B6B] text-[10px]">Coming soon</span>
-              </div>
+              {coinBalance >= 100 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowRedeemModal(true)}
+                  className="flex flex-col items-center gap-2 rounded-lg border border-[rgba(168,85,247,0.3)] bg-gradient-to-r from-[rgba(168,85,247,0.18)] to-[rgba(236,72,153,0.18)] p-4 text-center transition-all hover:scale-[1.02] hover:border-[#A855F7]"
+                >
+                  <Gift size={20} className="text-[#A855F7]" />
+                  <span className="text-[#FFFFFF] text-xs font-medium">Redeem Free Session</span>
+                  <span className="text-[#A855F7] text-[10px]">-100 coins</span>
+                </button>
+              ) : (
+                <div
+                  className="flex cursor-not-allowed flex-col items-center gap-2 rounded-lg border border-[#27272A] bg-[#0A0A0A] p-4 text-center opacity-50"
+                  title={`Need ${100 - coinBalance} more coins`}
+                >
+                  <Gift size={20} className="text-[#A1A1AA]" />
+                  <span className="text-[#A1A1AA] text-xs font-medium">Redeem Free Session</span>
+                  <span className="text-[#6B6B6B] text-[10px]">Need {100 - coinBalance} more</span>
+                </div>
+              )}
             </div>
+          </div>
+
+          <div className="bg-[#18181B] border border-[#27272A] rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Gift size={18} className="text-[#EC4899]" />
+              <span className="text-[#FFFFFF] font-semibold text-base">Redemption History</span>
+            </div>
+
+            {loadingBookings ? (
+              <div className="space-y-2">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-12 bg-[#0A0A0A] rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : redemptions.length > 0 ? (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {redemptions.map((redemption) => (
+                  <div key={redemption.id} className="rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[13px] font-semibold text-[#FAFAFA]">
+                        {redemption.booking_code || 'Free Session'}
+                      </span>
+                      <span className="text-[12px] font-medium text-[#EF4444]">{redemption.amount} coins</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-3 text-[12px] text-[#A1A1AA]">
+                      <span>
+                        {redemption.booking_date
+                          ? new Date(`${redemption.booking_date}T00:00:00`).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                            })
+                          : 'Redeemed'}
+                        {redemption.time_slot_label ? ` · ${redemption.time_slot_label}` : ''}
+                      </span>
+                      <span>
+                        {new Date(redemption.created_at).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[#A1A1AA] text-sm text-center py-4">
+                No redemptions yet. Keep earning H Coins.
+              </p>
+            )}
           </div>
         </div>
       </div>
+
+      <RedeemModal
+        isOpen={showRedeemModal}
+        onClose={() => setShowRedeemModal(false)}
+        onSuccess={() => window.location.reload()}
+        currentBalance={coinBalance}
+      />
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function AdminSettingsPage() {
   return (
     <div>
       <div className="mb-6">
-        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">SETTINGS</div>
+        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">SETTINGS</div>
         <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">SETTINGS</h1>
       </div>
 
@@ -44,11 +44,11 @@ export default function AdminSettingsPage() {
           <div className="text-[16px] font-semibold text-[#FAFAFA]">Venue Details</div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {['The Hideout', 'Chennai', '11:00 AM', '11:00 PM', '+91 9XXXXXXXXX'].map((value, index) => (
-              <input key={value} defaultValue={value} className="rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#FF3A3A]" />
+              <input key={value} defaultValue={value} className="rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#A855F7]" />
             ))}
           </div>
           <div className="mt-3 text-[12px] text-[#71717A]">These values are display-only for now. Backend config coming soon.</div>
-          <button type="button" className="mt-4 rounded-lg bg-[#FF3A3A] px-5 py-3 text-[14px] font-semibold text-[#09090B]">Save Changes</button>
+          <button type="button" className="mt-4 rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-5 py-3 text-[14px] font-semibold text-white">Save Changes</button>
         </div>
 
         <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-6">
