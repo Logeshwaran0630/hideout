@@ -17,7 +17,7 @@ export default function About() {
         </ScrollReveal>
 
         <div className="grid items-center gap-12 md:grid-cols-2">
-          <ScrollReveal direction="left">
+          <ScrollReveal>
             <div>
               <p className="mb-4 leading-relaxed text-[#A1A1AA]">
                 The Hideout is Chennai's premier after-hours gaming lounge, designed for gamers who demand the best equipment and atmosphere.
@@ -35,7 +35,7 @@ export default function About() {
               { label: "Audio Gear", image: "/aboutus/audio%20gear.webp" },
               { label: "Tournaments", image: "/aboutus/tournaments.jpg" },
             ].map((item, i) => (
-              <ScrollReveal key={item.label} delay={i * 100} type="flip">
+              <ScrollReveal key={item.label} delay={i * 100}>
                 <TiltCard>
                   <AnimatedBorder>
                     <div className="card-premium rounded-xl p-6 text-center">
