@@ -3,9 +3,7 @@
 import Navbar from "@/components/Navbar";
 import SlotCard from "@/components/SlotCard";
 import { supabase } from "@/lib/supabase/client";
-import { checkMultipleSlotsAvailability, createCalendarEvent } from "@/lib/googleCalendarClient";
-import { createISTDate, formatIST, toISTISO } from "@/lib/indianTime";
-import { Check, CheckCircle2, Copy, Loader2, Sparkles, User, MessageCircle } from "lucide-react";
+import { Check, CheckCircle2, Copy, Loader2, Sparkles, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -15,8 +13,6 @@ type SessionType = {
   max_players: number;
   price_per_hour: number;
   description: string | null;
-  h_coins_earned: number | null;
-  sort_order?: number | null;
 };
 
 type Profile = {
@@ -26,25 +22,20 @@ type Profile = {
 };
 
 type BookingResult = {
-  id: string;
   booking_code: string;
   booking_date: string;
   total_price: number;
   session_type_id: string;
   time_slot_id: string;
-  time_slots?: TimeSlot;
-  session_types?: SessionType;
+  id: string;
 };
 
-type TimeSlot = {
+type SlotRecord = {
   id: string;
   label: string;
   start_time: string;
   end_time: string;
   sort_order: number;
-};
-
-type SlotRecord = TimeSlot & {
   state: "available" | "selected" | "booked" | "past";
 };
 
@@ -72,7 +63,7 @@ function toLocalDateString(date: Date) {
 
 function isSlotPast(startTime: string, date: string) {
   const now = new Date();
-  const slotDateTime = createISTDate(date, startTime);
+  const slotDateTime = new Date(`${date}T${startTime}`);
   return slotDateTime < now;
 }
 
@@ -82,7 +73,6 @@ export default function BookingWizard({ sessionTypes, user, profile }: BookingWi
   const [step, setStep] = useState<1 | 2 | 3 | "confirmed">(1);
   const [selectedDate, setSelectedDate] = useState(toLocalDateString(new Date()));
   const [selectedSessionTypeId, setSelectedSessionTypeId] = useState(sessionTypes[0]?.id ?? "");
-  const [loadedSessionTypes, setLoadedSessionTypes] = useState(sessionTypes);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [availableSlots, setAvailableSlots] = useState<SlotRecord[]>([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
@@ -91,7 +81,7 @@ export default function BookingWizard({ sessionTypes, user, profile }: BookingWi
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
   const [copiedBookingCode, setCopiedBookingCode] = useState(false);
 
-  const selectedSessionType = loadedSessionTypes.find((item) => item.id === selectedSessionTypeId) ?? loadedSessionTypes[0] ?? null;
+  const selectedSessionType = sessionTypes.find((item) => item.id === selectedSessionTypeId) ?? sessionTypes[0] ?? null;
   const selectedSlot = availableSlots.find((slot) => slot.id === selectedSlotId) ?? null;
 
   const dates = useMemo(() => {
@@ -109,36 +99,10 @@ export default function BookingWizard({ sessionTypes, user, profile }: BookingWi
   }, [today]);
 
   useEffect(() => {
-    if (loadedSessionTypes.length > 0) return;
-
-    let active = true;
-
-    async function fetchSessionTypes() {
-      let response = await supabase
-        .from("session_types")
-        .select("*")
-        .order("sort_order", { ascending: true });
-
-      if (response.error) {
-        response = await supabase
-          .from("session_types")
-          .select("*")
-          .order("price_per_hour", { ascending: true });
-      }
-
-      if (!active) return;
-
-      const nextSessionTypes = (response.data ?? []) as SessionType[];
-      setLoadedSessionTypes(nextSessionTypes);
-      setSelectedSessionTypeId((current) => current || nextSessionTypes[0]?.id || "");
+    if (!selectedSessionTypeId && sessionTypes[0]) {
+      setSelectedSessionTypeId(sessionTypes[0].id);
     }
-
-    void fetchSessionTypes();
-
-    return () => {
-      active = false;
-    };
-  }, [loadedSessionTypes.length]);
+  }, [selectedSessionTypeId, sessionTypes]);
 
   useEffect(() => {
     if (step !== 2) return;
@@ -149,55 +113,36 @@ export default function BookingWizard({ sessionTypes, user, profile }: BookingWi
       setAvailabilityLoading(true);
       setError(null);
 
-      try {
-        // Get all time slots
-        const { data: allSlots } = await supabase
-          .from("time_slots")
-          .select("*")
-          .order("sort_order");
+      const [{ data: allSlots }, { data: bookedSlots }] = await Promise.all([
+        supabase.from("time_slots").select("*").order("sort_order"),
+        supabase.from("booked_slots").select("time_slot_id").eq("booking_date", selectedDate),
+      ]);
 
-        if (!allSlots) {
-          throw new Error("Could not fetch time slots");
-        }
+      if (cancelled) return;
 
-        const slotsToCheck = allSlots.map((slot: TimeSlot) => {
-          return {
-            slotId: slot.id,
-            start: createISTDate(selectedDate, slot.start_time),
-            end: createISTDate(selectedDate, slot.end_time),
-          };
-        });
+      const bookedIds = new Set((bookedSlots ?? []).map((slot: any) => slot.time_slot_id));
 
-        const availabilityMap = await checkMultipleSlotsAvailability(slotsToCheck);
-
-        if (cancelled) return;
-
-        setAvailableSlots(
-          allSlots.map((slot: TimeSlot) => {
-            const isAvailable = availabilityMap.get(slot.id) ?? true;
-            return {
-              ...slot,
-              state: !isAvailable
-                ? "booked"
-                : isSlotPast(slot.start_time, selectedDate)
-                  ? "past"
-                  : slot.id === selectedSlotId
-                    ? "selected"
-                    : "available",
-            };
-          })
-        );
-        setAvailabilityLoading(false);
-      } catch (err) {
-        console.error('Error fetching availability:', err);
-        if (!cancelled) {
-          setAvailabilityLoading(false);
-          setError("Couldn't load slot availability. Please try again.");
-        }
-      }
+      setAvailableSlots(
+        (allSlots ?? []).map((slot: any) => ({
+          ...slot,
+          state: bookedIds.has(slot.id)
+            ? "booked"
+            : isSlotPast(slot.start_time, selectedDate)
+              ? "past"
+              : slot.id === selectedSlotId
+                ? "selected"
+                : "available",
+        }))
+      );
+      setAvailabilityLoading(false);
     }
 
-    void fetchAvailability();
+    fetchAvailability().catch(() => {
+      if (!cancelled) {
+        setAvailabilityLoading(false);
+        setError("Couldn't load slot availability. Please try again.");
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -210,74 +155,32 @@ export default function BookingWizard({ sessionTypes, user, profile }: BookingWi
     setLoadingConfirm(true);
     setError(null);
 
-    try {
-      let calendarEventId: string | null = null;
-      const startDateTime = createISTDate(selectedDate, selectedSlot.start_time);
-      const endDateTime = createISTDate(selectedDate, selectedSlot.end_time);
+    const { data, error: bookingError } = await supabase
+      .from("bookings")
+      .insert({
+        user_id: user.id,
+        time_slot_id: selectedSlot.id,
+        session_type_id: selectedSessionType.id,
+        booking_date: selectedDate,
+        player_count: selectedSessionType.max_players,
+        total_price: selectedSessionType.price_per_hour,
+      })
+      .select()
+      .single();
 
-      console.log("Booking DateTime (IST):", {
-        selectedDate,
-        startTime: selectedSlot.start_time,
-        endTime: selectedSlot.end_time,
-        startIST: formatIST(startDateTime),
-        endIST: formatIST(endDateTime),
-        startISO: startDateTime.toISOString(),
-        endISO: endDateTime.toISOString(),
-      });
-
-      calendarEventId = await createCalendarEvent({
-        summary: `Hideout Booking - ${profile?.display_name || "Guest"} (${profile?.h_id || 'N/A'})`,
-        description: `
-Booking Details:
-- Session Type: ${selectedSessionType.name}
-- Players: ${selectedSessionType.max_players}
-- Price: ₹${selectedSessionType.price_per_hour}/hour
-- H-ID: ${profile?.h_id || 'N/A'}
-- Email: ${profile?.email || user.email || 'N/A'}
-        `.trim(),
-        startTime: toISTISO(selectedDate, selectedSlot.start_time),
-        endTime: toISTISO(selectedDate, selectedSlot.end_time),
-      });
-
-      if (!calendarEventId) {
-        setError("Failed to create calendar event. Please try again.");
-        setLoadingConfirm(false);
-        return;
+    if (bookingError) {
+      if (bookingError.code === "23505") {
+        setError("This slot was just booked by someone else. Please choose another.");
+      } else {
+        setError("Something went wrong. Please try again.");
       }
-
-      // THEN: Create booking in Supabase with calendar_event_id
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          time_slot_id: selectedSlot.id,
-          session_type_id: selectedSessionType.id,
-          booking_date: selectedDate,
-          calendar_event_id: calendarEventId,
-        }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 409) {
-          setError("This slot was just booked by someone else. Please choose another.");
-        } else {
-          setError("Something went wrong. Please try again.");
-        }
-        setLoadingConfirm(false);
-        return;
-      }
-
-      const payload = (await response.json()) as { booking: BookingResult };
-      setBookingResult(payload.booking);
       setLoadingConfirm(false);
-      setStep("confirmed");
-    } catch (err) {
-      console.error('Error confirming booking:', err);
-      setError("Something went wrong. Please try again.");
-      setLoadingConfirm(false);
+      return;
     }
+
+    setBookingResult(data as BookingResult);
+    setLoadingConfirm(false);
+    setStep("confirmed");
   }
 
   async function copyBookingCode() {
@@ -287,23 +190,23 @@ Booking Details:
     setTimeout(() => setCopiedBookingCode(false), 2000);
   }
 
-  const bookingCoinAmount = selectedSessionType?.h_coins_earned ?? (selectedSessionType?.name === "Duo" ? 15 : selectedSessionType?.name === "Squad" ? 25 : 10);
+  const bookingCoinAmount = selectedSessionType?.name === "Duo" ? 15 : selectedSessionType?.name === "Squad" ? 25 : 10;
   const currentStepNumber = step === "confirmed" ? 3 : step;
 
   if (step === "confirmed" && bookingResult && selectedSlot && selectedSessionType) {
     return (
-      <main className="min-h-screen bg-[#0A0A0A] text-[#FAFAFA]">
+      <main className="min-h-screen bg-[#09090B] text-[#FAFAFA]">
         <Navbar />
         <section className="mx-auto flex max-w-3xl flex-col items-center px-6 py-16 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#A855F7] bg-[#18181B] glow-purple animate-[bookingPulse_400ms_ease-out]">
-            <CheckCircle2 className="h-10 w-10 text-[#A855F7]" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#FF3A3A] bg-[#18181B] glow-purple animate-[bookingPulse_400ms_ease-out]">
+            <CheckCircle2 className="h-10 w-10 text-[#FF3A3A]" />
           </div>
           <h1 className="mt-8 font-heading text-[48px] uppercase text-[#FAFAFA]">YOU&apos;RE IN!</h1>
           <p className="mt-2 text-[16px] text-[#A1A1AA]">Your slot is locked in. See you at The Hideout.</p>
 
-          <div className="mt-8 w-full rounded-xl border border-[#A855F7] bg-[#18181B] p-8 text-center glow-purple">
+          <div className="mt-8 w-full rounded-xl border border-[#FF3A3A] bg-[#18181B] p-8 text-center glow-purple">
             <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#A1A1AA]">BOOKING CODE</div>
-            <div className="mt-4 font-mono text-[36px] tracking-widest text-[#A855F7] glow-text">{bookingResult.booking_code}</div>
+            <div className="mt-4 font-mono text-[36px] tracking-widest text-[#FF3A3A] glow-text">{bookingResult.booking_code}</div>
             <button type="button" onClick={copyBookingCode} className="mt-4 inline-flex items-center gap-2 text-[13px] text-[#A1A1AA] transition-colors hover:text-[#FAFAFA]">
               {copiedBookingCode ? <Check className="h-4 w-4 text-[#4ADE80]" /> : <Copy className="h-4 w-4" />}
               {copiedBookingCode ? "Copied" : "Copy booking code"}
@@ -326,13 +229,13 @@ Booking Details:
 
           <div className="mt-6 w-full rounded-lg border border-[rgba(255,58,58,0.2)] bg-[rgba(255,58,58,0.08)] px-5 py-4 text-left">
             <div className="flex items-center gap-2 text-[14px] text-[#FAFAFA]">
-              <Sparkles className="h-4 w-4 text-[#A855F7]" />
+              <Sparkles className="h-4 w-4 text-[#FF3A3A]" />
               +{bookingCoinAmount} H Coins added to your account!
             </div>
           </div>
 
           <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-            <button type="button" onClick={() => router.push("/profile")} className="rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-6 py-3 text-[14px] font-semibold text-white transition duration-200 hover:shadow-lg hover:shadow-[#A855F7]/50">
+            <button type="button" onClick={() => router.push("/profile")} className="rounded-lg bg-[#FF3A3A] px-6 py-3 text-[14px] font-semibold text-[#09090B] transition duration-200 hover:glow-purple">
               View My Bookings
             </button>
             <button
@@ -342,7 +245,7 @@ Booking Details:
                 setSelectedSlotId(null);
                 setStep(1);
               }}
-              className="rounded-lg border border-[#27272A] px-6 py-3 text-[14px] font-semibold text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]"
+              className="rounded-lg border border-[#27272A] px-6 py-3 text-[14px] font-semibold text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]"
             >
               Book Another Slot
             </button>
@@ -360,7 +263,7 @@ Booking Details:
 
       <section className="mx-auto max-w-180 px-6 py-12 md:py-16">
         <div className="mb-8">
-          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">BOOK YOUR SESSION</div>
+          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">BOOK YOUR SESSION</div>
           <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">CHOOSE YOUR SLOT</h1>
         </div>
 
@@ -378,7 +281,7 @@ Booking Details:
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-semibold ${
                       isComplete || isActive
-                        ? "bg-[#8B5CF6] text-[#0A0A0A]"
+                        ? "bg-[#8B5CF6] text-[#09090B]"
                         : "border border-[#27272A] bg-[#18181B] text-[#A1A1AA]"
                     } ${isActive ? "glow-purple" : ""}`}
                   >
@@ -412,7 +315,7 @@ Booking Details:
                         className={`min-w-23 rounded-lg border p-3 text-center transition-all duration-150 ${
                           isSelected
                             ? "border-[#8B5CF6] bg-[#27272A] glow-purple"
-                            : "border-[#27272A] bg-[#0A0A0A] hover:border-[#06B6D4]"
+                            : "border-[#27272A] bg-[#09090B] hover:border-[#06B6D4]"
                         } ${isPast ? "cursor-not-allowed opacity-40" : ""}`}
                       >
                         <div className="text-[11px] font-medium uppercase text-[#A1A1AA]">{date.dayName}</div>
@@ -428,13 +331,8 @@ Booking Details:
 
               <div className="mt-8">
                 <label className="text-[13px] font-medium text-[#FAFAFA]">Session Type</label>
-                {loadedSessionTypes.length === 0 ? (
-                  <div className="mt-4 rounded-xl border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-5 py-4 text-[13px] text-[#EF4444]">
-                    Session types are not loaded from Supabase yet. Run the SQL setup in database/slot_booking_flow.sql, then refresh this page.
-                  </div>
-                ) : null}
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
-                  {loadedSessionTypes.map((sessionType) => {
+                  {sessionTypes.map((sessionType) => {
                     const isSelected = selectedSessionTypeId === sessionType.id;
                     const isPopular = sessionType.name === "Duo";
                     return (
@@ -443,29 +341,22 @@ Booking Details:
                         type="button"
                         onClick={() => setSelectedSessionTypeId(sessionType.id)}
                         className={`relative rounded-xl border p-5 text-left transition-all duration-150 ${
-                          isSelected ? "border-[#8B5CF6] bg-[#27272A] glow-purple" : "border-[#27272A] bg-[#0A0A0A] hover:border-[#06B6D4]"
+                          isSelected ? "border-[#8B5CF6] bg-[#27272A] glow-purple" : "border-[#27272A] bg-[#09090B] hover:border-[#06B6D4]"
                         }`}
                       >
                         {isPopular ? (
-                          <span className="absolute right-3 top-3 rounded bg-[#8B5CF6] px-2 py-0.5 text-[10px] font-semibold uppercase text-[#0A0A0A]">Popular</span>
+                          <span className="absolute right-3 top-3 rounded bg-[#8B5CF6] px-2 py-0.5 text-[10px] font-semibold uppercase text-[#09090B]">Popular</span>
                         ) : null}
                         <div className="flex items-start justify-between gap-3">
                           <div className="text-[16px] font-semibold text-[#FAFAFA]">{sessionType.name}</div>
-                          <div className="font-heading text-[24px] uppercase text-[#A855F7]">₹{sessionType.price_per_hour}/hr</div>
+                          <div className="font-heading text-[24px] uppercase text-[#FF3A3A]">₹{sessionType.price_per_hour}/hr</div>
                         </div>
                         <div className="mt-3 text-[13px] text-[#A1A1AA]">{sessionType.description}</div>
-                        <div className="mt-4 flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-[12px] text-[#71717A]">Max {sessionType.max_players} player(s)</div>
-                            <div className="mt-3 flex items-center gap-1">
-                              {Array.from({ length: 4 }).map((_, index) => (
-                                <User key={index} className={`h-3.5 w-3.5 ${index < sessionType.max_players ? "text-[#8B5CF6]" : "text-[#A1A1AA]"}`} />
-                              ))}
-                            </div>
-                          </div>
-                          <div className="rounded-full border border-[rgba(34,197,94,0.25)] bg-[rgba(34,197,94,0.08)] px-3 py-1 text-[12px] font-medium text-[#4ADE80]">
-                            +{sessionType.h_coins_earned ?? 10} H Coins
-                          </div>
+                        <div className="mt-4 text-[12px] text-[#71717A]">Max {sessionType.max_players} player(s)</div>
+                        <div className="mt-3 flex items-center gap-1">
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <User key={index} className={`h-3.5 w-3.5 ${index < sessionType.max_players ? "text-[#8B5CF6]" : "text-[#A1A1AA]"}`} />
+                          ))}
                         </div>
                       </button>
                     );
@@ -476,7 +367,7 @@ Booking Details:
                   type="button"
                   disabled={!selectedDate || !selectedSessionTypeId}
                   onClick={() => setStep(2)}
-                  className="mt-8 w-full rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="mt-8 w-full rounded-lg bg-[#FF3A3A] px-6 py-3 text-[16px] font-semibold text-[#09090B] transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:glow-purple"
                 >
                   Continue to Time Slots →
                 </button>
@@ -491,7 +382,7 @@ Booking Details:
                   <div className="text-[13px] font-medium text-[#FAFAFA]">Select Time Slot</div>
                   <div className="mt-1 text-[13px] text-[#A1A1AA]">{formatDateLabel(selectedDate)} · {selectedSessionType?.name}</div>
                 </div>
-                <button type="button" onClick={() => setStep(1)} className="rounded-lg border border-[#27272A] px-4 py-2 text-[14px] text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]">
+                <button type="button" onClick={() => setStep(1)} className="rounded-lg border border-[#27272A] px-4 py-2 text-[14px] text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]">
                   ← Back
                 </button>
               </div>
@@ -526,7 +417,7 @@ Booking Details:
                     Selected: <span className="font-semibold text-[#FAFAFA]">{selectedSlot.label}</span>
                   </div>
                   <div className="text-[14px] text-[#A1A1AA]">
-                    Total: <span className="font-heading text-[24px] uppercase text-[#A855F7]">₹{totalPrice}</span>
+                    Total: <span className="font-heading text-[24px] uppercase text-[#FF3A3A]">₹{totalPrice}</span>
                   </div>
                 </div>
               ) : null}
@@ -538,10 +429,10 @@ Booking Details:
               ) : null}
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-                <button type="button" onClick={() => setStep(1)} className="rounded-lg border border-[#27272A] px-5 py-2.5 text-[14px] text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]">
+                <button type="button" onClick={() => setStep(1)} className="rounded-lg border border-[#27272A] px-5 py-2.5 text-[14px] text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]">
                   ← Back
                 </button>
-                <button type="button" disabled={!selectedSlotId} onClick={() => setStep(3)} className="rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-5 py-2.5 text-[14px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40">
+                <button type="button" disabled={!selectedSlotId} onClick={() => setStep(3)} className="rounded-lg bg-[#FF3A3A] px-5 py-2.5 text-[14px] font-semibold text-[#09090B] transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:glow-purple">
                   Confirm Details →
                 </button>
               </div>
@@ -571,17 +462,17 @@ Booking Details:
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <div className="text-[16px] font-semibold text-[#FAFAFA]">Total</div>
-                  <div className="font-heading text-[28px] uppercase text-[#A855F7]">₹{totalPrice}</div>
+                  <div className="font-heading text-[28px] uppercase text-[#FF3A3A]">₹{totalPrice}</div>
                 </div>
               </div>
 
               <div className="mt-4 rounded-lg border border-[rgba(255,58,58,0.2)] bg-[rgba(255,58,58,0.08)] px-4 py-3 text-[13px] text-[#A1A1AA] flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#A855F7]" />
+                <Sparkles className="h-4 w-4 text-[#FF3A3A]" />
                 You&apos;ll earn {bookingCoinAmount} H Coins for this booking.
               </div>
 
               <div className="mt-4 text-[13px] text-[#A1A1AA]">
-                Booking under H-ID: <span className="font-mono text-[14px] text-[#A855F7]">{profile?.h_id || 'N/A'}</span>
+                Booking under H-ID: <span className="font-mono text-[14px] text-[#FF3A3A]">{profile?.h_id || 'N/A'}</span>
               </div>
 
               <div className="mt-4 text-[12px] text-[#71717A]">
@@ -595,31 +486,15 @@ Booking Details:
               ) : null}
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-                <button type="button" onClick={() => setStep(2)} className="rounded-lg border border-[#27272A] px-5 py-2.5 text-[14px] text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]">
+                <button type="button" onClick={() => setStep(2)} className="rounded-lg border border-[#27272A] px-5 py-2.5 text-[14px] text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]">
                   ← Change Slot
                 </button>
-                <button type="button" onClick={confirmBooking} disabled={!selectedSlotId || loadingConfirm} className="rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-5 py-2.5 text-[14px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40">
+                <button type="button" onClick={confirmBooking} disabled={!selectedSlotId || loadingConfirm} className="rounded-lg bg-[#FF3A3A] px-5 py-2.5 text-[14px] font-semibold text-[#09090B] transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:glow-purple">
                   {loadingConfirm ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Confirming...</span> : "Confirm Booking"}
                 </button>
               </div>
             </div>
           ) : null}
-        </div>
-      </section>
-
-      {/* WhatsApp Support Section */}
-      <section className="mx-auto max-w-180 px-6 py-8 md:py-12">
-        <div className="max-w-3xl">
-          <p className="text-sm text-[#A1A1AA] mb-3">Need help choosing a slot?</p>
-          <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919876543210"}?text=${encodeURIComponent("Hi Hideout Team, I need help booking a slot")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[#25D366] hover:underline text-sm font-medium transition-colors"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Chat with us on WhatsApp
-          </a>
         </div>
       </section>
     </main>

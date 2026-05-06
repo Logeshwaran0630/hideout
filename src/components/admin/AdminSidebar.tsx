@@ -72,7 +72,7 @@ export default function AdminSidebar({ profile }: { profile: AdminProfile }) {
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors duration-150 ${
                 isActive
                   ? "bg-[#8B5CF6] text-[#FAFAFA]"
-                  : "text-[#A1A1AA] hover:bg-[#0A0A0A] hover:text-[#FAFAFA]"
+                  : "text-[#A1A1AA] hover:bg-[#09090B] hover:text-[#FAFAFA]"
               }`}
             >
               <Icon className={`h-4 w-4 ${isActive ? "text-[#FAFAFA]" : "text-[#A1A1AA]"}`} />
@@ -84,7 +84,7 @@ export default function AdminSidebar({ profile }: { profile: AdminProfile }) {
 
       <div className="border-t border-[#27272A] p-4">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#A855F7]" />
+          <span className="h-2 w-2 rounded-full bg-[#FF3A3A]" />
           <div className="text-[13px] font-medium text-[#FAFAFA]">{profile.display_name || profile.email}</div>
         </div>
         <div className="mt-1 font-mono text-[11px] text-[#A1A1AA]">{profile.h_id}</div>

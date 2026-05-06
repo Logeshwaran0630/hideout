@@ -6,8 +6,8 @@ interface ScrollRevealProps {
   children: ReactNode;
   delay?: number;
   className?: string;
+  type?: string;
 }
-
 export default function ScrollReveal({ children, delay = 0, className = "" }: ScrollRevealProps) {
   // ScrollReveal temporarily disabled - renders children instantly
   return (
