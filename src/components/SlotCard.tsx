@@ -10,22 +10,25 @@ type SlotCardProps = {
 
 const stateClasses: Record<SlotState, string> = {
   available:
-    "cursor-pointer bg-[#0A0A0A] border-[#2A2A2A] hover:border-[#3B82F6] hover:bg-[#27272A]",
-  selected: "cursor-pointer border-[#A855F7] bg-[#27272A] glow-purple",
-  booked: "cursor-not-allowed opacity-50 bg-[#0A0A0A] border-[#2A2A2A]",
-  past: "cursor-not-allowed opacity-40 bg-[#0A0A0A] border-[#2A2A2A]",
+    "cursor-pointer bg-[#0A0A0A] border-[#2A2A2A] hover:border-[#06B6D4] hover:bg-[#1A1A22] hover:shadow-lg hover:shadow-[#06B6D4]/10",
+  selected:
+    "cursor-pointer bg-gradient-to-r from-[#A855F7]/10 to-[#7C3AED]/10 border-[#A855F7] shadow-lg shadow-[#A855F7]/20",
+  booked:
+    "cursor-not-allowed opacity-50 bg-[#0A0A0A] border-[#2A2A2A]",
+  past:
+    "cursor-not-allowed opacity-40 bg-[#0A0A0A] border-[#2A2A2A]",
 };
 
 const dotClasses: Record<SlotState, string> = {
-  available: "bg-[#3B82F6]",
+  available: "bg-[#06B6D4]",
   selected: "bg-[#A855F7]",
-  booked: "bg-[#6B6B6B]",
-  past: "bg-[#3F3F46]",
+  booked: "bg-[#3F3F46]",
+  past: "bg-[#3A3F48]",
 };
 
 const badgeClasses: Record<SlotState, string> = {
   available:
-    "border border-[rgba(59,130,246,0.3)] bg-[rgba(59,130,246,0.1)] text-[#3B82F6]",
+    "border border-[rgba(6,182,212,0.3)] bg-[rgba(6,182,212,0.1)] text-[#06B6D4]",
   selected:
     "border border-[#A855F7] bg-[rgba(168,85,247,0.15)] text-[#A855F7]",
   booked: "border border-transparent bg-transparent text-[#A1A1AA]",

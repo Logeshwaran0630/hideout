@@ -195,3 +195,18 @@ export async function updateCalendarEvent(
     return false;
   }
 }
+
+/**
+ * Verify calendar connection (for testing)
+ */
+export async function verifyCalendarConnection(): Promise<boolean> {
+  try {
+    const response = await calendar.calendars.get({
+      calendarId: process.env.GOOGLE_CALENDAR_ID,
+    });
+    return response.status === 200;
+  } catch (error) {
+    console.error('Calendar connection failed:', error);
+    return false;
+  }
+}

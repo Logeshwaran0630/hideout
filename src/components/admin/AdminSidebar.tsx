@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   CalendarDays,
+  CalendarPlus,
   CircleDollarSign,
   LayoutDashboard,
   LogOut,
@@ -19,6 +20,7 @@ import { supabase } from "@/lib/supabase/client";
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarDays },
+  { href: "/admin/manual-booking", label: "Manual Booking", icon: CalendarPlus },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/coins", label: "H Coins", icon: CircleDollarSign },
   { href: "/admin/settings", label: "Settings", icon: Settings },
@@ -84,7 +86,7 @@ export default function AdminSidebar({ profile }: { profile: AdminProfile }) {
 
       <div className="border-t border-[#27272A] p-4">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#FF3A3A]" />
+          <span className="h-2 w-2 rounded-full bg-[#A855F7]" />
           <div className="text-[13px] font-medium text-[#FAFAFA]">{profile.display_name || profile.email}</div>
         </div>
         <div className="mt-1 font-mono text-[11px] text-[#A1A1AA]">{profile.h_id}</div>

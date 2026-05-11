@@ -1,4 +1,5 @@
 import ProfileClient from "@/components/ProfileClient";
+import { sendWelcomeEmail } from "@/lib/email";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -51,6 +52,18 @@ export default async function ProfilePage() {
     .select("id, email, h_id, display_name, role, created_at")
     .eq("id", user.id)
     .single();
+
+  if (newProfile?.email) {
+    const profileWasCreated = !profile;
+    if (profileWasCreated) {
+      await sendWelcomeEmail({
+        id: newProfile.id,
+        email: newProfile.email,
+        display_name: newProfile.display_name,
+        h_id: newProfile.h_id,
+      });
+    }
+  }
 
   const fallbackProfile = {
     id: user.id,

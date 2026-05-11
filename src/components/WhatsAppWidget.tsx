@@ -10,7 +10,7 @@ const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919876543210
 interface QuickAction {
   icon: React.ReactNode;
   label: string;
-  key: string;
+  message: string;
 }
 
 export default function WhatsAppWidget() {
@@ -62,52 +62,24 @@ export default function WhatsAppWidget() {
     return () => subscription?.unsubscribe();
   }, []);
 
-  // Get current page URL and title
-  const getCurrentPageInfo = () => {
-    if (typeof window === "undefined") return { url: "", path: "", pageName: "The Hideout" };
-    
-    const url = window.location.href;
-    const path = window.location.pathname;
-    
-    let pageName = "The Hideout";
-    if (path === "/") pageName = "Homepage";
-    else if (path === "/slots") pageName = "Slot Booking";
-    else if (path === "/profile") pageName = "My Profile";
-    else if (path.startsWith("/admin")) pageName = "Admin Panel";
-    else if (path === "/login") pageName = "Login/Signup";
-    
-    return { url, path, pageName };
-  };
-
   // Generate WhatsApp message based on action
   const generateMessage = (action: string) => {
-    const { url, pageName } = getCurrentPageInfo();
-    const timestamp = new Date().toLocaleString('en-IN', { 
-      timeZone: 'Asia/Kolkata',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    
-    const baseMessage = `Hi Hideout Team,\n\n`;
-    
+    const currentHId = userHId
+      ? userHId.startsWith("HID-")
+        ? userHId
+        : `HID-${userHId}`
+      : null;
+
+    const baseMessage = `🏠 *THE HIDEOUT - BOOKING REQUEST*\n\n`;
+
     const templates: Record<string, string> = {
-      booking: `${baseMessage}I would like to book a slot at The Hideout.\n\nDate: \nTime: \nSession Type: \n\n${
-        isLoggedIn ? `H-ID: ${userHId}\n` : `Note: I will sign up before booking.\n`
-      }\nPage: ${pageName}\nTime Sent: ${timestamp}\n\nPlease confirm availability.\n\nThank you.`,
-      
-      question: `${baseMessage}I have a question about The Hideout.\n\nQuestion:\n\n${
-        isLoggedIn ? `H-ID: ${userHId}\n` : `Status: Not logged in yet\n`
-      }Page: ${pageName}\nTime Sent: ${timestamp}\n\nPlease respond at your earliest convenience.`,
-      
-      issue: `${baseMessage}I am experiencing an issue.\n\nIssue Description:\n\n${
-        isLoggedIn ? `H-ID: ${userHId}\n` : `Status: Not logged in\n`
-      }Page: ${pageName}\nURL: ${url}\nTime: ${timestamp}\n\nPlease help resolve this issue.`,
-      
-      tournament: `${baseMessage}I am interested in tournaments at The Hideout.\n\nGame Interested In: \nTeam Size: \n\n${
-        isLoggedIn ? `H-ID: ${userHId}\n` : `Status: Will create account\n`
-      }Page: ${pageName}\nTime Sent: ${timestamp}\n\nPlease share the tournament schedule and prize details.`,
+      booking: `${baseMessage}${isLoggedIn ? `🔑 *H-ID:* ${currentHId}\n\n` : `📝 *Not logged in* - Please sign up at hideout.vercel.app\n\n`}📅 *I want to book:*\n\nExample format:\n${currentHId || "HID-XXXXXX"} [DATE] [TIME] [SESSION]\n\nExamples:\n• ${currentHId || "HID-000001"} tomorrow 7pm duo\n• ${currentHId || "HID-000001"} may 16 8pm squad\n• ${currentHId || "HID-000001"} friday 3pm solo\n\n━━━━━━━━━━━━━━━━━━━━\n\n*My booking:*\n${currentHId || "HID-______"} ________ __ __\n\n━━━━━━━━━━━━━━━━━━━━\n\n📍 The Hideout, Chennai\n🕐 Open 11 AM - Midnight\n\nPlease confirm my booking. Thanks!`,
+
+      example: `${baseMessage}📋 *Example Messages You Can Send:*\n\n1. HID-000001 tomorrow 7pm duo\n2. HID-000001 may 16 8pm squad\n3. HID-000001 friday 3pm solo\n\n━━━━━━━━━━━━━━━━━━━━\n\n📅 *Date words:* today, tomorrow, [day name] e.g., monday, [date] e.g., may 16\n\n⏰ *Time:* 7pm, 8pm, 3pm, 9pm etc.\n\n👥 *Session:* solo (1 player), duo (2 players), squad (4 players)\n\n━━━━━━━━━━━━━━━━━━━━\n\n*Your H-ID:* ${currentHId || "Sign up to get H-ID"}\n\nSend your booking request and we'll confirm!`,
+
+      help: `${baseMessage}🆘 *Need Help?*\n\nTo book a slot, send:\n${currentHId || "HID-XXXXXX"} [date] [time] [session]\n\n*Examples:*\n• ${currentHId || "HID-000001"} tomorrow 7pm duo\n• ${currentHId || "HID-000001"} may 16 8pm squad\n• ${currentHId || "HID-000001"} friday 3pm solo\n\n━━━━━━━━━━━━━━━━━━━━\n\n📍 Visit our website: hideout.vercel.app\n📞 Call us: +91 XXXXX XXXXX\n\nWe'll respond shortly!`,
+
+      myhid: `${baseMessage}🔑 *Your H-ID Information*\n\n${isLoggedIn ? `✅ *Your H-ID:* ${currentHId}\n\nYou can use this ID to book slots:\nSend: ${currentHId} tomorrow 7pm duo\n\n━━━━━━━━━━━━━━━━━━━━\n\n📝 *Don't have an H-ID?*\nSign up at hideout.vercel.app\n\nIt's free and takes 1 minute!` : `❌ *You are not logged in*\n\nPlease sign up at hideout.vercel.app to get your unique H-ID.\n\nIt's free and takes 1 minute!\n\nAfter signup, you can book slots via WhatsApp.`}`,
     };
     
     return templates[action] || templates.booking;
@@ -118,28 +90,27 @@ export default function WhatsAppWidget() {
     { 
       icon: <Calendar className="w-4 h-4" />, 
       label: "Book a Slot", 
-      key: "booking"
+      message: generateMessage("booking")
     },
     { 
       icon: <HelpCircle className="w-4 h-4" />, 
-      label: "Ask Question", 
-      key: "question"
+      label: "How to Book", 
+      message: generateMessage("example")
     },
     { 
       icon: <Flag className="w-4 h-4" />, 
-      label: "Report Issue", 
-      key: "issue"
+      label: "Need Help?", 
+      message: generateMessage("help")
     },
     { 
       icon: <Trophy className="w-4 h-4" />, 
-      label: "Tournament", 
-      key: "tournament"
+      label: "My H-ID", 
+      message: generateMessage("myhid")
     },
   ];
 
   // Open WhatsApp with message
-  const openWhatsApp = (action: string) => {
-    const message = generateMessage(action);
+  const openWhatsApp = (message: string) => {
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
@@ -186,8 +157,8 @@ export default function WhatsAppWidget() {
               <p className="text-xs text-[#A1A1AA] px-2 py-1">Quick messages:</p>
               {quickActions.map((action) => (
                 <button
-                  key={action.key}
-                  onClick={() => openWhatsApp(action.key)}
+                  key={action.label}
+                  onClick={() => openWhatsApp(action.message)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#0A0A0A] transition-colors text-left group"
                 >
                   <div className="text-[#25D366]">{action.icon}</div>
@@ -204,7 +175,7 @@ export default function WhatsAppWidget() {
             {/* Custom Message */}
             <div className="p-3">
               <button
-                onClick={() => openWhatsApp("booking")}
+                onClick={() => openWhatsApp(generateMessage("booking"))}
                 className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BA58] text-white py-2.5 rounded-xl text-sm font-semibold transition-colors"
               >
                 <Send className="w-4 h-4" />
@@ -256,7 +227,7 @@ export default function WhatsAppWidget() {
         {/* Tooltip when hovering */}
         {!isOpen && isHovered && (
           <div className="absolute bottom-20 right-0 mb-2 whitespace-nowrap bg-[#18181B] text-white text-sm px-4 py-2 rounded-xl shadow-lg border border-[#2A2A2A] animate-fade-in">
-            Chat with us on WhatsApp
+            💬 Book via WhatsApp — Send H-ID + Date + Time + Session
             <div className="absolute -bottom-1 right-6 w-2 h-2 bg-[#18181B] rotate-45 border-r border-b border-[#2A2A2A]" />
           </div>
         )}

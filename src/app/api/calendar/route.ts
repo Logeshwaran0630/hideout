@@ -74,12 +74,29 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Missing date parameters" }, { status: 400 });
       }
 
+      // DEBUG LOGGING
+      console.log("[DEBUG] Checking availability:");
+      console.log("  Start (raw):", startDateTime);
+      console.log("  End (raw):", endDateTime);
+      console.log("  Start as Date:", new Date(startDateTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+      console.log("  End as Date:", new Date(endDateTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+      console.log("  Start UTC:", new Date(startDateTime).toISOString());
+      console.log("  End UTC:", new Date(endDateTime).toISOString());
+
       const response = await calendar.events.list({
         calendarId,
         timeMin: startDateTime,
         timeMax: endDateTime,
         singleEvents: true,
       });
+
+      console.log("  Events found:", response.data.items?.length || 0);
+      if (response.data.items && response.data.items.length > 0) {
+        response.data.items.forEach((event, idx) => {
+          console.log(`    Event ${idx + 1}:`, event.summary, "Start:", event.start?.dateTime, "End:", event.end?.dateTime);
+        });
+      }
+      console.log("  Available:", (response.data.items?.length || 0) === 0);
 
       const available = (response.data.items?.length || 0) === 0;
       return NextResponse.json({ success: true, available });
@@ -94,8 +111,15 @@ export async function POST(request: NextRequest) {
 
       const availability: Record<string, boolean> = {};
 
+      console.log("[DEBUG] Checking multiple slots availability");
+      console.log("  Total slots:", slots.length);
+
       for (const slot of slots) {
         try {
+          console.log(`  Checking slot ${slot.slotId}:`);
+          console.log(`    Start: ${slot.start} (UTC: ${new Date(slot.start).toISOString()})`);
+          console.log(`    End: ${slot.end} (UTC: ${new Date(slot.end).toISOString()})`);
+
           const response = await calendar.events.list({
             calendarId,
             timeMin: slot.start,
@@ -106,7 +130,12 @@ export async function POST(request: NextRequest) {
           const isAvailable = (response.data.items?.length || 0) === 0;
           availability[slot.slotId] = isAvailable;
 
-          console.log(`[Calendar API] Slot ${slot.slotId}: ${isAvailable ? "Available" : "Booked"}`);
+          console.log(`    Result: ${isAvailable ? "✅ Available" : "❌ Booked"} (${response.data.items?.length || 0} events)`);
+          if (response.data.items && response.data.items.length > 0) {
+            response.data.items.forEach((event) => {
+              console.log(`      - ${event.summary} at ${event.start?.dateTime}`);
+            });
+          }
         } catch (error) {
           console.error(`[Calendar API] Error checking slot ${slot.slotId}:`, error);
           availability[slot.slotId] = true;
@@ -186,6 +215,34 @@ export async function POST(request: NextRequest) {
       console.log("[Calendar API] Event deleted:", eventId);
 
       return NextResponse.json({ success: true });
+    }
+
+    if (action === "verifyCalendarConnection") {
+      try {
+        const response = await calendar.calendars.get({
+          calendarId,
+        });
+
+        const isConnected = response.status === 200;
+
+        console.log("[Calendar API] Connection verified:", isConnected);
+
+        return NextResponse.json({
+          success: isConnected,
+          message: isConnected ? "Google Calendar is connected and ready" : "Connection failed",
+        });
+      } catch (error) {
+        console.error("[Calendar API] Connection verification failed:", error);
+
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Connection failed",
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });

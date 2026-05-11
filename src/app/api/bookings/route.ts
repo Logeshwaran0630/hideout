@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { sendAdminAlertEmail, sendBookingConfirmationEmail } from "@/lib/email";
 
 type BookingRequestBody = {
   time_slot_id?: string;
@@ -97,6 +98,38 @@ export async function POST(request: Request) {
         // Don't fail the booking if ledger fails
       }
     }
+
+    const { data: profile } = await supabase
+      .from("users")
+      .select("id, email, display_name, h_id")
+      .eq("id", user.id)
+      .single();
+
+    const bookingForEmail = {
+      ...data,
+      users: profile ?? {
+        id: user.id,
+        email: user.email ?? "",
+        display_name: user.user_metadata?.display_name ?? user.email ?? undefined,
+        h_id: undefined,
+      },
+    };
+
+    console.log("📧 [Booking] Sending emails for booking:", data.booking_code);
+
+    const [customerEmailResult, adminEmailResult] = await Promise.all([
+      sendBookingConfirmationEmail(bookingForEmail).catch((err) => {
+        console.error("❌ [Booking] Failed to send customer email:", err);
+        return false;
+      }),
+      sendAdminAlertEmail(bookingForEmail).catch((err) => {
+        console.error("❌ [Booking] Failed to send admin email:", err);
+        return false;
+      }),
+    ]);
+
+    console.log("📧 Customer email result:", customerEmailResult ? "✅ Sent" : "❌ Failed");
+    console.log("📧 Admin email result:", adminEmailResult ? "✅ Sent" : "❌ Failed");
 
     return NextResponse.json({ success: true, booking: data });
   } catch (error) {
