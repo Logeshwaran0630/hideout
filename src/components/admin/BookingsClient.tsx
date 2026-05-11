@@ -26,7 +26,7 @@ function formatDate(value: string) {
 
 const statusBadgeClasses: Record<string, string> = {
   confirmed: "border-[rgba(74,222,128,0.3)] bg-[rgba(74,222,128,0.1)] text-[#4ADE80]",
-  cancelled: "border-[rgba(168,85,247,0.3)] bg-[rgba(168,85,247,0.08)] text-[#A855F7]",
+  cancelled: "border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] text-[#EF4444]",
   completed: "border-[rgba(161,161,170,0.3)] bg-[rgba(161,161,170,0.1)] text-[#A1A1AA]",
 };
 
@@ -55,7 +55,7 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">BOOKINGS</div>
+          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF3A3A]">BOOKINGS</div>
           <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">ALL BOOKINGS</h1>
         </div>
         <div className="text-[14px] text-[#A1A1AA]">{bookings.length} bookings</div>
@@ -67,12 +67,12 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
             type="date"
             value={date}
             onChange={(e) => updateParams({ date: e.target.value || undefined })}
-            className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]"
+            className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]"
           />
           <select
             value={status}
             onChange={(e) => updateParams({ status: e.target.value || undefined })}
-            className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]"
+            className="w-full rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]"
           >
             <option value="">All</option>
             <option value="confirmed">Confirmed</option>
@@ -85,7 +85,7 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
               value={search}
               onChange={(e) => updateParams({ search: e.target.value || undefined })}
               placeholder="Search H-ID or booking code..."
-              className="w-full rounded-lg border border-[#27272A] bg-[#09090B] py-3 pl-9 pr-4 text-[14px] text-[#FAFAFA] outline-none focus:border-[#A855F7]"
+              className="w-full rounded-lg border border-[#27272A] bg-[#09090B] py-3 pl-9 pr-4 text-[14px] text-[#FAFAFA] outline-none focus:border-[#FF3A3A]"
             />
           </div>
         </div>
@@ -103,15 +103,15 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking.id} className="border-b border-[#27272A] transition-colors hover:bg-[#18181B]">
-                <td className="px-4 py-4 font-mono text-[13px] text-[#A855F7]">{booking.booking_code}</td>
+                <td className="px-4 py-4 font-mono text-[13px] text-[#FF3A3A]">{booking.booking_code}</td>
                 <td className="px-4 py-4 text-[14px] text-[#FAFAFA]">{formatDate(booking.booking_date)}</td>
                 <td className="px-4 py-4 text-[14px] text-[#A1A1AA]">{booking.time_slots?.label}</td>
                 <td className="px-4 py-4">
-                  <div className="font-mono text-[12px] text-[#A855F7]">{booking.users?.h_id}</div>
+                  <div className="font-mono text-[12px] text-[#FF3A3A]">{booking.users?.h_id}</div>
                   <div className="text-[12px] text-[#71717A]">{booking.users?.display_name || booking.users?.email}</div>
                 </td>
                 <td className="px-4 py-4">
-                  <span className="rounded-full border border-[rgba(168,85,247,0.3)] bg-[rgba(168,85,247,0.08)] px-2 py-0.5 text-[12px] font-medium text-[#A855F7]">{booking.session_types?.name}</span>
+                  <span className="rounded-full border border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#FF3A3A]">{booking.session_types?.name}</span>
                 </td>
                 <td className="px-4 py-4 text-[14px] font-semibold text-[#FAFAFA]">₹{booking.total_price}</td>
                 <td className="px-4 py-4">
@@ -119,11 +119,11 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => setViewTarget(booking)} className="rounded-md border border-[#27272A] p-2 text-[#A1A1AA] transition-colors hover:border-[#A855F7] hover:text-[#FAFAFA]" aria-label="View booking">
+                    <button type="button" onClick={() => setViewTarget(booking)} className="rounded-md border border-[#27272A] p-2 text-[#A1A1AA] transition-colors hover:border-[#FF3A3A] hover:text-[#FAFAFA]" aria-label="View booking">
                       <Eye className="h-4 w-4" />
                     </button>
                     {booking.status === 'confirmed' ? (
-                      <button type="button" onClick={() => setCancelTarget(booking)} className="rounded-md border border-[#27272A] p-2 text-[#A855F7] transition-colors hover:border-[#A855F7]" aria-label="Cancel booking">
+                      <button type="button" onClick={() => setCancelTarget(booking)} className="rounded-md border border-[#27272A] p-2 text-[#EF4444] transition-colors hover:border-[#EF4444]" aria-label="Cancel booking">
                         <X className="h-4 w-4" />
                       </button>
                     ) : null}
@@ -176,7 +176,7 @@ function CancelModal({ booking, onClose, onCancelled }: { booking: BookingRow; o
   const [loading, setLoading] = useState(false);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-[#A855F7] bg-[#18181B] p-8">
+      <div className="w-full max-w-md rounded-xl border border-[#EF4444] bg-[#18181B] p-8">
         <div className="flex items-start justify-between gap-4">
           <h2 className="font-heading text-[32px] uppercase text-[#FAFAFA]">CANCEL BOOKING?</h2>
           <button type="button" onClick={onClose} className="rounded-md p-2 text-[#A1A1AA] hover:text-[#FAFAFA]">
@@ -184,7 +184,7 @@ function CancelModal({ booking, onClose, onCancelled }: { booking: BookingRow; o
           </button>
         </div>
         <p className="mt-4 text-[15px] text-[#A1A1AA]">
-          This will cancel booking <span className="font-mono text-[#A855F7]">{booking.booking_code}</span>. The slot will be freed. This cannot be undone.
+          This will cancel booking <span className="font-mono text-[#FF3A3A]">{booking.booking_code}</span>. The slot will be freed. This cannot be undone.
         </p>
         <div className="mt-6 flex gap-3">
           <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-[#27272A] px-4 py-3 text-[14px] text-[#A1A1AA] hover:text-[#FAFAFA]">Keep Booking</button>
@@ -209,7 +209,7 @@ function CancelModal({ booking, onClose, onCancelled }: { booking: BookingRow; o
               await onCancelled();
               setLoading(false);
             }}
-            className="flex-1 rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-4 py-3 text-[14px] font-semibold text-[#FAFAFA]"
+            className="flex-1 rounded-lg bg-[#EF4444] px-4 py-3 text-[14px] font-semibold text-[#FAFAFA]"
           >
             {loading ? 'Cancelling...' : 'Yes, Cancel It'}
           </button>

@@ -86,7 +86,7 @@ export default function AdminSidebar({ profile }: { profile: AdminProfile }) {
 
       <div className="border-t border-[#27272A] p-4">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#A855F7]" />
+          <span className="h-2 w-2 rounded-full bg-[#FF3A3A]" />
           <div className="text-[13px] font-medium text-[#FAFAFA]">{profile.display_name || profile.email}</div>
         </div>
         <div className="mt-1 font-mono text-[11px] text-[#A1A1AA]">{profile.h_id}</div>

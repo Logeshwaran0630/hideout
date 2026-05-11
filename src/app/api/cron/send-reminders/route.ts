@@ -1,7 +1,6 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { sendBookingReminderEmail } from '@/lib/emailService';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 // This endpoint will be called by a cron job daily
 export async function GET(request: Request) {
@@ -11,7 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createServerSupabaseClient();
 
   // Get bookings scheduled for tomorrow
   const tomorrow = new Date();

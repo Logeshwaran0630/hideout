@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createCalendarEvent } from '@/lib/googleCalendar';
-import { sendAdminAlertEmail, sendBookingConfirmationEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -127,21 +126,6 @@ Booked by: Admin (Manual Booking)
         description: `Manual booking: ${booking.booking_code}`
       });
     }
-
-    const bookingForEmail = {
-      ...booking,
-      users: userData,
-    };
-
-    console.log('[Manual Booking API] Sending emails for booking:', booking.booking_code);
-
-    sendBookingConfirmationEmail(bookingForEmail).catch((err) => {
-      console.error('[Manual Booking API] Failed to send customer email:', err);
-    });
-
-    sendAdminAlertEmail(bookingForEmail).catch((err) => {
-      console.error('[Manual Booking API] Failed to send admin email:', err);
-    });
     
     // Generate WhatsApp confirmation message
     const whatsappMessage = `

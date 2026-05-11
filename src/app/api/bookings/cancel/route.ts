@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cancelCalendarEvent } from '@/lib/googleCalendar';
 import { sendBookingCancellationEmail } from '@/lib/email';
+import type { User } from '@/lib/emailService';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -49,14 +49,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
+    const userProfile: User = profile ?? {
+      id: user.id,
+      email: user.email ?? '',
+      display_name: user.user_metadata?.display_name ?? user.email ?? null,
+      h_id: null,
+    };
+
     await sendBookingCancellationEmail({
       ...booking,
-      users: profile ?? {
-        id: user.id,
-        email: user.email ?? '',
-        display_name: user.user_metadata?.display_name ?? user.email ?? undefined,
-        h_id: profile?.h_id,
-      },
+      users: userProfile,
     });
 
     return NextResponse.json({ success: true });
