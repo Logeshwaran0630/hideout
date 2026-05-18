@@ -1,8 +1,10 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { sendAdminAlertEmail, sendBookingConfirmationEmail } from "@/lib/email";
+import { calculateBookingPrice } from "@/lib/pricing";
 
 type BookingRequestBody = {
+  setup_id?: string;
   time_slot_id?: string;
   session_type_id?: string;
   booking_date?: string;
@@ -25,20 +27,35 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as BookingRequestBody;
-    const { time_slot_id, session_type_id, booking_date, calendar_event_id } = body;
+    const { setup_id, time_slot_id, session_type_id, booking_date, calendar_event_id } = body;
 
-    if (!time_slot_id || !session_type_id || !isValidDate(booking_date)) {
+    if (!setup_id || !time_slot_id || !session_type_id || !isValidDate(booking_date)) {
       return NextResponse.json({ error: "Missing booking details" }, { status: 400 });
+    }
+
+    const { data: setup, error: setupError } = await supabase
+      .from("setups")
+      .select("id, name, display_name, base_price, max_players, is_active")
+      .eq("id", setup_id)
+      .eq("is_active", true)
+      .single();
+
+    if (setupError || !setup) {
+      return NextResponse.json({ error: "Invalid setup" }, { status: 400 });
     }
 
     const { data: sessionType, error: sessionError } = await supabase
       .from("session_types")
-      .select("id, max_players, price_per_hour")
+      .select("id, name, max_players, price_per_hour, price_multiplier, h_coins_earned")
       .eq("id", session_type_id)
       .single();
 
     if (sessionError || !sessionType) {
       return NextResponse.json({ error: "Invalid session type" }, { status: 400 });
+    }
+
+    if (sessionType.max_players > setup.max_players) {
+      return NextResponse.json({ error: "Session type is not available for this setup" }, { status: 400 });
     }
 
     const { data: timeSlot, error: slotError } = await supabase
@@ -51,19 +68,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid time slot" }, { status: 400 });
     }
 
+    const totalPrice = calculateBookingPrice(setup, sessionType);
+
     const { data, error } = await supabase
       .from("bookings")
       .insert({
         user_id: user.id,
+        setup_id,
         time_slot_id,
         session_type_id,
         booking_date,
         player_count: sessionType.max_players,
-        total_price: sessionType.price_per_hour,
+        total_price: totalPrice,
         calendar_event_id,
         status: "confirmed",
       })
-      .select("*, time_slots(*), session_types(*)")
+      .select("*, setups(*), time_slots(*), session_types(*)")
       .single();
 
     if (error) {
@@ -75,19 +95,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Booking failed" }, { status: 500 });
     }
 
-    // ✅ Manually award H Coins (no trigger)
-    const { data: sessionTypeData } = await supabase
-      .from("session_types")
-      .select("h_coins_earned, price_per_hour")
-      .eq("id", session_type_id)
-      .single();
-
-    if (sessionTypeData && sessionTypeData.price_per_hour > 0 && sessionTypeData.h_coins_earned > 0) {
+    if (totalPrice > 0 && sessionType.h_coins_earned > 0) {
       const { error: ledgerError } = await supabase
         .from("h_coin_ledger")
         .insert({
           user_id: user.id,
-          amount: sessionTypeData.h_coins_earned,
+          amount: sessionType.h_coins_earned,
           type: "earn",
           reference_id: data.id,
           description: `Booking completed: ${data.booking_code}`,
@@ -95,7 +108,6 @@ export async function POST(request: Request) {
 
       if (ledgerError) {
         console.error("Ledger error:", ledgerError);
-        // Don't fail the booking if ledger fails
       }
     }
 
@@ -115,21 +127,21 @@ export async function POST(request: Request) {
       },
     };
 
-    console.log("📧 [Booking] Sending emails for booking:", data.booking_code);
+    console.log("[Booking] Sending emails for booking:", data.booking_code);
 
     const [customerEmailResult, adminEmailResult] = await Promise.all([
       sendBookingConfirmationEmail(bookingForEmail).catch((err) => {
-        console.error("❌ [Booking] Failed to send customer email:", err);
+        console.error("[Booking] Failed to send customer email:", err);
         return false;
       }),
       sendAdminAlertEmail(bookingForEmail).catch((err) => {
-        console.error("❌ [Booking] Failed to send admin email:", err);
+        console.error("[Booking] Failed to send admin email:", err);
         return false;
       }),
     ]);
 
-    console.log("📧 Customer email result:", customerEmailResult ? "✅ Sent" : "❌ Failed");
-    console.log("📧 Admin email result:", adminEmailResult ? "✅ Sent" : "❌ Failed");
+    console.log("Customer email result:", customerEmailResult ? "Sent" : "Failed");
+    console.log("Admin email result:", adminEmailResult ? "Sent" : "Failed");
 
     return NextResponse.json({ success: true, booking: data });
   } catch (error) {

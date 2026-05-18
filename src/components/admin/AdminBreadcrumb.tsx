@@ -17,18 +17,18 @@ export default function AdminBreadcrumb() {
   });
   
   return (
-    <nav className="flex items-center gap-2 text-sm mb-6 pb-4 border-b border-[#2A2A2A]">
-      <Link href="/admin" className="text-[#A1A1AA] hover:text-white transition-colors flex items-center gap-1">
+    <nav className="flex items-center gap-2 text-sm mb-6 pb-4 border-b border-[#2A2F38]">
+      <Link href="/admin" className="text-[#A0A6AF] hover:text-white transition-colors flex items-center gap-1">
         <Home className="w-3 h-3" />
         Admin
       </Link>
       {breadcrumbs.slice(1).map((crumb) => (
         <div key={crumb.href} className="flex items-center gap-2">
-          <ChevronRight className="w-3 h-3 text-[#A1A1AA]" />
+          <ChevronRight className="w-3 h-3 text-[#A0A6AF]" />
           {crumb.isLast ? (
-            <span className="text-[#A855F7] font-medium">{crumb.label}</span>
+            <span className="text-[#FF4500] font-medium">{crumb.label}</span>
           ) : (
-            <Link href={crumb.href} className="text-[#A1A1AA] hover:text-white transition-colors">
+            <Link href={crumb.href} className="text-[#A0A6AF] hover:text-white transition-colors">
               {crumb.label}
             </Link>
           )}

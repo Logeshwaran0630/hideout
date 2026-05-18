@@ -38,7 +38,7 @@ export const BookingCancellationEmail = ({
           style={logo}
         />
 
-        <Heading style={h1}>Booking Cancelled ❌</Heading>
+        <Heading style={h1}>Booking Cancelled</Heading>
 
         <Text style={text}>Hey {name}, your booking has been cancelled.</Text>
 
@@ -73,13 +73,13 @@ export const BookingCancellationEmail = ({
 );
 
 const main = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: '#18181B',
-  border: '1px solid #2A2A2A',
+  backgroundColor: '#14181F',
+  border: '1px solid #2A2F38',
   borderRadius: '16px',
   margin: '40px auto',
   padding: '32px',
@@ -92,7 +92,7 @@ const logo = {
 };
 
 const h1 = {
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '24px',
   fontWeight: 'bold',
   textAlign: 'center' as const,
@@ -100,21 +100,21 @@ const h1 = {
 };
 
 const text = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '15px',
   textAlign: 'center' as const,
   margin: '12px 0',
 };
 
 const detailsBox = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   borderRadius: '12px',
   padding: '16px',
   margin: '20px 0',
 };
 
 const detailRow = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '14px',
   margin: '8px 0',
 };
@@ -127,9 +127,9 @@ const refund = {
 };
 
 const button = {
-  backgroundColor: '#A855F7',
+  backgroundColor: '#FF4500',
   borderRadius: '8px',
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontWeight: 'bold',
   textDecoration: 'none',
   textAlign: 'center' as const,
@@ -140,7 +140,7 @@ const button = {
 };
 
 const hr = {
-  borderColor: '#2A2A2A',
+  borderColor: '#2A2F38',
   margin: '24px 0 16px',
 };
 

@@ -34,7 +34,7 @@ export const WelcomeEmail = ({ name, hId, email }: WelcomeEmailProps) => (
           alt="The Hideout"
           style={logo}
         />
-        <Heading style={h1}>Welcome to The Hideout, {name}! 🎮</Heading>
+        <Heading style={h1}>Welcome to The Hideout, {name}!</Heading>
 
         <Text style={text}>
           You're now part of Chennai's premier gaming lounge. Here's your unique H-ID:
@@ -86,13 +86,13 @@ export const WelcomeEmail = ({ name, hId, email }: WelcomeEmailProps) => (
 );
 
 const main = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: '#18181B',
-  border: '1px solid #2A2A2A',
+  backgroundColor: '#14181F',
+  border: '1px solid #2A2F38',
   borderRadius: '16px',
   margin: '40px auto',
   padding: '40px 32px',
@@ -105,7 +105,7 @@ const logo = {
 };
 
 const h1 = {
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '28px',
   fontWeight: 'bold',
   textAlign: 'center' as const,
@@ -113,7 +113,7 @@ const h1 = {
 };
 
 const text = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '16px',
   lineHeight: '24px',
   textAlign: 'center' as const,
@@ -121,15 +121,15 @@ const text = {
 };
 
 const codeBox = {
-  backgroundColor: '#0A0A0A',
-  border: '1px solid #A855F7',
+  backgroundColor: '#0A0F18',
+  border: '1px solid #FF4500',
   borderRadius: '12px',
   padding: '16px',
   margin: '24px 0',
 };
 
 const codeText = {
-  color: '#A855F7',
+  color: '#FF4500',
   fontSize: '32px',
   fontWeight: 'bold',
   textAlign: 'center' as const,
@@ -139,14 +139,14 @@ const codeText = {
 };
 
 const statsSection = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   borderRadius: '12px',
   padding: '20px',
   margin: '24px 0',
 };
 
 const statNumber = {
-  color: '#A855F7',
+  color: '#FF4500',
   fontSize: '24px',
   fontWeight: 'bold',
   margin: 0,
@@ -159,9 +159,9 @@ const statLabel = {
 };
 
 const button = {
-  backgroundColor: '#A855F7',
+  backgroundColor: '#FF4500',
   borderRadius: '8px',
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '16px',
   fontWeight: 'bold',
   textDecoration: 'none',
@@ -173,7 +173,7 @@ const button = {
 };
 
 const hr = {
-  borderColor: '#2A2A2A',
+  borderColor: '#2A2F38',
   margin: '32px 0 24px',
 };
 

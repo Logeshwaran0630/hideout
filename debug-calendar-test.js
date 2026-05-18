@@ -9,7 +9,7 @@
 const colors = {
   success: 'color: #4ade80; font-weight: bold;',
   error: 'color: #ef4444; font-weight: bold;',
-  info: 'color: #06b6d4; font-weight: bold;',
+  info: 'color: #4ADE80; font-weight: bold;',
   debug: 'color: #a78bfa; font-weight: bold;',
 };
 

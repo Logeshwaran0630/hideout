@@ -57,7 +57,7 @@ export default function GlowTrailCursor() {
               height: size,
               left: dot.x - size / 2,
               top: dot.y - size / 2,
-              background: hovering ? "#EC4899" : "#A855F7",
+              background: hovering ? "#FF5722" : "#FF4500",
               opacity,
               filter: "blur(0.4px)",
               transition: "left 50ms linear, top 50ms linear",
@@ -73,8 +73,8 @@ export default function GlowTrailCursor() {
           top: position.y - (hovering ? 28 : 20),
           width: hovering ? 56 : 40,
           height: hovering ? 56 : 40,
-          border: `2px solid ${hovering ? "#EC4899" : "#A855F7"}`,
-          boxShadow: `0 0 22px ${hovering ? "rgba(236,72,153,0.7)" : "rgba(168,85,247,0.7)"}`,
+          border: `2px solid ${hovering ? "#FF5722" : "#FF4500"}`,
+          boxShadow: `0 0 22px ${hovering ? "rgba(255,87,34,0.7)" : "rgba(255,69,0,0.7)"}`,
           opacity: 0.75,
           transition: "all 140ms ease",
         }}
@@ -87,8 +87,8 @@ export default function GlowTrailCursor() {
           top: position.y - 4,
           width: 8,
           height: 8,
-          background: hovering ? "#EC4899" : "#A855F7",
-          boxShadow: "0 0 14px rgba(168,85,247,0.9)",
+          background: hovering ? "#FF5722" : "#FF4500",
+          boxShadow: "0 0 14px rgba(255,69,0,0.9)",
         }}
       />
     </div>

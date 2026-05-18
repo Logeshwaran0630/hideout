@@ -55,7 +55,7 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
     // Extract time (7 PM, 7:00 PM, 19:00, 7pm)
     let extractedTime = null;
     const timePatterns = [
-      /(\d{1,2})[:.](\d{2})?\s*(am|pm)/i,
+      /(\d{1,2})[:.]?(\d{2})?\s*(am|pm)/i,
       /(\d{1,2})\s*(am|pm)/i,
       /at\s+(\d{1,2})\s*(am|pm)?/i,
     ];
@@ -234,42 +234,42 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
 
   if (result) {
     return (
-      <div className="bg-[#18181B] border border-[#2A2A2A] rounded-2xl p-6">
+      <div className="bg-[#14181F] border border-[#2A2F38] rounded-2xl p-6">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
             <Check className="w-8 h-8 text-green-500" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Booking Created!</h2>
-          <p className="text-[#A1A1AA] mb-4">
-            Booking Code: <span className="text-[#A855F7] font-mono font-bold">{result.booking?.code}</span>
+          <p className="text-[#A0A6AF] mb-4">
+            Booking Code: <span className="text-[#FF4500] font-mono font-bold">{result.booking?.code}</span>
           </p>
           
-          <div className="bg-[#0A0A0A] rounded-xl p-4 mb-4 text-left">
-            <h3 className="text-white font-semibold mb-2">📋 Booking Summary</h3>
+          <div className="bg-[#0A0F18] rounded-xl p-4 mb-4 text-left">
+            <h3 className="text-white font-semibold mb-2">Booking Summary</h3>
             <div className="space-y-1 text-sm">
-              <p><span className="text-[#A1A1AA]">H-ID:</span> {result.booking?.hId}</p>
-              <p><span className="text-[#A1A1AA]">Customer:</span> {result.booking?.customerName}</p>
-              <p><span className="text-[#A1A1AA]">Date:</span> {result.booking?.date}</p>
-              <p><span className="text-[#A1A1AA]">Time:</span> {result.booking?.timeSlot}</p>
-              <p><span className="text-[#A1A1AA]">Session:</span> {result.booking?.sessionType}</p>
-              <p><span className="text-[#A1A1AA]">Price:</span> ₹{result.booking?.price}</p>
-              <p><span className="text-[#A1A1AA]">H Coins:</span> +{result.booking?.coinsEarned}</p>
+              <p><span className="text-[#A0A6AF]">H-ID:</span> {result.booking?.hId}</p>
+              <p><span className="text-[#A0A6AF]">Customer:</span> {result.booking?.customerName}</p>
+              <p><span className="text-[#A0A6AF]">Date:</span> {result.booking?.date}</p>
+              <p><span className="text-[#A0A6AF]">Time:</span> {result.booking?.timeSlot}</p>
+              <p><span className="text-[#A0A6AF]">Session:</span> {result.booking?.sessionType}</p>
+              <p><span className="text-[#A0A6AF]">Price:</span> ₹{result.booking?.price}</p>
+              <p><span className="text-[#A0A6AF]">H Coins:</span> +{result.booking?.coinsEarned}</p>
             </div>
           </div>
           
-          <div className="bg-[#0A0A0A] rounded-xl p-4 mb-4 text-left border border-[#A855F7]/30">
-            <p className="text-[#A1A1AA] text-sm mb-2 flex items-center gap-2">
+          <div className="bg-[#0A0F18] rounded-xl p-4 mb-4 text-left border border-[#FF4500]/30">
+            <p className="text-[#A0A6AF] text-sm mb-2 flex items-center gap-2">
               <Smartphone className="w-4 h-4 text-green-500" />
               Copy this message to send to customer:
             </p>
-            <div className="bg-[#0A0A0A] rounded-lg p-3 text-sm whitespace-pre-wrap text-[#A1A1AA] font-mono text-xs max-h-60 overflow-auto">
+            <div className="bg-[#0A0F18] rounded-lg p-3 text-sm whitespace-pre-wrap text-[#A0A6AF] font-mono text-xs max-h-60 overflow-auto">
               {result.whatsappMessage}
             </div>
           </div>
           
           <button
             onClick={copyToClipboard}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#7C3AED] text-white font-semibold rounded-xl hover:scale-105 transition-transform mb-3 w-full justify-center"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF4500] to-[#FF4500] text-white font-semibold rounded-xl hover:scale-105 transition-transform mb-3 w-full justify-center"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             {copied ? "Copied!" : "Copy WhatsApp Message"}
@@ -289,7 +289,7 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
               });
               setUserFound(null);
             }}
-            className="w-full px-6 py-3 border border-[#2A2A2A] text-[#A1A1AA] font-semibold rounded-xl hover:border-[#A855F7] transition-colors"
+            className="w-full px-6 py-3 border border-[#2A2F38] text-[#A0A6AF] font-semibold rounded-xl hover:border-[#FF4500] transition-colors"
           >
             Create Another Booking
           </button>
@@ -299,53 +299,53 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
   }
 
   return (
-    <div className="bg-[#18181B] border border-[#2A2A2A] rounded-2xl p-6">
+    <div className="bg-[#14181F] border border-[#2A2F38] rounded-2xl p-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step 1: Paste WhatsApp Message - Auto-fill */}
-        <div className="bg-[#A855F7]/5 border border-[#A855F7]/20 rounded-xl p-4">
+        <div className="bg-[#FF4500]/5 border border-[#FF4500]/20 rounded-xl p-4">
           <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-[#A855F7]" />
-            📱 Step 1: Paste Customer WhatsApp Message
+            <Smartphone className="w-4 h-4 text-[#FF4500]" />
+            Step 1: Paste Customer WhatsApp Message
           </label>
           <textarea
             value={formData.customerMessage}
             onChange={(e) => setFormData({ ...formData, customerMessage: e.target.value })}
             placeholder={`Example messages that work:\n\n"HID-000006, book for May 16 at 7 PM Duo session"\n\n"My H-ID is HID-000001. I want to book Solo for tomorrow 3pm"\n\n"Hi, HID-000003 - Squad session on 16th May 8 PM"`}
             rows={4}
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-white focus:border-[#A855F7] outline-none resize-none text-sm"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none resize-none text-sm"
           />
           <button
             type="button"
             onClick={parseAndAutoFill}
             disabled={!formData.customerMessage || loading}
-            className="mt-3 px-4 py-2 text-sm bg-[#A855F7] text-white rounded-lg hover:bg-[#7C3AED] transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="mt-3 px-4 py-2 text-sm bg-[#FF4500] text-white rounded-lg hover:bg-[#FF4500] transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             Auto-Fill Form from Message
           </button>
-          <p className="text-xs text-[#A1A1AA] mt-2">
+          <p className="text-xs text-[#A0A6AF] mt-2">
             System extracts: H-ID, Date, Time, Session Type
           </p>
         </div>
 
-        <div className="border-t border-[#2A2A2A] pt-4">
-          <p className="text-sm text-[#A1A1AA] mb-4">📝 Step 2: Verify and Confirm</p>
+        <div className="border-t border-[#2A2F38] pt-4">
+          <p className="text-sm text-[#A0A6AF] mb-4">Step 2: Verify and Confirm</p>
         </div>
 
         {/* H-ID Field */}
         <div>
           <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Hash className="w-4 h-4 text-[#A855F7]" />
+            <Hash className="w-4 h-4 text-[#FF4500]" />
             Customer H-ID <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA] text-sm">HID-</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A0A6AF] text-sm">HID-</span>
             <input
               type="text"
               value={formData.hId.replace('HID-', '')}
               onChange={(e) => setFormData({ ...formData, hId: `HID-${e.target.value.replace(/[^0-9]/g, '')}` })}
               required
-              className="w-full pl-12 pr-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-white focus:border-[#A855F7] outline-none"
+              className="w-full pl-12 pr-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
               placeholder="000001"
             />
           </div>
@@ -357,29 +357,29 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
         {/* Customer Name (Auto-filled) */}
         <div>
           <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <User className="w-4 h-4 text-[#A1A1AA]" />
+            <User className="w-4 h-4 text-[#A0A6AF]" />
             Customer Name
           </label>
           <input
             type="text"
             value={formData.customerName}
             readOnly
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-[#A1A1AA] cursor-not-allowed"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] cursor-not-allowed"
           />
-          <p className="text-xs text-[#A1A1AA] mt-1">Auto-filled from H-ID lookup</p>
+          <p className="text-xs text-[#A0A6AF] mt-1">Auto-filled from H-ID lookup</p>
         </div>
 
         {/* Booking Date */}
         <div>
           <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#A1A1AA]" />
+            <Calendar className="w-4 h-4 text-[#A0A6AF]" />
             Booking Date <span className="text-red-500">*</span>
           </label>
           <select
             value={formData.bookingDate}
             onChange={(e) => setFormData({ ...formData, bookingDate: e.target.value })}
             required
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-white focus:border-[#A855F7] outline-none"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
           >
             <option value="">Select date</option>
             {dateOptions.map((date) => (
@@ -393,14 +393,14 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
         {/* Time Slot */}
         <div>
           <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#A1A1AA]" />
+            <Clock className="w-4 h-4 text-[#A0A6AF]" />
             Time Slot <span className="text-red-500">*</span>
           </label>
           <select
             value={formData.timeSlotId}
             onChange={(e) => setFormData({ ...formData, timeSlotId: e.target.value })}
             required
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-white focus:border-[#A855F7] outline-none"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
           >
             <option value="">Select time slot</option>
             {timeSlots.map((slot) => (
@@ -414,14 +414,14 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
         {/* Session Type */}
         <div>
           <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#A1A1AA]" />
+            <Users className="w-4 h-4 text-[#A0A6AF]" />
             Session Type <span className="text-red-500">*</span>
           </label>
           <select
             value={formData.sessionTypeId}
             onChange={(e) => setFormData({ ...formData, sessionTypeId: e.target.value })}
             required
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-white focus:border-[#A855F7] outline-none"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
           >
             {sessionTypes.map((type) => (
               <option key={type.id} value={type.id}>
@@ -433,15 +433,15 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
 
         {/* Price Display */}
         {sessionTypes.find(s => s.id === formData.sessionTypeId) && (
-          <div className="bg-[#0A0A0A] rounded-lg p-3">
+          <div className="bg-[#0A0F18] rounded-lg p-3">
             <div className="flex justify-between items-center">
-              <span className="text-[#A1A1AA]">Total Price:</span>
-              <span className="text-2xl font-bold text-[#A855F7]">
+              <span className="text-[#A0A6AF]">Total Price:</span>
+              <span className="text-2xl font-bold text-[#FF4500]">
                 ₹{sessionTypes.find(s => s.id === formData.sessionTypeId)?.price_per_hour}
               </span>
             </div>
             <div className="flex justify-between items-center mt-1">
-              <span className="text-[#A1A1AA] text-sm">H Coins earned:</span>
+              <span className="text-[#A0A6AF] text-sm">H Coins earned:</span>
               <span className="text-sm text-green-500">
                 +{sessionTypes.find(s => s.id === formData.sessionTypeId)?.h_coins_earned} coins
               </span>
@@ -456,7 +456,7 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             rows={2}
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0A0A] border border-[#2A2A2A] text-white focus:border-[#A855F7] outline-none resize-none"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none resize-none"
             placeholder="Any special requests or notes..."
           />
         </div>
@@ -472,7 +472,7 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-r from-[#A855F7] to-[#7C3AED] text-white font-semibold rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+          className="w-full py-3 bg-gradient-to-r from-[#FF4500] to-[#FF4500] text-white font-semibold rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">

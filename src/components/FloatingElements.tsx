@@ -8,7 +8,7 @@ export default function FloatingElements() {
       {floatingItems.map((item, idx) => (
         <span
           key={item + idx}
-          className="absolute text-sm font-bold tracking-widest text-[#A855F7]/15 will-change-transform"
+          className="absolute text-sm font-bold tracking-widest text-[#FF4500]/15 will-change-transform"
           style={{
             left: `${15 + (idx * 25)}%`,
             top: `${20 + (idx % 3) * 30}%`,

@@ -4,7 +4,7 @@ module.exports = {
     extend: {
       colors: {
         hideout: {
-          orange: "#A855F7",
+          orange: "#FF4500",
           amber: "#F89858",
           black: "#0A0F18",
           charcoal: "#14181F",
@@ -15,20 +15,20 @@ module.exports = {
           mute: "#6B7280",
         },
         status: {
-          available: "#06B6D4",
-          danger: "#A855F7",
+          available: "#4ADE80",
+          danger: "#FF4500",
           disabled: "#3A3F48",
         },
       },
       fontFamily: {
-        display: ["var(--font-orbitron)", "system-ui", "sans-serif"],
-        heading: ["var(--font-rajdhani)", "system-ui", "sans-serif"],
-        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["Orbitron", "sans-serif"],
+        heading: ["Cinzel", "serif"],
+        sans: ["Rajdhani", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        neon: "0 0 0 1px #A855F7, 0 0 16px rgba(168,85,247,0.45), 0 0 32px rgba(200,120,255,0.25)",
-        "neon-soft": "0 0 0 1px #A855F7, 0 0 8px rgba(168,85,247,0.30)",
+        neon: "0 0 0 1px #FF4500, 0 0 16px rgba(255,69,0,0.45), 0 0 32px rgba(255,87,34,0.25)",
+        "neon-soft": "0 0 0 1px #FF4500, 0 0 8px rgba(255,69,0,0.30)",
       },
       borderRadius: {
         card: "12px",

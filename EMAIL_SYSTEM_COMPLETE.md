@@ -9,7 +9,7 @@
 - **BookingCancellationEmail.tsx** - Cancellation confirmation with refund notice
 
 All templates:
-- Dark theme matching your brand (#0A0A0A, #18181B, #A855F7)
+- Dark theme matching your brand (#0A0F18, #14181F, #FF4500)
 - Responsive design
 - Branded header with logo
 - Call-to-action buttons

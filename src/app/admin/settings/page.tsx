@@ -35,43 +35,43 @@ export default function AdminSettingsPage() {
   return (
     <div>
       <div className="mb-6">
-        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#A855F7]">SETTINGS</div>
-        <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#FAFAFA]">SETTINGS</h1>
+        <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF4500]">SETTINGS</div>
+        <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#F5F1EA]">SETTINGS</h1>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-6">
-          <div className="text-[16px] font-semibold text-[#FAFAFA]">Venue Details</div>
+        <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-6">
+          <div className="text-[16px] font-semibold text-[#F5F1EA]">Venue Details</div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {['The Hideout', 'Chennai', '11:00 AM', '11:00 PM', '+91 9XXXXXXXXX'].map((value, index) => (
-              <input key={value} defaultValue={value} className="rounded-lg border border-[#27272A] bg-[#0A0A0A] px-4 py-3 text-[#FAFAFA] outline-none focus:border-[#A855F7]" />
+              <input key={value} defaultValue={value} className="rounded-lg border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 text-[#F5F1EA] outline-none focus:border-[#FF4500]" />
             ))}
           </div>
           <div className="mt-3 text-[12px] text-[#71717A]">These values are display-only for now. Backend config coming soon.</div>
-          <button type="button" className="mt-4 rounded-lg bg-gradient-to-r from-[#A855F7] to-[#7C3AED] px-5 py-3 text-[14px] font-semibold text-white">Save Changes</button>
+          <button type="button" className="mt-4 rounded-lg bg-gradient-to-r from-[#FF4500] to-[#FF4500] px-5 py-3 text-[14px] font-semibold text-white">Save Changes</button>
         </div>
 
-        <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-6">
-          <div className="text-[16px] font-semibold text-[#FAFAFA]">H Coin Configuration</div>
-          <div className="mt-4 grid gap-2 text-[14px] text-[#A1A1AA] md:grid-cols-2">
-            <div>Solo session: <span className="text-[#FAFAFA]">10 coins</span></div>
-            <div>Duo session: <span className="text-[#FAFAFA]">15 coins</span></div>
-            <div>Squad session: <span className="text-[#FAFAFA]">25 coins</span></div>
-            <div>Free session threshold: <span className="text-[#FAFAFA]">100 coins</span></div>
+        <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-6">
+          <div className="text-[16px] font-semibold text-[#F5F1EA]">H Coin Configuration</div>
+          <div className="mt-4 grid gap-2 text-[14px] text-[#A0A6AF] md:grid-cols-2">
+            <div>Solo session: <span className="text-[#F5F1EA]">10 coins</span></div>
+            <div>Duo session: <span className="text-[#F5F1EA]">15 coins</span></div>
+            <div>Squad session: <span className="text-[#F5F1EA]">25 coins</span></div>
+            <div>Free session threshold: <span className="text-[#F5F1EA]">100 coins</span></div>
           </div>
           <div className="mt-3 text-[12px] text-[#71717A]">Coin rules are set in the database trigger. Edit the function to change values.</div>
         </div>
 
-        <div className="rounded-xl border border-[rgba(239,68,68,0.3)] bg-[#18181B] p-6">
+        <div className="rounded-xl border border-[rgba(239,68,68,0.3)] bg-[#14181F] p-6">
           <div className="text-[16px] font-semibold text-[#EF4444]">Danger Zone</div>
-          <div className="mt-4 space-y-3 text-[14px] text-[#A1A1AA]">
+          <div className="mt-4 space-y-3 text-[14px] text-[#A0A6AF]">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>Mark all past bookings as completed</div>
               <button type="button" className="rounded-lg border border-[#EF4444] px-4 py-2 text-[#EF4444]">Run</button>
             </div>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>Export all bookings as CSV</div>
-              <button type="button" onClick={() => exportCSV(bookings)} className="rounded-lg border border-[#27272A] px-4 py-2 text-[#A1A1AA]">Export</button>
+              <button type="button" onClick={() => exportCSV(bookings)} className="rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF]">Export</button>
             </div>
           </div>
         </div>

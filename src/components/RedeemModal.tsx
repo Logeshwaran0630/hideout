@@ -159,64 +159,64 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#27272A] bg-[#18181B] text-[#FAFAFA] shadow-2xl">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#2A2F38] bg-[#14181F] text-[#F5F1EA] shadow-2xl">
         {step === "success" ? (
           <div className="p-8 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#A855F7] bg-[rgba(168,85,247,0.14)] glow-purple">
-              <CheckCircle2 className="h-8 w-8 text-[#A855F7]" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#FF4500] bg-[rgba(255,69,0,0.14)] glow-box">
+              <CheckCircle2 className="h-8 w-8 text-[#FF4500]" />
             </div>
-            <h2 className="mt-5 font-heading text-[32px] uppercase text-[#FAFAFA]">FREE SESSION REDEEMED</h2>
-            <p className="mt-2 text-[14px] text-[#A1A1AA]">Your booking is confirmed and 100 H Coins were deducted.</p>
+            <h2 className="mt-5 font-heading text-[32px] uppercase text-[#F5F1EA]">FREE SESSION REDEEMED</h2>
+            <p className="mt-2 text-[14px] text-[#A0A6AF]">Your booking is confirmed and 100 H Coins were deducted.</p>
 
-            <div className="mt-6 rounded-xl border border-[#27272A] bg-[#0A0A0A] p-5">
-              <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#A1A1AA]">Booking Code</div>
-              <div className="mt-2 font-mono text-[28px] tracking-widest text-[#A855F7]">{bookingCode}</div>
+            <div className="mt-6 rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-5">
+              <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#A0A6AF]">Booking Code</div>
+              <div className="mt-2 font-mono text-[28px] tracking-widest text-[#FF4500]">{bookingCode}</div>
             </div>
 
-            <button type="button" onClick={finish} className="btn-primary mt-6 w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#FFFFFF]">
+            <button type="button" onClick={finish} className="btn-primary mt-6 w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#F5F1EA]">
               Done
             </button>
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between border-b border-[#27272A] p-6">
+            <div className="flex items-center justify-between border-b border-[#2A2F38] p-6">
               <div className="flex items-center gap-3">
-                <Gift className="h-6 w-6 text-[#A855F7]" />
+                <Gift className="h-6 w-6 text-[#FF4500]" />
                 <div>
-                  <h2 className="text-[22px] font-semibold text-[#FAFAFA]">Redeem Free Session</h2>
-                  <p className="mt-1 text-[13px] text-[#A1A1AA]">100 H Coins gets you one solo hour.</p>
+                  <h2 className="text-[22px] font-semibold text-[#F5F1EA]">Redeem Free Session</h2>
+                  <p className="mt-1 text-[13px] text-[#A0A6AF]">100 H Coins gets you one solo hour.</p>
                 </div>
               </div>
-              <button type="button" onClick={onClose} className="rounded-lg p-2 text-[#A1A1AA] transition-colors hover:bg-[#0A0A0A] hover:text-[#FAFAFA]">
+              <button type="button" onClick={onClose} className="rounded-lg p-2 text-[#A0A6AF] transition-colors hover:bg-[#0A0F18] hover:text-[#F5F1EA]">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="p-6">
-              <div className="rounded-xl border border-[rgba(168,85,247,0.24)] bg-[rgba(168,85,247,0.08)] p-4">
+              <div className="rounded-xl border border-[rgba(255,69,0,0.24)] bg-[rgba(255,69,0,0.08)] p-4">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-[13px] text-[#A1A1AA]">H Coins Balance</span>
-                  <span className="font-heading text-[28px] uppercase text-[#A855F7]">{currentBalance}</span>
+                  <span className="text-[13px] text-[#A0A6AF]">H Coins Balance</span>
+                  <span className="font-heading text-[28px] uppercase text-[#FF4500]">{currentBalance}</span>
                 </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#27272A]">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#A855F7] to-[#EC4899] transition-all duration-500" style={{ width: `${coinProgress}%` }} />
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#2A2F38]">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#FF4500] to-[#FF5722] transition-all duration-500" style={{ width: `${coinProgress}%` }} />
                 </div>
-                <p className="mt-2 text-[12px] text-[#A1A1AA]">
+                <p className="mt-2 text-[12px] text-[#A0A6AF]">
                   {currentBalance >= 100 ? "You have enough coins to redeem a free session." : `Need ${100 - currentBalance} more coins to redeem.`}
                 </p>
               </div>
 
               <div className="mt-6 flex items-center justify-center gap-3">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "select" ? "bg-[#A855F7] text-[#0A0A0A]" : "bg-[#27272A] text-[#A1A1AA]"}`}>1</div>
-                <div className="h-px w-16 bg-[#27272A]" />
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "confirm" ? "bg-[#A855F7] text-[#0A0A0A]" : "bg-[#27272A] text-[#A1A1AA]"}`}>2</div>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "select" ? "bg-[#FF4500] text-[#0A0F18]" : "bg-[#2A2F38] text-[#A0A6AF]"}`}>1</div>
+                <div className="h-px w-16 bg-[#2A2F38]" />
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "confirm" ? "bg-[#FF4500] text-[#0A0F18]" : "bg-[#2A2F38] text-[#A0A6AF]"}`}>2</div>
               </div>
 
               {step === "select" ? (
                 <div className="mt-6 space-y-6">
                   <div>
-                    <div className="flex items-center gap-2 text-[13px] font-medium text-[#FAFAFA]">
-                      <Calendar className="h-4 w-4 text-[#A855F7]" />
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-[#F5F1EA]">
+                      <Calendar className="h-4 w-4 text-[#FF4500]" />
                       Select Date
                     </div>
                     <div className="mt-4 grid grid-cols-4 gap-2 md:grid-cols-7">
@@ -227,12 +227,12 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                           onClick={() => setSelectedDate(date.value)}
                           className={`rounded-lg border p-2 text-center transition-all duration-150 ${
                             selectedDate === date.value
-                              ? "border-[#A855F7] bg-[#27272A] glow-purple"
-                              : "border-[#27272A] bg-[#0A0A0A] text-[#A1A1AA] hover:border-[#06B6D4]"
+                              ? "border-[#FF4500] bg-[#2A2F38] glow-box"
+                              : "border-[#2A2F38] bg-[#0A0F18] text-[#A0A6AF] hover:border-[#22C55E]"
                           }`}
                         >
                           <div className="text-[10px] font-medium">{date.dayName}</div>
-                          <div className="mt-1 text-[18px] font-semibold text-[#FAFAFA]">{date.dayNumber}</div>
+                          <div className="mt-1 text-[18px] font-semibold text-[#F5F1EA]">{date.dayNumber}</div>
                           <div className="mt-1 text-[10px]">{date.monthName}</div>
                         </button>
                       ))}
@@ -242,15 +242,15 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
                   {selectedDate ? (
                     <div>
-                      <div className="flex items-center gap-2 text-[13px] font-medium text-[#FAFAFA]">
-                        <Clock className="h-4 w-4 text-[#3B82F6]" />
+                      <div className="flex items-center gap-2 text-[13px] font-medium text-[#F5F1EA]">
+                        <Clock className="h-4 w-4 text-[#FF4500]" />
                         Select Time Slot
                       </div>
 
                       {loadingAvailability ? (
                         <div className="mt-4 grid gap-2 md:grid-cols-2">
                           {Array.from({ length: 6 }).map((_, index) => (
-                            <div key={index} className="h-14 animate-pulse rounded-lg border border-[#27272A] bg-[#0A0A0A]" />
+                            <div key={index} className="h-14 animate-pulse rounded-lg border border-[#2A2F38] bg-[#0A0F18]" />
                           ))}
                         </div>
                       ) : (
@@ -267,10 +267,10 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                                 onClick={() => setSelectedSlot(slot)}
                                 className={`rounded-lg border px-4 py-3 text-left text-[13px] transition-all duration-150 ${
                                   isSelected
-                                    ? "border-[#A855F7] bg-[#27272A] text-[#FAFAFA] glow-purple"
+                                    ? "border-[#FF4500] bg-[#2A2F38] text-[#F5F1EA] glow-box"
                                     : isBooked
-                                      ? "cursor-not-allowed border-[#27272A] bg-[#0A0A0A] text-[#71717A] opacity-50"
-                                      : "border-[#27272A] bg-[#0A0A0A] text-[#A1A1AA] hover:border-[#3B82F6] hover:text-[#FAFAFA]"
+                                      ? "cursor-not-allowed border-[#2A2F38] bg-[#0A0F18] text-[#71717A] opacity-50"
+                                      : "border-[#2A2F38] bg-[#0A0F18] text-[#A0A6AF] hover:border-[#4ADE80] hover:text-[#F5F1EA]"
                                 }`}
                               >
                                 <div className="font-semibold">{slot.label}</div>
@@ -294,7 +294,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                     type="button"
                     onClick={() => setStep("confirm")}
                     disabled={!selectedDate || !selectedSlot || currentBalance < 100}
-                    className="btn-primary w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#FFFFFF] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="btn-primary w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#F5F1EA] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Continue to Confirm
                   </button>
@@ -303,7 +303,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
               {step === "confirm" && selectedDate && selectedSlot ? (
                 <div className="mt-6 space-y-5">
-                  <div className="rounded-xl border border-[#27272A] bg-[#0A0A0A] p-5">
+                  <div className="rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-5">
                     {[
                       { label: "Date", value: formatDateLabel(selectedDate) },
                       { label: "Time", value: selectedSlot.label },
@@ -311,14 +311,14 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                       { label: "Coins", value: "-100 H Coins" },
                       { label: "Price", value: "₹0" },
                     ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between border-b border-[#27272A] py-3 last:border-b-0">
-                        <span className="text-[13px] text-[#A1A1AA]">{item.label}</span>
-                        <span className="text-right text-[14px] font-semibold text-[#FAFAFA]">{item.value}</span>
+                      <div key={item.label} className="flex items-center justify-between border-b border-[#2A2F38] py-3 last:border-b-0">
+                        <span className="text-[13px] text-[#A0A6AF]">{item.label}</span>
+                        <span className="text-right text-[14px] font-semibold text-[#F5F1EA]">{item.value}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="rounded-lg border border-[rgba(168,85,247,0.2)] bg-[rgba(168,85,247,0.08)] px-4 py-3 text-center text-[13px] text-[#A1A1AA]">
+                  <div className="rounded-lg border border-[rgba(255,69,0,0.2)] bg-[rgba(255,69,0,0.08)] px-4 py-3 text-center text-[13px] text-[#A0A6AF]">
                     Free sessions do not earn additional H Coins.
                   </div>
 
@@ -330,14 +330,14 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                   ) : null}
 
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <button type="button" onClick={() => setStep("select")} className="btn-outline flex-1 rounded-lg px-5 py-3 text-[14px] font-semibold text-[#FAFAFA]">
+                    <button type="button" onClick={() => setStep("select")} className="btn-outline flex-1 rounded-lg px-5 py-3 text-[14px] font-semibold text-[#F5F1EA]">
                       Back
                     </button>
                     <button
                       type="button"
                       onClick={handleConfirmRedeem}
                       disabled={loadingRedeem}
-                      className="flex-1 rounded-lg bg-gradient-to-r from-[#A855F7] to-[#EC4899] px-5 py-3 text-[14px] font-semibold text-[#FFFFFF] transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex-1 rounded-lg bg-gradient-to-r from-[#FF4500] to-[#FF5722] px-5 py-3 text-[14px] font-semibold text-[#F5F1EA] transition-all disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {loadingRedeem ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Redeeming...</span> : "Confirm Redemption"}
                     </button>

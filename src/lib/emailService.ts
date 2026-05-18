@@ -84,18 +84,18 @@ export async function sendWelcomeEmail(user: User) {
       subject: 'Welcome to The Hideout!',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #A855F7, #7C3AED); padding: 20px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #FF4500, #FF4500); padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Welcome to The Hideout!</h1>
           </div>
-          <div style="padding: 20px; background: #18181B; color: #A1A1AA;">
+          <div style="padding: 20px; background: #14181F; color: #A0A6AF;">
             <p>Hi <strong style="color: white;">${getCustomerName(user)}</strong>,</p>
             <p>Your gaming adventure starts here!</p>
-            <div style="background: #0A0A0A; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; color: #A855F7; font-size: 12px;">YOUR H-ID</p>
+            <div style="background: #0A0F18; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #FF4500; font-size: 12px;">YOUR H-ID</p>
               <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold; color: white;">${user.h_id || 'HID-000001'}</p>
             </div>
             <p>Use this H-ID to book slots and track your H Coins.</p>
-            <a href="https://hideout-67tl.vercel.app/slots" style="display: inline-block; background: #A855F7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px;">
+            <a href="https://hideout-67tl.vercel.app/slots" style="display: inline-block; background: #FF4500; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px;">
               Book Your First Slot
             </a>
           </div>
@@ -139,21 +139,21 @@ export async function sendBookingConfirmationEmail(booking: Booking) {
       subject: `Booking Confirmed: ${booking.booking_code}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #A855F7, #7C3AED); padding: 20px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #FF4500, #FF4500); padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Booking Confirmed!</h1>
           </div>
-          <div style="padding: 20px; background: #18181B; color: #A1A1AA;">
+          <div style="padding: 20px; background: #14181F; color: #A0A6AF;">
             <p>Hi <strong style="color: white;">${getCustomerName(user)}</strong>,</p>
             <p>Your slot is locked in! Here are your booking details:</p>
-            <div style="background: #0A0A0A; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; color: #A855F7; font-size: 12px;">BOOKING CODE</p>
+            <div style="background: #0A0F18; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #FF4500; font-size: 12px;">BOOKING CODE</p>
               <p style="margin: 5px 0 0; font-size: 28px; font-weight: bold; color: white; letter-spacing: 2px;">${booking.booking_code}</p>
             </div>
             <table style="width: 100%; margin: 20px 0;">
               <tr><td style="padding: 8px 0; color: #6B7280;">Date</td><td style="color: white;">${getFormattedDate(booking.booking_date)}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Time</td><td style="color: white;">${timeSlot}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Session</td><td style="color: white;">${sessionType}</td></tr>
-              <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #A855F7; font-weight: bold;">Rs. ${booking.total_price}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #FF4500; font-weight: bold;">Rs. ${booking.total_price}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">H Coins Earned</td><td style="color: #22C55E;">+${coinsEarned} coins</td></tr>
             </table>
             <p>Show this booking code at the counter when you arrive.</p>
@@ -240,10 +240,10 @@ export async function sendBookingCancellationEmail(booking: Booking) {
           <div style="background: #EF4444; padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Booking Cancelled</h1>
           </div>
-          <div style="padding: 20px; background: #18181B; color: #A1A1AA;">
+          <div style="padding: 20px; background: #14181F; color: #A0A6AF;">
             <p>Hi <strong style="color: white;">${getCustomerName(user)}</strong>,</p>
             <p>Your booking has been cancelled as requested.</p>
-            <div style="background: #0A0A0A; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <div style="background: #0A0F18; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0; color: #EF4444; font-size: 12px;">CANCELLED BOOKING</p>
               <p style="margin: 5px 0 0; font-size: 20px; font-weight: bold; color: white;">${booking.booking_code}</p>
             </div>
@@ -251,7 +251,7 @@ export async function sendBookingCancellationEmail(booking: Booking) {
               <tr><td style="padding: 8px 0; color: #6B7280;">Date</td><td style="color: white;">${getFormattedDate(booking.booking_date, false)}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Time</td><td style="color: white;">${timeSlot}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Session</td><td style="color: white;">${sessionType}</td></tr>
-              <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #A855F7;">Rs. ${booking.total_price}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #FF4500;">Rs. ${booking.total_price}</td></tr>
             </table>
             <p>We hope to see you again soon!</p>
           </div>
@@ -285,10 +285,10 @@ export async function sendAdminAlertEmail(booking: Booking) {
       subject: `New Booking: ${booking.booking_code}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #A855F7, #7C3AED); padding: 20px; text-align: center;">
+          <div style="background: linear-gradient(135deg, #FF4500, #FF4500); padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">New Booking Alert!</h1>
           </div>
-          <div style="padding: 20px; background: #18181B; color: #A1A1AA;">
+          <div style="padding: 20px; background: #14181F; color: #A0A6AF;">
             <p>A new booking has been made:</p>
             <table style="width: 100%; margin: 20px 0;">
               <tr><td style="padding: 8px 0; color: #6B7280;">Booking Code</td><td style="color: white; font-weight: bold;">${booking.booking_code}</td></tr>
@@ -297,7 +297,7 @@ export async function sendAdminAlertEmail(booking: Booking) {
               <tr><td style="padding: 8px 0; color: #6B7280;">Date</td><td style="color: white;">${getFormattedDate(booking.booking_date)}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Time</td><td style="color: white;">${timeSlot}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Session</td><td style="color: white;">${sessionType}</td></tr>
-              <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #A855F7;">Rs. ${booking.total_price}</td></tr>
+              <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #FF4500;">Rs. ${booking.total_price}</td></tr>
             </table>
             <p>Login to admin panel to view full details.</p>
           </div>

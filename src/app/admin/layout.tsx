@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#FAFAFA] md:flex">
+    <div className="min-h-screen bg-[#0A0F18] text-[#F5F1EA] md:flex">
       <AdminSidebar profile={profile} />
       <main className="flex-1 px-6 py-6 md:px-8 md:py-8 md:pl-72">
         <AdminBreadcrumb />

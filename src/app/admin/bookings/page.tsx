@@ -4,7 +4,7 @@ import BookingsClient from "@/components/admin/BookingsClient";
 export default async function AdminBookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string; status?: string; search?: string }>;
+  searchParams: Promise<{ date?: string; status?: string; paymentStatus?: string; search?: string }>;
 }) {
   // Await searchParams (Next.js 16 requires this)
   const params = await searchParams;
@@ -15,6 +15,7 @@ export default async function AdminBookingsPage({
     .from("bookings")
     .select(`
       *,
+      setups (display_name),
       users (h_id, display_name, email),
       time_slots (label, start_time),
       session_types (name, price_per_hour)
@@ -24,6 +25,7 @@ export default async function AdminBookingsPage({
 
   if (params.date) query = query.eq("booking_date", params.date);
   if (params.status) query = query.eq("status", params.status);
+  if (params.paymentStatus) query = query.eq("payment_status", params.paymentStatus);
 
   const { data: rawBookings } = await query.limit(100);
   

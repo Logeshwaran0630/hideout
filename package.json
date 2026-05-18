@@ -4,23 +4,33 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/bebas-neue": "^5.2.7",
+    "@fontsource/cinzel": "^5.2.8",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/orbitron": "^5.2.8",
+    "@fontsource/rajdhani": "^5.2.7",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@react-email/components": "^1.0.12",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
+    "cross-env": "^7.0.3",
     "framer-motion": "^12.38.0",
     "googleapis": "^171.4.0",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.12.0",
     "next": "16.2.4",
     "nodemailer": "^8.0.7",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-email": "^6.1.1",
-    "resend": "^6.12.3"
+    "resend": "^6.12.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -13,7 +13,7 @@ type Particle = {
   color: string;
 };
 
-const COLORS = ["#A855F7", "#C084FC", "#3B82F6", "#60A5FA", "#EC4899", "#F472B6"];
+const COLORS = ["#FF4500", "#FF5722", "#CC3700", "#22C55E", "#FF5722", "#FF4500"];
 
 export default function ParticleNetwork() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -65,8 +65,8 @@ export default function ParticleNetwork() {
           if (dist < 150) {
             const opacity = 0.12 * (1 - dist / 150);
             const line = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-            line.addColorStop(0, `rgba(168, 85, 247, ${opacity})`);
-            line.addColorStop(1, `rgba(59, 130, 246, ${opacity})`);
+            line.addColorStop(0, `rgba(255, 69, 0, ${opacity})`);
+            line.addColorStop(1, `rgba(255, 87, 34, ${opacity})`);
             ctx.beginPath();
             ctx.strokeStyle = line;
             ctx.lineWidth = 0.8;

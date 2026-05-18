@@ -50,7 +50,7 @@ export const BookingConfirmationEmail = ({
           style={logo}
         />
 
-        <Heading style={h1}>Booking Confirmed! 🎉</Heading>
+        <Heading style={h1}>Booking Confirmed!</Heading>
 
         <Text style={text}>Hey {name}, your slot is locked in!</Text>
 
@@ -100,7 +100,7 @@ export const BookingConfirmationEmail = ({
         </Section>
 
         <Text style={reminder}>
-          ⏰ Please arrive 10 minutes before your slot.
+          Please arrive 10 minutes before your slot.
           Cancellations must be made 2 hours in advance.
         </Text>
 
@@ -119,13 +119,13 @@ export const BookingConfirmationEmail = ({
 );
 
 const main = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: '#18181B',
-  border: '1px solid #2A2A2A',
+  backgroundColor: '#14181F',
+  border: '1px solid #2A2F38',
   borderRadius: '16px',
   margin: '40px auto',
   padding: '32px',
@@ -138,7 +138,7 @@ const logo = {
 };
 
 const h1 = {
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '24px',
   fontWeight: 'bold',
   textAlign: 'center' as const,
@@ -146,7 +146,7 @@ const h1 = {
 };
 
 const text = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '15px',
   lineHeight: '22px',
   textAlign: 'center' as const,
@@ -154,8 +154,8 @@ const text = {
 };
 
 const codeBox = {
-  backgroundColor: '#0A0A0A',
-  border: '1px solid #A855F7',
+  backgroundColor: '#0A0F18',
+  border: '1px solid #FF4500',
   borderRadius: '12px',
   padding: '16px',
   margin: '20px 0',
@@ -170,7 +170,7 @@ const codeLabel = {
 };
 
 const codeText = {
-  color: '#A855F7',
+  color: '#FF4500',
   fontSize: '28px',
   fontWeight: 'bold',
   fontFamily: 'monospace',
@@ -184,7 +184,7 @@ const codeNote = {
 };
 
 const detailsBox = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   borderRadius: '12px',
   padding: '16px',
   margin: '20px 0',
@@ -201,14 +201,14 @@ const detailLabel = {
 };
 
 const detailValue = {
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '15px',
   fontWeight: 'bold',
   margin: 0,
 };
 
 const priceBox = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   borderRadius: '12px',
   padding: '12px',
   margin: '20px 0',
@@ -221,7 +221,7 @@ const priceLabel = {
 };
 
 const priceValue = {
-  color: '#A855F7',
+  color: '#FF4500',
   fontSize: '20px',
   fontWeight: 'bold',
   margin: '4px 0 0',
@@ -235,16 +235,16 @@ const coinsValue = {
 };
 
 const reminder = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '12px',
   textAlign: 'center' as const,
   margin: '16px 0',
 };
 
 const button = {
-  backgroundColor: '#A855F7',
+  backgroundColor: '#FF4500',
   borderRadius: '8px',
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '14px',
   fontWeight: 'bold',
   textDecoration: 'none',
@@ -256,7 +256,7 @@ const button = {
 };
 
 const hr = {
-  borderColor: '#2A2A2A',
+  borderColor: '#2A2F38',
   margin: '24px 0 16px',
 };
 

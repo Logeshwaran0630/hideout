@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
           const isAvailable = (response.data.items?.length || 0) === 0;
           availability[slot.slotId] = isAvailable;
 
-          console.log(`    Result: ${isAvailable ? "✅ Available" : "❌ Booked"} (${response.data.items?.length || 0} events)`);
+          console.log(`    Result: ${isAvailable ? "Available" : "Booked"} (${response.data.items?.length || 0} events)`);
           if (response.data.items && response.data.items.length > 0) {
             response.data.items.forEach((event) => {
               console.log(`      - ${event.summary} at ${event.start?.dateTime}`);

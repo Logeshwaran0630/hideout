@@ -16,7 +16,7 @@ export default function SlotGrid() {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   return (
-    <div className="space-y-0 bg-[#0A0A0A]">
+    <div className="space-y-0 bg-[#0A0F18]">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {slots.map(({ label, state }) => {
           const isSelected = selectedSlot === label;
@@ -37,7 +37,7 @@ export default function SlotGrid() {
         })}
       </div>
 
-      <p className="mt-6 text-sm text-[#A1A1AA]">
+      <p className="mt-6 text-sm text-[#A0A6AF]">
         {selectedSlot ? `Selected: ${selectedSlot}` : "Select a slot to continue"}
       </p>
 
@@ -51,14 +51,14 @@ export default function SlotGrid() {
         }}
         className={`mt-4 rounded-lg px-6 py-3 font-semibold transition duration-200 ${
           selectedSlot
-            ? "bg-gradient-to-r from-[#A855F7] to-[#7C3AED] text-white hover:shadow-lg hover:shadow-[#A855F7]/50"
-            : "cursor-not-allowed bg-[#3A3F48] text-[#A1A1AA]"
+            ? "bg-gradient-to-r from-[#FF4500] to-[#FF4500] text-white hover:shadow-lg hover:shadow-[#FF4500]/50"
+            : "cursor-not-allowed bg-[#3A3F48] text-[#A0A6AF]"
         }`}
       >
         Continue
       </button>
 
-      <p className="mt-2 text-sm text-[#A1A1AA]">
+      <p className="mt-2 text-sm text-[#A0A6AF]">
         You will enter your details in the next step
       </p>
     </div>

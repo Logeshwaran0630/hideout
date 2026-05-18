@@ -6,23 +6,23 @@ import TiltCard from "./TiltCard";
 
 export default function About() {
   return (
-    <section id="about" className="bg-[#0A0A0A] px-6 py-20">
+    <section id="about" className="bg-[#0A0F18] px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal>
           <div className="mb-12 text-center">
-            <span className="text-sm uppercase tracking-wider text-[#A855F7]">About Us</span>
+            <span className="text-sm uppercase tracking-wider text-[#FF4500]">About Us</span>
             <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">Welcome to The Hideout</h2>
-            <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#A855F7] to-[#3B82F6]" />
+            <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#FF4500] to-[#FF5722]" />
           </div>
         </ScrollReveal>
 
         <div className="grid items-center gap-12 md:grid-cols-2">
           <ScrollReveal>
             <div>
-              <p className="mb-4 leading-relaxed text-[#A1A1AA]">
+              <p className="mb-4 leading-relaxed text-[#A0A6AF]">
                 The Hideout is Chennai's premier after-hours gaming lounge, designed for gamers who demand the best equipment and atmosphere.
               </p>
-              <p className="leading-relaxed text-[#A1A1AA]">
+              <p className="leading-relaxed text-[#A0A6AF]">
                 Whether you're grinding ranked matches, hosting a squad, or just looking for a place to unwind — we've got you covered with premium consoles, comfortable seating, and midnight hours.
               </p>
             </div>
@@ -39,10 +39,10 @@ export default function About() {
                 <TiltCard>
                   <AnimatedBorder>
                     <div className="card-premium rounded-xl p-6 text-center">
-                      <div className="mb-2 flex h-16 items-center justify-center rounded-lg bg-[#18181B] text-[#6B6B6B]">
+                      <div className="mb-2 flex h-16 items-center justify-center rounded-lg bg-[#14181F] text-[#6B7280]">
                         <img src={item.image} alt={item.label} className="h-full w-full rounded-lg object-cover" />
                       </div>
-                      <div className="text-sm text-[#A1A1AA]">{item.label}</div>
+                      <div className="text-sm text-[#A0A6AF]">{item.label}</div>
                     </div>
                   </AnimatedBorder>
                 </TiltCard>

@@ -32,7 +32,7 @@ export default async function ManualBookingPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">Manual Booking</h1>
-        <p className="text-[#A1A1AA] mt-2">
+        <p className="text-[#A0A6AF] mt-2">
           Create booking from WhatsApp message — paste message, auto-fill, confirm
         </p>
       </div>

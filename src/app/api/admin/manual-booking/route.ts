@@ -86,7 +86,7 @@ Customer: ${userData.display_name || userData.email}
 H-ID: ${userData.h_id}
 Session: ${sessionType.name}
 Players: ${sessionType.max_players}
-Price: ₹${sessionType.price_per_hour}
+Price: Rs. ${sessionType.price_per_hour}
 Notes: ${notes || 'None'}
 Booked by: Admin (Manual Booking)
       `.trim(),
@@ -129,7 +129,7 @@ Booked by: Admin (Manual Booking)
     
     // Generate WhatsApp confirmation message
     const whatsappMessage = `
-*THE HIDEOUT - BOOKING CONFIRMED* 🎮
+*THE HIDEOUT - BOOKING CONFIRMED*
 
 Booking Code: *${booking.booking_code}*
 H-ID: ${userData.h_id}
@@ -137,15 +137,15 @@ Customer: ${userData.display_name || userData.email}
 Date: ${new Date(bookingDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 Time: ${timeSlot.label}
 Session: *${sessionType.name}* (${sessionType.max_players} player${sessionType.max_players > 1 ? 's' : ''})
-Price: ₹${sessionType.price_per_hour}
+Price: Rs. ${sessionType.price_per_hour}
 
-${sessionType.h_coins_earned > 0 ? `✨ H Coins earned: +${sessionType.h_coins_earned}\n` : ''}
+${sessionType.h_coins_earned > 0 ? `H Coins earned: +${sessionType.h_coins_earned}\n` : ''}
 
-📍 Show this code at the counter.
-📍 The Hideout, Chennai
-🕐 Open 11 AM - Midnight
+Show this code at the counter.
+The Hideout, Chennai
+Open 11 AM - Midnight
 
-See you at The Hideout! 🎮
+See you at The Hideout!
     `.trim();
     
     return NextResponse.json({

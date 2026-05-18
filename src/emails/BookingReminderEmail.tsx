@@ -40,7 +40,7 @@ export const BookingReminderEmail = ({
           style={logo}
         />
 
-        <Heading style={h1}>⏰ Booking Reminder</Heading>
+        <Heading style={h1}>Booking Reminder</Heading>
 
         <Text style={text}>Hey {name}, your gaming session is tomorrow!</Text>
 
@@ -60,9 +60,9 @@ export const BookingReminderEmail = ({
         </Section>
 
         <Text style={reminder}>
-          📍 Location: The Hideout, Chennai<br />
-          🕐 Please arrive 10 minutes early<br />
-          ❌ Cancellations must be made at least 2 hours before
+          Location: The Hideout, Chennai<br />
+          Please arrive 10 minutes early<br />
+          Cancellations must be made at least 2 hours before
         </Text>
 
         <Button href="https://hideout.vercel.app/profile" style={button}>
@@ -78,13 +78,13 @@ export const BookingReminderEmail = ({
 );
 
 const main = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container = {
-  backgroundColor: '#18181B',
-  border: '1px solid #2A2A2A',
+  backgroundColor: '#14181F',
+  border: '1px solid #2A2F38',
   borderRadius: '16px',
   margin: '40px auto',
   padding: '32px',
@@ -97,7 +97,7 @@ const logo = {
 };
 
 const h1 = {
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontSize: '24px',
   fontWeight: 'bold',
   textAlign: 'center' as const,
@@ -105,27 +105,27 @@ const h1 = {
 };
 
 const text = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '15px',
   textAlign: 'center' as const,
   margin: '12px 0',
 };
 
 const detailsBox = {
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#0A0F18',
   borderRadius: '12px',
   padding: '16px',
   margin: '20px 0',
 };
 
 const detailRow = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '14px',
   margin: '8px 0',
 };
 
 const reminder = {
-  color: '#A1A1AA',
+  color: '#A0A6AF',
   fontSize: '13px',
   textAlign: 'center' as const,
   lineHeight: '20px',
@@ -133,9 +133,9 @@ const reminder = {
 };
 
 const button = {
-  backgroundColor: '#A855F7',
+  backgroundColor: '#FF4500',
   borderRadius: '8px',
-  color: '#FFFFFF',
+  color: '#F5F1EA',
   fontWeight: 'bold',
   textDecoration: 'none',
   textAlign: 'center' as const,

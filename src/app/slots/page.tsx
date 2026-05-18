@@ -26,6 +26,12 @@ export default async function SlotsPage() {
     sessionTypesError = fallback.error;
   }
 
+  const { data: setups } = await supabase
+    .from("setups")
+    .select("*")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
   const { data: profile } = await supabase
     .from("users")
     .select("id, h_id, display_name, email, role")
@@ -33,8 +39,9 @@ export default async function SlotsPage() {
     .single();
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] pt-18">
+    <div className="min-h-screen bg-[#0A0F18] pt-18">
       <BookingWizard
+        setups={setups || []}
         sessionTypes={sessionTypes || []}
         user={{ id: user.id, email: user.email! }}
         profile={profile}
