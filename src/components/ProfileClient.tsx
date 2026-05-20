@@ -55,6 +55,39 @@ function firstItem<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
+function getBookingDateTime(booking: Booking) {
+  const timeSlot = firstItem(booking.time_slots);
+
+  if (!timeSlot?.start_time) {
+    return null;
+  }
+
+  const normalizedTime = timeSlot.start_time.slice(0, 5);
+  const bookingDateTime = new Date(`${booking.booking_date}T${normalizedTime}:00+05:30`);
+
+  return Number.isNaN(bookingDateTime.getTime()) ? null : bookingDateTime;
+}
+
+function canCancelBooking(booking: Booking) {
+  const bookingDateTime = getBookingDateTime(booking);
+
+  if (!bookingDateTime) {
+    return false;
+  }
+
+  return bookingDateTime.getTime() > Date.now();
+}
+
+function isRefundEligible(booking: Booking) {
+  const bookingDateTime = getBookingDateTime(booking);
+
+  if (!bookingDateTime) {
+    return false;
+  }
+
+  return (bookingDateTime.getTime() - Date.now()) / (1000 * 60 * 60) >= 2;
+}
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-IN", {
     weekday: "short",
@@ -72,6 +105,9 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
   const [pastBookings, setPastBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<{ booking: Booking; isPast?: boolean } | null>(null);
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [bookingActionMessage, setBookingActionMessage] = useState<string | null>(null);
+  const [bookingActionError, setBookingActionError] = useState<string | null>(null);
 
   const profileData = useMemo(() => (profile ? { ...profile, role: profile.role || "user" } : null), [profile]);
   const isAdmin = profileData?.role === "admin";
@@ -176,6 +212,36 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
     router.push("/");
   }
 
+  async function handleCancelBooking(bookingId: string) {
+    setCancellingBookingId(bookingId);
+    setBookingActionMessage(null);
+    setBookingActionError(null);
+
+    try {
+      const response = await fetch("/api/bookings/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setBookingActionError(payload?.error || "Failed to cancel booking.");
+        return;
+      }
+
+      setBookingActionMessage(payload?.message || "Booking cancelled successfully.");
+      setUpcomingBookings((current) => current.filter((booking) => booking.id !== bookingId));
+      setSelectedBooking((current) => (current?.booking.id === bookingId ? null : current));
+    } catch (error) {
+      console.error("Booking cancellation failed:", error);
+      setBookingActionError("Something went wrong. Please try again.");
+    } finally {
+      setCancellingBookingId(null);
+    }
+  }
+
   const memberSince = new Date(profile.created_at).toLocaleDateString("en-IN", {
     month: "long",
     year: "numeric",
@@ -278,6 +344,18 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
               )}
             </div>
 
+            {bookingActionMessage ? (
+              <div className="mb-4 rounded-lg border border-[rgba(74,222,128,0.25)] bg-[rgba(74,222,128,0.08)] px-4 py-3 text-sm text-[#4ADE80]">
+                {bookingActionMessage}
+              </div>
+            ) : null}
+
+            {bookingActionError ? (
+              <div className="mb-4 rounded-lg border border-[rgba(239,68,68,0.25)] bg-[rgba(239,68,68,0.08)] px-4 py-3 text-sm text-[#F87171]">
+                {bookingActionError}
+              </div>
+            ) : null}
+
             {loading ? (
               <div className="space-y-3">
                 {[1, 2].map((i) => (
@@ -300,6 +378,8 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                   const timeSlot = firstItem(booking.time_slots);
                   const sessionType = firstItem(booking.session_types);
                   const setup = firstItem(booking.setups);
+                  const canCancel = canCancelBooking(booking);
+                  const refundEligible = isRefundEligible(booking);
 
                   return (
                     <div key={booking.id} className="rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-4">
@@ -320,13 +400,30 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                           </div>
                           <div className="font-mono text-xs text-white/40">{booking.booking_code}</div>
                           <div className="text-sm font-semibold text-devil-orange">₹{booking.total_price}</div>
+                          {canCancel ? (
+                            <p className="text-[11px] text-white/40">
+                              {refundEligible ? "Cancel now for an H Coins refund." : "Cancel now, but no H Coins refund within 2 hours of the slot."}
+                            </p>
+                          ) : (
+                            <p className="text-[11px] text-white/40">Cancellation window has closed for this booking.</p>
+                          )}
                         </div>
-                        <button
-                          onClick={() => setSelectedBooking({ booking, isPast: false })}
-                          className="rounded-lg border border-devil-orange px-3 py-1.5 text-xs text-devil-orange transition hover:bg-[rgba(255,82,0,0.1)]"
-                        >
-                          View Ticket
-                        </button>
+                        <div className="flex shrink-0 flex-col gap-2">
+                          <button
+                            onClick={() => setSelectedBooking({ booking, isPast: false })}
+                            className="rounded-lg border border-devil-orange px-3 py-1.5 text-xs text-devil-orange transition hover:bg-[rgba(255,82,0,0.1)]"
+                          >
+                            View Ticket
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!canCancel || cancellingBookingId === booking.id}
+                            onClick={() => handleCancelBooking(booking.id)}
+                            className="rounded-lg border border-[#EF4444] px-3 py-1.5 text-xs text-[#EF4444] transition hover:bg-[rgba(239,68,68,0.1)] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {cancellingBookingId === booking.id ? "Cancelling..." : canCancel ? "Cancel Booking" : "Cannot Cancel"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

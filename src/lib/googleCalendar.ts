@@ -85,6 +85,16 @@ export async function checkMultipleSlotsAvailability(
  */
 export async function createCalendarEvent(eventData: CalendarEventData): Promise<string | null> {
   try {
+    if (!process.env.GOOGLE_CALENDAR_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !privateKey) {
+      console.error('Google Calendar is not configured');
+      return null;
+    }
+
+    if (!eventData.summary || !eventData.startTime || !eventData.endTime) {
+      console.error('Missing required calendar event fields');
+      return null;
+    }
+
     const event = {
       summary: eventData.summary,
       description: eventData.description,
@@ -110,7 +120,7 @@ export async function createCalendarEvent(eventData: CalendarEventData): Promise
       requestBody: event,
     });
 
-    return response.data.id || null;
+    return response.data?.id || null;
   } catch (error) {
     console.error('Error creating calendar event:', error);
     return null;

@@ -213,11 +213,16 @@ export async function sendBookingReminderEmail(booking: Booking) {
   }
 }
 
-export async function sendBookingCancellationEmail(booking: Booking) {
+export async function sendBookingCancellationEmail(booking: Booking & { refundAmount?: number }) {
   const user = booking.users;
   const recipient = user?.email || '';
   const timeSlot = booking.time_slots?.label || 'Unknown';
   const sessionType = booking.session_types?.name || 'Standard';
+  const refundAmount = booking.refundAmount ?? 0;
+  const refundMessage =
+    refundAmount > 0
+      ? `Your H Coins refund of ${refundAmount} coins has been credited to your account.`
+      : 'No H Coins refund was issued for this cancellation.';
 
   console.log(`[Email] Sending cancellation email to ${recipient || 'missing email'}`);
 
@@ -253,6 +258,7 @@ export async function sendBookingCancellationEmail(booking: Booking) {
               <tr><td style="padding: 8px 0; color: #6B7280;">Session</td><td style="color: white;">${sessionType}</td></tr>
               <tr><td style="padding: 8px 0; color: #6B7280;">Price</td><td style="color: #FF4500;">Rs. ${booking.total_price}</td></tr>
             </table>
+            <p>${refundMessage}</p>
             <p>We hope to see you again soon!</p>
           </div>
         </div>

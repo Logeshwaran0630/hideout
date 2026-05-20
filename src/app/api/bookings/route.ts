@@ -111,6 +111,13 @@ export async function POST(request: Request) {
       }
     }
 
+    await supabase.from("setup_status").upsert({
+      setup_id,
+      status: "booked",
+      current_booking_id: data.id,
+      updated_at: new Date().toISOString(),
+    });
+
     const { data: profile } = await supabase
       .from("users")
       .select("id, email, display_name, h_id")

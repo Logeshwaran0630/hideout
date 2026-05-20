@@ -1,225 +1,72 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, Clock, Users, Copy, Check, Loader2, Sparkles, Smartphone, User, Hash } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/client";
+import { 
+  Hash, User, Phone, Mail, Calendar, Clock, Users, 
+  CreditCard, Loader2, CheckCircle, Sparkles, 
+  Smartphone, Copy, Gamepad2
+} from "lucide-react";
 
 interface TimeSlot {
   id: string;
   label: string;
   start_time: string;
   end_time: string;
+  sort_order: number;
 }
 
 interface SessionType {
   id: string;
   name: string;
   max_players: number;
-  price_per_hour: number;
+  price_multiplier: number;
   h_coins_earned: number;
 }
 
-interface ManualBookingFormProps {
-  timeSlots: TimeSlot[];
-  sessionTypes: SessionType[];
+interface Setup {
+  id: string;
+  name: string;
+  display_name: string;
+  badge: string;
+  description: string;
+  base_price: number;
+  max_players: number;
 }
 
-export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBookingFormProps) {
-  const [formData, setFormData] = useState({
-    customerMessage: "",
-    hId: "",
-    customerName: "",
-    bookingDate: "",
-    timeSlotId: "",
-    sessionTypeId: sessionTypes[0]?.id || "",
-    notes: "",
-  });
-
-  const [userFound, setUserFound] = useState<any>(null);
+export default function ManualBookingForm() {
+  const [customerType, setCustomerType] = useState<'regular' | 'new'>('regular');
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [sessionTypes, setSessionTypes] = useState<SessionType[]>([]);
+  const [setups, setSetups] = useState<Setup[]>([]);
+  
+  // WhatsApp message auto-fill
+  const [customerMessage, setCustomerMessage] = useState("");
+  const [parsingMessage, setParsingMessage] = useState(false);
+  
+  // Regular customer fields
+  const [hId, setHId] = useState("");
+  const [fetchedCustomer, setFetchedCustomer] = useState<any>(null);
+  const [customerLoading, setCustomerLoading] = useState(false);
+  
+  // New customer fields
+  const [newCustomerName, setNewCustomerName] = useState("");
+  const [newCustomerEmail, setNewCustomerEmail] = useState("");
+  const [newCustomerPhone, setNewCustomerPhone] = useState("");
+  
+  // Common booking fields
+  const [selectedSetup, setSelectedSetup] = useState("");
+  const [selectedSession, setSelectedSession] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
+  const [paymentMode, setPaymentMode] = useState<'cash' | 'upi'>('cash');
+  const [notes, setNotes] = useState("");
+  
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Parse message and auto-fill form
-  const parseAndAutoFill = async () => {
-    const message = formData.customerMessage;
-    if (!message) return;
-
-    setLoading(true);
-    setError(null);
-
-    // Extract H-ID (HID-000006 or HID-000001 format)
-    const hIdMatch = message.match(/HID[-\s]*(\d{6})/i) || message.match(/(\d{6})/);
-    const extractedHId = hIdMatch ? `HID-${hIdMatch[1]}` : null;
-
-    // Extract time (7 PM, 7:00 PM, 19:00, 7pm)
-    let extractedTime = null;
-    const timePatterns = [
-      /(\d{1,2})[:.]?(\d{2})?\s*(am|pm)/i,
-      /(\d{1,2})\s*(am|pm)/i,
-      /at\s+(\d{1,2})\s*(am|pm)?/i,
-    ];
-    
-    for (const pattern of timePatterns) {
-      const match = message.match(pattern);
-      if (match) {
-        let hour = parseInt(match[1]);
-        const isPM = match[3]?.toLowerCase() === 'pm' || match[2]?.toLowerCase() === 'pm';
-        
-        if (isPM && hour < 12) hour += 12;
-        if (!isPM && hour === 12) hour = 0;
-        
-        extractedTime = hour;
-        break;
-      }
-    }
-
-    // Extract date (tomorrow, May 16, 16/05, 2026-05-16)
-    let extractedDate = null;
-    const today = new Date();
-    
-    if (message.toLowerCase().includes("tomorrow")) {
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      extractedDate = tomorrow.toISOString().split('T')[0];
-    } else {
-      const datePatterns = [
-        /(\d{1,2})[\/\-](\d{1,2})/,  // 16/05 or 16-05
-        /(\d{4})-(\d{2})-(\d{2})/,   // 2026-05-16
-        /(?:may|apr|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2})/i,
-      ];
-      
-      for (const pattern of datePatterns) {
-        const match = message.match(pattern);
-        if (match) {
-          if (match[1].length === 4) {
-            // YYYY-MM-DD format
-            extractedDate = `${match[1]}-${match[2]}-${match[3]}`;
-          } else {
-            // DD/MM format
-            const day = parseInt(match[1]);
-            const month = parseInt(match[2]) - 1;
-            const year = today.getFullYear();
-            const parsedDate = new Date(year, month, day);
-            if (parsedDate > today) {
-              extractedDate = parsedDate.toISOString().split('T')[0];
-            }
-          }
-          break;
-        }
-      }
-    }
-
-    // Extract session type
-    let extractedSessionId = formData.sessionTypeId;
-    if (message.toLowerCase().includes("solo") || message.includes("1 player")) {
-      const solo = sessionTypes.find(s => s.name === "Solo");
-      if (solo) extractedSessionId = solo.id;
-    } else if (message.toLowerCase().includes("duo") || message.includes("2 player")) {
-      const duo = sessionTypes.find(s => s.name === "Duo");
-      if (duo) extractedSessionId = duo.id;
-    } else if (message.toLowerCase().includes("squad") || message.includes("4 player") || message.includes("team")) {
-      const squad = sessionTypes.find(s => s.name === "Squad");
-      if (squad) extractedSessionId = squad.id;
-    }
-
-    // Find matching time slot
-    let extractedSlotId = "";
-    if (extractedTime !== null) {
-      const slotsWithHour = timeSlots.map(slot => {
-        const hour = parseInt(slot.start_time.split(':')[0]);
-        return { ...slot, hour };
-      });
-      
-      const exactMatch = slotsWithHour.find(s => s.hour === extractedTime);
-      if (exactMatch) {
-        extractedSlotId = exactMatch.id;
-      } else {
-        const closest = slotsWithHour.reduce((prev, curr) => {
-          return Math.abs(curr.hour - extractedTime!) < Math.abs(prev.hour - extractedTime!) ? curr : prev;
-        });
-        extractedSlotId = closest.id;
-      }
-    }
-
-    // Update form
-    setFormData(prev => ({
-      ...prev,
-      hId: extractedHId || prev.hId,
-      bookingDate: extractedDate || prev.bookingDate,
-      timeSlotId: extractedSlotId || prev.timeSlotId,
-      sessionTypeId: extractedSessionId,
-    }));
-
-    // If H-ID found, lookup user
-    if (extractedHId) {
-      try {
-        const response = await fetch(`/api/admin/lookup-user?hId=${extractedHId}`);
-        const data = await response.json();
-        if (data.user) {
-          setUserFound(data.user);
-          setFormData(prev => ({ ...prev, customerName: data.user.display_name || data.user.email }));
-        } else {
-          setError(`User with H-ID ${extractedHId} not found. Ask customer to sign up first.`);
-        }
-      } catch (err) {
-        console.error("Lookup error:", err);
-        setError("Error looking up user");
-      }
-    }
-
-    setLoading(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    if (!formData.hId || !formData.bookingDate || !formData.timeSlotId) {
-      setError("Please fill H-ID, Date, and Time Slot");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/admin/manual-booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          hId: formData.hId,
-          bookingDate: formData.bookingDate,
-          timeSlotId: formData.timeSlotId,
-          sessionTypeId: formData.sessionTypeId,
-          notes: formData.notes,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to create booking");
-        setLoading(false);
-        return;
-      }
-
-      setResult(data);
-    } catch (err) {
-      console.error("Submit error:", err);
-      setError("Error creating booking");
-    }
-    setLoading(false);
-  };
-
-  const copyToClipboard = async () => {
-    if (result?.whatsappMessage) {
-      await navigator.clipboard.writeText(result.whatsappMessage);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
+  const [copied, setCopied] = useState(false);
+  
   // Generate date options (next 30 days)
   const dateOptions = [];
   const today = new Date();
@@ -229,259 +76,752 @@ export default function ManualBookingForm({ timeSlots, sessionTypes }: ManualBoo
     dateOptions.push({
       value: date.toISOString().split('T')[0],
       label: date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }),
+      dayName: date.toLocaleDateString('en-IN', { weekday: 'short' }),
+      dayNumber: date.getDate(),
+      monthName: date.toLocaleDateString('en-IN', { month: 'short' }),
     });
   }
+  
+  useEffect(() => {
+    fetchData();
+  }, []);
+  
+  const fetchData = async () => {
+    const [slotsRes, sessionsRes, setupsRes] = await Promise.all([
+      supabase.from('time_slots').select('*').order('sort_order'),
+      supabase.from('session_types').select('*').order('sort_order'),
+      supabase.from('setups').select('*').eq('is_active', true).order('sort_order'),
+    ]);
+    
+    if (slotsRes.data) setTimeSlots(slotsRes.data);
+    if (sessionsRes.data) setSessionTypes(sessionsRes.data);
+    if (setupsRes.data) setSetups(setupsRes.data);
+  };
+  
+  // Parse WhatsApp message
+  const parseCustomerMessage = () => {
+    const message = customerMessage.toLowerCase();
+    setParsingMessage(true);
+    
+    // Extract H-ID
+    const hIdMatch = message.match(/hid[-\s]*(\d{6})/i) || message.match(/(\d{6})/);
+    if (hIdMatch && customerType === 'regular') {
+      setHId(`HID-${hIdMatch[1]}`);
+      fetchCustomerByHId(`HID-${hIdMatch[1]}`);
+    }
+    
+    // Extract Setup
+    if (message.includes("ps5") || message.includes("playstation 5")) {
+      const ps5 = setups.find(s => s.name === 'ps5');
+      if (ps5) setSelectedSetup(ps5.id);
+    } else if (message.includes("ps4") || message.includes("playstation 4")) {
+      const ps4 = setups.find(s => s.name === 'ps4');
+      if (ps4) setSelectedSetup(ps4.id);
+    } else if (message.includes("arcade")) {
+      const arcade = setups.find(s => s.name === 'arcade');
+      if (arcade) setSelectedSetup(arcade.id);
+    } else if (message.includes("racing") || message.includes("sim")) {
+      const racing = setups.find(s => s.name === 'racing');
+      if (racing) setSelectedSetup(racing.id);
+    }
+    
+    // Extract Session Type
+    if (message.includes("solo") || message.includes("1 player")) {
+      const solo = sessionTypes.find(s => s.name === 'Solo');
+      if (solo) setSelectedSession(solo.id);
+    } else if (message.includes("duo") || message.includes("2 player")) {
+      const duo = sessionTypes.find(s => s.name === 'Duo');
+      if (duo) setSelectedSession(duo.id);
+    } else if (message.includes("squad") || message.includes("4 player") || message.includes("team")) {
+      const squad = sessionTypes.find(s => s.name === 'Squad');
+      if (squad) setSelectedSession(squad.id);
+    }
+    
+    // Extract Date
+    if (message.includes("tomorrow")) {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      setSelectedDate(tomorrow.toISOString().split('T')[0]);
+    } else {
+      const dateMatch = message.match(/(\d{1,2})[\/\-](\d{1,2})/);
+      if (dateMatch) {
+        const day = parseInt(dateMatch[1]);
+        const month = parseInt(dateMatch[2]) - 1;
+        const parsedDate = new Date(today.getFullYear(), month, day);
+        if (parsedDate > today) {
+          setSelectedDate(parsedDate.toISOString().split('T')[0]);
+        }
+      }
+    }
+    
+    // Extract Time
+    const timeMatch = message.match(/(\d{1,2})\s*(am|pm)/i);
+    if (timeMatch) {
+      let hour = parseInt(timeMatch[1]);
+      const isPM = timeMatch[2].toLowerCase() === 'pm';
+      if (isPM && hour < 12) hour += 12;
+      if (!isPM && hour === 12) hour = 0;
+      
+      const closestSlot = timeSlots.find(slot => {
+        const slotHour = parseInt(slot.start_time.split(':')[0]);
+        return slotHour >= hour;
+      });
+      if (closestSlot) setSelectedTimeSlot(closestSlot.id);
+    }
+    
+    setParsingMessage(false);
+  };
+  
+  const fetchCustomerByHId = async (hIdValue?: string) => {
+    const searchHId = hIdValue || hId;
+    if (!searchHId.trim()) return;
+    
+    setCustomerLoading(true);
+    const { data } = await supabase
+      .from('users')
+      .select('id, h_id, display_name, email, phone')
+      .eq('h_id', searchHId.toUpperCase())
+      .single();
+    
+    if (data) {
+      setFetchedCustomer(data);
+      setError(null);
+    } else {
+      setFetchedCustomer(null);
+      setError("Customer not found. Please check H-ID.");
+    }
+    setCustomerLoading(false);
+  };
+  
+  const calculatePrice = (): number => {
+    const setup = setups.find(s => s.id === selectedSetup);
+    const session = sessionTypes.find(s => s.id === selectedSession);
+    if (!setup || !session) return 0;
+    
+    // Racing Sim special pricing
+    if (setup.name === 'racing') {
+      if (session.name === 'Solo') return 50;
+      if (session.name === 'Duo') return 80;
+      if (session.name === 'Squad') return 150;
+    }
+    // Arcade special pricing
+    if (setup.name === 'arcade') {
+      if (session.name === 'Solo') return 50;
+      if (session.name === 'Duo') return 80;
+      if (session.name === 'Squad') return 120;
+    }
+    // Free Session
+    if (session.name === 'Free Session') return 0;
+    
+    // Standard pricing
+    const multipliers: Record<string, number> = { Solo: 1.0, Duo: 1.5, Squad: 2.0 };
+    const multiplier = multipliers[session.name] || 1.0;
+    return Math.round(setup.base_price * multiplier);
+  };
+  
+  const createNewUser = async (name: string, email: string, phone: string) => {
+    const password = "hideout@123";
+    
+    // Create user via auth
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: name,
+          phone: phone,
+        },
+      },
+    });
+    
+    if (signUpError) {
+      console.error("Signup error:", signUpError);
+      return null;
+    }
+    
+    if (!authData?.user) {
+      return null;
+    }
+    
+    // Wait a moment for the trigger to create the user record
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Fetch the user with H-ID
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id, h_id, display_name')
+      .eq('id', authData.user.id)
+      .single();
+    
+    return userData;
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    
+    // Validate
+    if (!selectedSetup || !selectedSession || !selectedDate || !selectedTimeSlot) {
+      setError("Please select Setup, Session, Date, and Time Slot");
+      setLoading(false);
+      return;
+    }
+    
+    const price = calculatePrice();
+    const setup = setups.find(s => s.id === selectedSetup);
+    const session = sessionTypes.find(s => s.id === selectedSession);
+    const timeSlot = timeSlots.find(t => t.id === selectedTimeSlot);
+    
+    let userId = null;
+    let customerName = "";
+    let customerPhone = "";
+    let customerHId = "";
+    
+    if (customerType === 'regular') {
+      if (!fetchedCustomer) {
+        setError("Please enter a valid H-ID");
+        setLoading(false);
+        return;
+      }
+      userId = fetchedCustomer.id;
+      customerName = fetchedCustomer.display_name || fetchedCustomer.email;
+      customerPhone = fetchedCustomer.phone || "";
+      customerHId = fetchedCustomer.h_id;
+    } else {
+      if (!newCustomerName) {
+        setError("Please enter customer name");
+        setLoading(false);
+        return;
+      }
+      if (!newCustomerEmail) {
+        setError("Please enter customer email");
+        setLoading(false);
+        return;
+      }
+      customerName = newCustomerName;
+      customerPhone = newCustomerPhone;
+      
+      // Create new user
+      const newUser = await createNewUser(newCustomerName, newCustomerEmail, newCustomerPhone);
+      if (!newUser) {
+        setError("Failed to create customer account. Please try again.");
+        setLoading(false);
+        return;
+      }
+      userId = newUser.id;
+      customerHId = newUser.h_id;
+    }
+    
+    // Parse dates for calendar
+    const [startHours, startMinutes] = timeSlot!.start_time.split(':');
+    const [endHours, endMinutes] = timeSlot!.end_time.split(':');
+    
+    const startDateTime = new Date(selectedDate);
+    startDateTime.setHours(parseInt(startHours), parseInt(startMinutes), 0, 0);
+    
+    const endDateTime = new Date(selectedDate);
+    endDateTime.setHours(parseInt(endHours), parseInt(endMinutes), 0, 0);
+    
+    // Create calendar event
+    let calendarEventId = null;
+    try {
+      const { createCalendarEvent } = await import("@/lib/googleCalendar");
+      calendarEventId = await createCalendarEvent({
+        summary: `Manual Booking - ${customerName}`,
+        description: `Customer: ${customerName}\nPhone: ${customerPhone}\nSetup: ${setup?.display_name}\nSession: ${session?.name}\nPrice: ₹${price}`,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
+      });
+    } catch (calError) {
+      console.error("Calendar error:", calError);
+      // Continue without calendar event
+    }
+    
+    // Create booking
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .insert({
+        user_id: userId,
+        setup_id: selectedSetup,
+        time_slot_id: selectedTimeSlot,
+        session_type_id: selectedSession,
+        booking_date: selectedDate,
+        player_count: session?.max_players || 1,
+        total_price: price,
+        calendar_event_id: calendarEventId,
+        payment_status: price === 0 ? 'paid' : 'paid',
+        payment_mode: paymentMode,
+        paid_at: new Date().toISOString(),
+        status: 'confirmed',
+        is_walkin: customerType === 'new',
+        guest_name: customerType === 'new' ? newCustomerName : null,
+        guest_phone: customerType === 'new' ? newCustomerPhone : null,
+        notes: notes,
+      })
+      .select()
+      .single();
+    
+    if (bookingError) {
+      console.error("Booking error:", bookingError);
+      setError(bookingError.message);
+      setLoading(false);
+      return;
+    }
+    
+    // Award H Coins (skip for free session)
+    if (session?.h_coins_earned && session.h_coins_earned > 0 && price > 0) {
+      await supabase.from('h_coin_ledger').insert({
+        user_id: userId,
+        amount: session.h_coins_earned,
+        type: 'earn',
+        reference_id: booking.id,
+        description: `Manual booking: ${booking.booking_code}`,
+      });
+    }
+    
+    // Generate WhatsApp message
+    const whatsappMessage = `
+*THE HIDEOUT - BOOKING CONFIRMED*
 
+Booking Code: *${booking.booking_code}*
+${customerType === 'regular' ? `H-ID: ${customerHId}` : `Customer: ${customerName}`}
+${customerPhone ? `Phone: ${customerPhone}` : ''}
+${customerType === 'new' ? `Email: ${newCustomerEmail}\nPassword: hideout@123\n` : ''}
+
+Date: ${new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+Time: ${timeSlot?.label}
+Setup: ${setup?.display_name}
+Session: *${session?.name}* (${session?.max_players} players)
+Amount: ${price === 0 ? 'FREE' : `₹${price}`}
+Payment: ${paymentMode.toUpperCase()}
+${session?.h_coins_earned && price > 0 ? `H Coins Earned: +${session.h_coins_earned}` : ''}
+
+Show this code at the counter.
+
+The Hideout, Chennai | Open 11 AM - Midnight
+    `.trim();
+    
+    setResult({ booking, whatsappMessage, customerName, customerHId });
+    setLoading(false);
+  };
+  
+  const copyToClipboard = async () => {
+    if (result?.whatsappMessage) {
+      await navigator.clipboard.writeText(result.whatsappMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+  
+  const selectedSetupData = setups.find(s => s.id === selectedSetup);
+  const selectedSessionData = sessionTypes.find(s => s.id === selectedSession);
+  const totalPrice = calculatePrice();
+  
+  const getSetupIcon = (setupName: string) => {
+    switch(setupName) {
+      case 'ps5': return '🎮';
+      case 'ps4': return '🎮';
+      case 'arcade': return '🕹️';
+      case 'racing': return '🏎️';
+      default: return '🎮';
+    }
+  };
+  
   if (result) {
     return (
-      <div className="bg-[#14181F] border border-[#2A2F38] rounded-2xl p-6">
+      <div className="bg-[#18181B] border border-[#2A2F38] rounded-2xl p-6">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-green-500" />
+            <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Booking Created!</h2>
           <p className="text-[#A0A6AF] mb-4">
-            Booking Code: <span className="text-[#FF4500] font-mono font-bold">{result.booking?.code}</span>
+            Booking Code: <span className="text-[#ff5200] font-mono font-bold">{result.booking.booking_code}</span>
           </p>
           
           <div className="bg-[#0A0F18] rounded-xl p-4 mb-4 text-left">
-            <h3 className="text-white font-semibold mb-2">Booking Summary</h3>
-            <div className="space-y-1 text-sm">
-              <p><span className="text-[#A0A6AF]">H-ID:</span> {result.booking?.hId}</p>
-              <p><span className="text-[#A0A6AF]">Customer:</span> {result.booking?.customerName}</p>
-              <p><span className="text-[#A0A6AF]">Date:</span> {result.booking?.date}</p>
-              <p><span className="text-[#A0A6AF]">Time:</span> {result.booking?.timeSlot}</p>
-              <p><span className="text-[#A0A6AF]">Session:</span> {result.booking?.sessionType}</p>
-              <p><span className="text-[#A0A6AF]">Price:</span> ₹{result.booking?.price}</p>
-              <p><span className="text-[#A0A6AF]">H Coins:</span> +{result.booking?.coinsEarned}</p>
-            </div>
-          </div>
-          
-          <div className="bg-[#0A0F18] rounded-xl p-4 mb-4 text-left border border-[#FF4500]/30">
-            <p className="text-[#A0A6AF] text-sm mb-2 flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-green-500" />
-              Copy this message to send to customer:
-            </p>
-            <div className="bg-[#0A0F18] rounded-lg p-3 text-sm whitespace-pre-wrap text-[#A0A6AF] font-mono text-xs max-h-60 overflow-auto">
+            <p className="text-[#A0A6AF] text-sm mb-2">Copy this message to send to customer:</p>
+            <div className="bg-[#050508] rounded-lg p-3 text-sm whitespace-pre-wrap text-[#A0A6AF] font-mono text-xs max-h-60 overflow-auto">
               {result.whatsappMessage}
             </div>
           </div>
           
-          <button
-            onClick={copyToClipboard}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF4500] to-[#FF4500] text-white font-semibold rounded-xl hover:scale-105 transition-transform mb-3 w-full justify-center"
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? "Copied!" : "Copy WhatsApp Message"}
-          </button>
-          
-          <button
-            onClick={() => {
+          <div className="flex gap-3">
+            <button onClick={copyToClipboard} className="flex-1 py-3 btn-primary text-white font-semibold rounded-lg flex items-center justify-center gap-2">
+              {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied ? "Copied!" : "Copy Message"}
+            </button>
+            <button onClick={() => {
               setResult(null);
-              setFormData({
-                customerMessage: "",
-                hId: "",
-                customerName: "",
-                bookingDate: "",
-                timeSlotId: "",
-                sessionTypeId: sessionTypes[0]?.id || "",
-                notes: "",
-              });
-              setUserFound(null);
-            }}
-            className="w-full px-6 py-3 border border-[#2A2F38] text-[#A0A6AF] font-semibold rounded-xl hover:border-[#FF4500] transition-colors"
-          >
-            Create Another Booking
-          </button>
+              setHId("");
+              setFetchedCustomer(null);
+              setNewCustomerName("");
+              setNewCustomerEmail("");
+              setNewCustomerPhone("");
+              setSelectedSetup("");
+              setSelectedSession("");
+              setSelectedDate("");
+              setSelectedTimeSlot("");
+              setNotes("");
+              setCustomerMessage("");
+            }} className="flex-1 py-3 rounded-lg border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200] transition">
+              New Booking
+            </button>
+          </div>
         </div>
       </div>
     );
   }
-
+  
   return (
-    <div className="bg-[#14181F] border border-[#2A2F38] rounded-2xl p-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Step 1: Paste WhatsApp Message - Auto-fill */}
-        <div className="bg-[#FF4500]/5 border border-[#FF4500]/20 rounded-xl p-4">
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-[#FF4500]" />
-            Step 1: Paste Customer WhatsApp Message
-          </label>
-          <textarea
-            value={formData.customerMessage}
-            onChange={(e) => setFormData({ ...formData, customerMessage: e.target.value })}
-            placeholder={`Example messages that work:\n\n"HID-000006, book for May 16 at 7 PM Duo session"\n\n"My H-ID is HID-000001. I want to book Solo for tomorrow 3pm"\n\n"Hi, HID-000003 - Squad session on 16th May 8 PM"`}
-            rows={4}
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none resize-none text-sm"
-          />
-          <button
-            type="button"
-            onClick={parseAndAutoFill}
-            disabled={!formData.customerMessage || loading}
-            className="mt-3 px-4 py-2 text-sm bg-[#FF4500] text-white rounded-lg hover:bg-[#FF4500] transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            Auto-Fill Form from Message
-          </button>
-          <p className="text-xs text-[#A0A6AF] mt-2">
-            System extracts: H-ID, Date, Time, Session Type
-          </p>
-        </div>
+    <div className="bg-[#18181B] border border-[#2A2F38] rounded-2xl p-6">
+      {/* WhatsApp Message Auto-Fill Section */}
+      <div className="bg-[#ff5200]/5 border border-[#ff5200]/20 rounded-xl p-4 mb-6">
+        <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+          <Smartphone className="w-4 h-4 text-[#ff5200]" />
+          Step 1: Paste Customer WhatsApp Message
+        </label>
+        <textarea
+          value={customerMessage}
+          onChange={(e) => setCustomerMessage(e.target.value)}
+          placeholder={`Example messages that work:
 
-        <div className="border-t border-[#2A2F38] pt-4">
-          <p className="text-sm text-[#A0A6AF] mb-4">Step 2: Verify and Confirm</p>
-        </div>
+"HID-000006, book for May 16 at 7 PM Duo session on PS5"
 
-        {/* H-ID Field */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Hash className="w-4 h-4 text-[#FF4500]" />
-            Customer H-ID <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A0A6AF] text-sm">HID-</span>
-            <input
-              type="text"
-              value={formData.hId.replace('HID-', '')}
-              onChange={(e) => setFormData({ ...formData, hId: `HID-${e.target.value.replace(/[^0-9]/g, '')}` })}
-              required
-              className="w-full pl-12 pr-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
-              placeholder="000001"
-            />
-          </div>
-          {userFound && (
-            <p className="text-xs text-green-500 mt-1">✓ Customer found: {userFound.display_name || userFound.email}</p>
-          )}
-        </div>
+"My H-ID is HID-000001. I want to book Solo for tomorrow 3pm on PS4"
 
-        {/* Customer Name (Auto-filled) */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <User className="w-4 h-4 text-[#A0A6AF]" />
-            Customer Name
-          </label>
-          <input
-            type="text"
-            value={formData.customerName}
-            readOnly
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] cursor-not-allowed"
-          />
-          <p className="text-xs text-[#A0A6AF] mt-1">Auto-filled from H-ID lookup</p>
-        </div>
-
-        {/* Booking Date */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#A0A6AF]" />
-            Booking Date <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.bookingDate}
-            onChange={(e) => setFormData({ ...formData, bookingDate: e.target.value })}
-            required
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
-          >
-            <option value="">Select date</option>
-            {dateOptions.map((date) => (
-              <option key={date.value} value={date.value}>
-                {date.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Time Slot */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#A0A6AF]" />
-            Time Slot <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.timeSlotId}
-            onChange={(e) => setFormData({ ...formData, timeSlotId: e.target.value })}
-            required
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
-          >
-            <option value="">Select time slot</option>
-            {timeSlots.map((slot) => (
-              <option key={slot.id} value={slot.id}>
-                {slot.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Session Type */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#A0A6AF]" />
-            Session Type <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.sessionTypeId}
-            onChange={(e) => setFormData({ ...formData, sessionTypeId: e.target.value })}
-            required
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none"
-          >
-            {sessionTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name} - ₹{type.price_per_hour}/hour (+{type.h_coins_earned} coins)
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Price Display */}
-        {sessionTypes.find(s => s.id === formData.sessionTypeId) && (
-          <div className="bg-[#0A0F18] rounded-lg p-3">
-            <div className="flex justify-between items-center">
-              <span className="text-[#A0A6AF]">Total Price:</span>
-              <span className="text-2xl font-bold text-[#FF4500]">
-                ₹{sessionTypes.find(s => s.id === formData.sessionTypeId)?.price_per_hour}
-              </span>
+"Hi, HID-000003 - Squad session on Arcade for 16th May 8 PM"`}
+          rows={4}
+          className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none resize-none text-sm"
+        />
+        <button
+          type="button"
+          onClick={parseCustomerMessage}
+          disabled={!customerMessage || parsingMessage}
+          className="mt-3 px-4 py-2 text-sm bg-[#ff5200] text-white rounded-lg hover:bg-[#cc2200] transition-colors disabled:opacity-50 flex items-center gap-2"
+        >
+          {parsingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          Auto-Fill Form from Message
+        </button>
+        <p className="text-xs text-[#A0A6AF] mt-2">
+          System extracts: H-ID, Setup, Session, Date, Time
+        </p>
+      </div>
+      
+      <div className="border-t border-[#2A2F38] pt-4 mb-6">
+        <p className="text-sm text-[#A0A6AF] text-center">OR</p>
+      </div>
+      
+      {/* Customer Type Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => { setCustomerType('regular'); setError(null); setFetchedCustomer(null); }}
+          className={`flex-1 py-2 rounded-lg font-semibold transition ${
+            customerType === 'regular'
+              ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
+              : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+          }`}
+        >
+          Regular Customer
+        </button>
+        <button
+          onClick={() => { setCustomerType('new'); setError(null); setHId(""); setFetchedCustomer(null); }}
+          className={`flex-1 py-2 rounded-lg font-semibold transition ${
+            customerType === 'new'
+              ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
+              : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+          }`}
+        >
+          New Customer
+        </button>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Regular Customer Fields */}
+        {customerType === 'regular' && (
+          <div>
+            <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+              <Hash className="w-4 h-4 text-[#ff5200]" />
+              Customer H-ID *
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={hId}
+                onChange={(e) => setHId(e.target.value.toUpperCase())}
+                placeholder="HID-000001"
+                className="flex-1 px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => fetchCustomerByHId()}
+                disabled={customerLoading}
+                className="px-4 py-2 rounded-lg border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200] transition"
+              >
+                {customerLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lookup"}
+              </button>
             </div>
-            <div className="flex justify-between items-center mt-1">
-              <span className="text-[#A0A6AF] text-sm">H Coins earned:</span>
-              <span className="text-sm text-green-500">
-                +{sessionTypes.find(s => s.id === formData.sessionTypeId)?.h_coins_earned} coins
-              </span>
+            {fetchedCustomer && (
+              <div className="mt-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <p className="text-green-500 text-sm">✓ Customer found</p>
+                <p className="text-white text-sm">Name: {fetchedCustomer.display_name || fetchedCustomer.email}</p>
+                <p className="text-[#A0A6AF] text-xs">Phone: {fetchedCustomer.phone || 'Not provided'}</p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* New Customer Fields */}
+        {customerType === 'new' && (
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <User className="w-4 h-4 text-[#ff5200]" />
+                Customer Name *
+              </label>
+              <input
+                type="text"
+                value={newCustomerName}
+                onChange={(e) => setNewCustomerName(e.target.value)}
+                required
+                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none"
+                placeholder="Enter customer name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#ff5200]" />
+                Email Address *
+              </label>
+              <input
+                type="email"
+                value={newCustomerEmail}
+                onChange={(e) => setNewCustomerEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none"
+                placeholder="customer@example.com"
+              />
+              <p className="text-xs text-[#A0A6AF] mt-1">Customer will use this email to login with the default password</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[#ff5200]" />
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={newCustomerPhone}
+                onChange={(e) => setNewCustomerPhone(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none"
+                placeholder="9876543210"
+              />
+              <p className="text-xs text-[#A0A6AF] mt-1">H-ID will be auto-generated</p>
             </div>
           </div>
         )}
-
+        
+        {/* Setup Selection */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Gamepad2 className="w-4 h-4 text-[#ff5200]" />
+            Select Setup *
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {setups.map((setup) => (
+              <button
+                key={setup.id}
+                type="button"
+                onClick={() => setSelectedSetup(setup.id)}
+                className={`p-3 rounded-xl text-center transition-all ${
+                  selectedSetup === setup.id
+                    ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white shadow-lg shadow-[#ff5200]/30'
+                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                }`}
+              >
+                <div className="text-2xl mb-1">{getSetupIcon(setup.name)}</div>
+                <div className="text-xs font-semibold">{setup.display_name}</div>
+                <div className="text-[10px] opacity-80">From ₹{setup.base_price}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Session Type Selection */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Users className="w-4 h-4 text-[#ff5200]" />
+            Select Session *
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {sessionTypes.filter(s => s.name !== 'Free Session').map((session) => {
+              let price = 0;
+              if (selectedSetupData) {
+                if (selectedSetupData.name === 'racing') {
+                  if (session.name === 'Solo') price = 50;
+                  else if (session.name === 'Duo') price = 80;
+                  else if (session.name === 'Squad') price = 150;
+                } else if (selectedSetupData.name === 'arcade') {
+                  if (session.name === 'Solo') price = 50;
+                  else if (session.name === 'Duo') price = 80;
+                  else if (session.name === 'Squad') price = 120;
+                } else {
+                  const multipliers = { Solo: 1.0, Duo: 1.5, Squad: 2.0 };
+                  price = Math.round(selectedSetupData.base_price * (multipliers[session.name] || 1.0));
+                }
+              }
+              
+              return (
+                <button
+                  key={session.id}
+                  type="button"
+                  onClick={() => setSelectedSession(session.id)}
+                  className={`p-3 rounded-xl text-center transition-all ${
+                    selectedSession === session.id
+                      ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white shadow-lg shadow-[#ff5200]/30'
+                      : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                  }`}
+                >
+                  <div className="font-bold">{session.name}</div>
+                  <div className="text-xs opacity-80">{session.max_players} player(s)</div>
+                  {selectedSetupData && (
+                    <div className="text-sm font-bold mt-1">₹{price}</div>
+                  )}
+                  <div className="text-[10px] text-green-400">+{session.h_coins_earned} coins</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Date Selection */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#ff5200]" />
+            Select Date *
+          </label>
+          <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
+            {dateOptions.map((date) => (
+              <button
+                key={date.value}
+                type="button"
+                onClick={() => setSelectedDate(date.value)}
+                className={`p-2 rounded-xl text-center transition-all ${
+                  selectedDate === date.value
+                    ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
+                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                }`}
+              >
+                <div className="text-xs font-medium">{date.dayName}</div>
+                <div className="text-lg font-bold">{date.dayNumber}</div>
+                <div className="text-xs opacity-70">{date.monthName}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Time Slot Selection */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#ff5200]" />
+            Select Time Slot *
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {timeSlots.map((slot) => (
+              <button
+                key={slot.id}
+                type="button"
+                onClick={() => setSelectedTimeSlot(slot.id)}
+                className={`p-2 rounded-xl text-center transition-all ${
+                  selectedTimeSlot === slot.id
+                    ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
+                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                }`}
+              >
+                <div className="text-sm font-semibold">{slot.label}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Payment Mode */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-[#ff5200]" />
+            Payment Mode *
+          </label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setPaymentMode('cash')}
+              className={`flex-1 py-2 rounded-lg font-semibold transition ${
+                paymentMode === 'cash'
+                  ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
+                  : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+              }`}
+            >
+              💵 Cash
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentMode('upi')}
+              className={`flex-1 py-2 rounded-lg font-semibold transition ${
+                paymentMode === 'upi'
+                  ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
+                  : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+              }`}
+            >
+              📱 UPI
+            </button>
+          </div>
+        </div>
+        
+        {/* Price Display */}
+        {selectedSetupData && selectedSessionData && (
+          <div className="bg-[#0A0F18] rounded-xl p-4">
+            <div className="flex justify-between items-center">
+              <span className="text-[#A0A6AF]">Total Price:</span>
+              <span className="text-2xl font-bold text-[#ff5200]">₹{totalPrice}</span>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-[#A0A6AF] text-sm">H Coins earned:</span>
+              <span className="text-sm text-green-500">+{selectedSessionData.h_coins_earned} coins</span>
+            </div>
+            <div className="flex justify-between items-center mt-2 pt-2 border-t border-[#2A2F38]">
+              <span className="text-[#A0A6AF] text-sm">Setup:</span>
+              <span className="text-sm text-white">{selectedSetupData.display_name}</span>
+            </div>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-[#A0A6AF] text-sm">Session:</span>
+              <span className="text-sm text-white">{selectedSessionData.name} ({selectedSessionData.max_players} players)</span>
+            </div>
+          </div>
+        )}
+        
         {/* Notes */}
         <div>
           <label className="block text-sm font-medium text-white mb-2">Notes (Optional)</label>
           <textarea
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#FF4500] outline-none resize-none"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none resize-none"
             placeholder="Any special requests or notes..."
           />
         </div>
-
-        {/* Error Display */}
+        
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-500 text-sm">
             {error}
           </div>
         )}
-
-        {/* Submit Button */}
+        
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-r from-[#FF4500] to-[#FF4500] text-white font-semibold rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+          className="w-full py-3 bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white font-semibold rounded-lg hover:scale-105 transition disabled:opacity-50"
         >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Creating Booking...
-            </span>
-          ) : (
-            "Confirm Booking & Generate WhatsApp Message"
-          )}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Confirm Booking & Generate WhatsApp Message"}
         </button>
       </form>
     </div>

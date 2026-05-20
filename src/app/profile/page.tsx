@@ -21,6 +21,10 @@ export default async function ProfilePage() {
     .eq("id", user.id)
     .single();
 
+  if (profile?.role === "admin") {
+    redirect("/admin");
+  }
+
   if (profile) {
     return <ProfileClient profile={profile} />;
   }

@@ -31,6 +31,17 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  let userRole: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    userRole = profile?.role ?? null;
+  }
+
   const userProtected = ["/profile", "/slots"];
   if (userProtected.some((p) => pathname.startsWith(p)) && !user) {
     const loginUrl = new URL("/login", request.url);
@@ -38,12 +49,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (user && userRole === "admin" && pathname === "/profile") {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
   if (pathname.startsWith("/admin")) {
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    if (user.email?.toLowerCase() !== "admin@hideout.com") {
+    if (userRole !== "admin") {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

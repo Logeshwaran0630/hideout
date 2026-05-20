@@ -15,32 +15,15 @@ export default async function ManualBookingPage() {
     .single();
   
   if (profile?.role !== 'admin') redirect('/profile');
-  
-  // Fetch time slots
-  const { data: timeSlots } = await supabase
-    .from('time_slots')
-    .select('*')
-    .order('sort_order');
-  
-  // Fetch session types
-  const { data: sessionTypes } = await supabase
-    .from('session_types')
-    .select('*')
-    .order('sort_order');
-  
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">Manual Booking</h1>
         <p className="text-[#A0A6AF] mt-2">
           Create booking from WhatsApp message — paste message, auto-fill, confirm
         </p>
       </div>
-      
-      <ManualBookingForm 
-        timeSlots={timeSlots || []} 
-        sessionTypes={sessionTypes || []} 
-      />
+      <ManualBookingForm />
     </div>
   );
 }

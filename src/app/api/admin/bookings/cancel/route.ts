@@ -51,6 +51,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
+    if (booking.setup_id) {
+      await supabase.from('setup_status').upsert({
+        setup_id: booking.setup_id,
+        status: 'available',
+        current_booking_id: null,
+        occupied_since: null,
+        updated_at: new Date().toISOString(),
+      });
+    }
+
     const userProfile = booking.users ?? {
       id: booking.user_id,
       email: booking.users?.email ?? '',
