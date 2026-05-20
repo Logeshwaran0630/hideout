@@ -2,6 +2,7 @@
 
 import { AlertCircle, Calendar, CheckCircle2, Clock, Gift, Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
 type RedeemModalProps = {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
   const [loadingRedeem, setLoadingRedeem] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingCode, setBookingCode] = useState("");
+  const [coinsForFreeSession, setCoinsForFreeSession] = useState(100);
 
   const dates = useMemo(() => {
     const today = new Date();
@@ -71,6 +73,30 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
     setBookedSlotIds([]);
     setError(null);
     setBookingCode("");
+  }, [isOpen]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function fetchThreshold() {
+      const { data } = await supabase
+        .from("global_settings")
+        .select("value")
+        .eq("key", "h_coins")
+        .single();
+
+      if (!active) return;
+      const threshold = Number(data?.value?.coins_for_free_session ?? 100);
+      if (Number.isFinite(threshold) && threshold > 0) {
+        setCoinsForFreeSession(threshold);
+      }
+    }
+
+    fetchThreshold();
+
+    return () => {
+      active = false;
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -155,7 +181,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
   if (!isOpen) return null;
 
-  const coinProgress = Math.min((currentBalance / 100) * 100, 100);
+  const coinProgress = Math.min((currentBalance / coinsForFreeSession) * 100, 100);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
@@ -166,7 +192,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
               <CheckCircle2 className="h-8 w-8 text-[#FF4500]" />
             </div>
             <h2 className="mt-5 font-heading text-[32px] uppercase text-[#F5F1EA]">FREE SESSION REDEEMED</h2>
-            <p className="mt-2 text-[14px] text-[#A0A6AF]">Your booking is confirmed and 100 H Coins were deducted.</p>
+            <p className="mt-2 text-[14px] text-[#A0A6AF]">Your booking is confirmed and {coinsForFreeSession} H Coins were deducted.</p>
 
             <div className="mt-6 rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-5">
               <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#A0A6AF]">Booking Code</div>
@@ -184,7 +210,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                 <Gift className="h-6 w-6 text-[#FF4500]" />
                 <div>
                   <h2 className="text-[22px] font-semibold text-[#F5F1EA]">Redeem Free Session</h2>
-                  <p className="mt-1 text-[13px] text-[#A0A6AF]">100 H Coins gets you one solo hour.</p>
+                  <p className="mt-1 text-[13px] text-[#A0A6AF]">{coinsForFreeSession} H Coins gets you one solo hour.</p>
                 </div>
               </div>
               <button type="button" onClick={onClose} className="rounded-lg p-2 text-[#A0A6AF] transition-colors hover:bg-[#0A0F18] hover:text-[#F5F1EA]">
@@ -202,7 +228,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                   <div className="h-full rounded-full bg-gradient-to-r from-[#FF4500] to-[#FF5722] transition-all duration-500" style={{ width: `${coinProgress}%` }} />
                 </div>
                 <p className="mt-2 text-[12px] text-[#A0A6AF]">
-                  {currentBalance >= 100 ? "You have enough coins to redeem a free session." : `Need ${100 - currentBalance} more coins to redeem.`}
+                  {currentBalance >= coinsForFreeSession ? "You have enough coins to redeem a free session." : `Need ${coinsForFreeSession - currentBalance} more coins to redeem.`}
                 </p>
               </div>
 
@@ -293,7 +319,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                   <button
                     type="button"
                     onClick={() => setStep("confirm")}
-                    disabled={!selectedDate || !selectedSlot || currentBalance < 100}
+                    disabled={!selectedDate || !selectedSlot || currentBalance < coinsForFreeSession}
                     className="btn-primary w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#F5F1EA] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Continue to Confirm
@@ -308,7 +334,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                       { label: "Date", value: formatDateLabel(selectedDate) },
                       { label: "Time", value: selectedSlot.label },
                       { label: "Session", value: "Free Session (Solo)" },
-                      { label: "Coins", value: "-100 H Coins" },
+                      { label: "Coins", value: `-${coinsForFreeSession} H Coins` },
                       { label: "Price", value: "₹0" },
                     ].map((item) => (
                       <div key={item.label} className="flex items-center justify-between border-b border-[#2A2F38] py-3 last:border-b-0">

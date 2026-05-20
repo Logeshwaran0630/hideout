@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  BarChart3,
   CalendarDays,
   CalendarPlus,
   CircleDollarSign,
@@ -24,8 +25,9 @@ const navItems = [
   { href: "/admin/manual-booking", label: "Manual Booking", icon: CalendarPlus },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/coins", label: "H Coins", icon: CircleDollarSign },
+  { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/help", label: "Admin Instruction", icon: HelpCircle },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/settings", label: "Price Settings", icon: Settings },
 ];
 
 type AdminProfile = {

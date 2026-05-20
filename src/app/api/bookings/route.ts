@@ -68,7 +68,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid time slot" }, { status: 400 });
     }
 
-    const totalPrice = calculateBookingPrice(setup, sessionType);
+    const { data: dynamicPriceSetting } = await supabase
+      .from("price_settings")
+      .select("current_price")
+      .eq("setup_id", setup_id)
+      .eq("session_type_id", session_type_id)
+      .single();
+
+    const totalPrice =
+      typeof dynamicPriceSetting?.current_price === "number"
+        ? dynamicPriceSetting.current_price
+        : calculateBookingPrice(setup, sessionType);
 
     const { data, error } = await supabase
       .from("bookings")

@@ -1,10 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ScrollReveal from "./ScrollReveal";
 import { CheckCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function PricingSection() {
+  const [startingPrice, setStartingPrice] = useState(50);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchStartingPrice = async () => {
+      const { data } = await supabase
+        .from("price_settings")
+        .select("current_price")
+        .order("current_price", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (!isActive) return;
+      if (typeof data?.current_price === "number") {
+        setStartingPrice(data.current_price);
+      }
+    };
+
+    fetchStartingPrice();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
   return (
     <section id="pricing" className="bg-dark-bg px-6 py-20">
       <div className="max-w-4xl mx-auto text-center">
@@ -17,7 +45,7 @@ export default function PricingSection() {
         <ScrollReveal delay={100}>
           <div className="mb-8 rounded-2xl border border-[rgba(255,82,0,0.18)] bg-card-bg p-8">
             <p className="mb-2 text-sm uppercase tracking-wider text-white/45">Sessions Starting At</p>
-            <div className="mb-2 text-6xl font-bold text-devil-orange glow-orange md:text-7xl">₹50</div>
+            <div className="mb-2 text-6xl font-bold text-devil-orange glow-orange md:text-7xl">₹{startingPrice}</div>
             <p className="text-xl text-white mb-4">/onwards</p>
             <p className="mx-auto max-w-md text-white/60">
               Pricing varies by station, group size, and time of day. For session bundles, group rates, and tournament packages — chat with us.

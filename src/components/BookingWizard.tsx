@@ -58,6 +58,7 @@ function isSlotPast(date: string, startTime: string) {
 
 export default function BookingWizard({ setups, sessionTypes, user, profile }: BookingWizardProps) {
   const router = useRouter();
+  const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({});
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "confirmed">(1);
   const [selectedSetup, setSelectedSetup] = useState<Setup | null>(null);
   const [selectedSessionType, setSelectedSessionType] = useState<SessionType | null>(null);
@@ -92,8 +93,40 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
 
   const totalPrice = useMemo(() => {
     if (!selectedSetup || !selectedSessionType) return 0;
+    const priceKey = `${selectedSetup.id}_${selectedSessionType.name}`;
+    if (typeof currentPrices[priceKey] === "number") {
+      return currentPrices[priceKey];
+    }
     return calculateBookingPrice(selectedSetup, selectedSessionType);
-  }, [selectedSetup, selectedSessionType]);
+  }, [currentPrices, selectedSetup, selectedSessionType]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchPrices = async () => {
+      const { data } = await supabase
+        .from("price_settings")
+        .select("setup_id, current_price, session_types(name)");
+
+      if (!isActive || !data) return;
+
+      const priceMap: Record<string, number> = {};
+      for (const item of data as any[]) {
+        const relation = item.session_types;
+        const sessionName = Array.isArray(relation) ? relation[0]?.name : relation?.name;
+        if (!item.setup_id || !sessionName) continue;
+        priceMap[`${item.setup_id}_${sessionName}`] = item.current_price;
+      }
+
+      setCurrentPrices(priceMap);
+    };
+
+    fetchPrices();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (step === 3 && !selectedDate && dates.length > 0) {
@@ -422,7 +455,11 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
               <div className="mt-5 grid gap-4 md:grid-cols-3">
                 {eligibleSessionTypes.map((sessionType) => {
                   const isSelected = selectedSessionType?.id === sessionType.id;
-                  const price = calculateBookingPrice(selectedSetup, sessionType);
+                  const priceKey = `${selectedSetup.id}_${sessionType.name}`;
+                  const price =
+                    typeof currentPrices[priceKey] === "number"
+                      ? currentPrices[priceKey]
+                      : calculateBookingPrice(selectedSetup, sessionType);
 
                   return (
                     <button

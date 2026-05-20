@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { calculateBookingPrice } from "@/lib/pricing";
 import { 
   Hash, User, Phone, Mail, Calendar, Clock, Users, 
   CreditCard, Loader2, CheckCircle, Sparkles, 
@@ -39,6 +40,7 @@ export default function ManualBookingForm() {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [sessionTypes, setSessionTypes] = useState<SessionType[]>([]);
   const [setups, setSetups] = useState<Setup[]>([]);
+  const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({});
   
   // WhatsApp message auto-fill
   const [customerMessage, setCustomerMessage] = useState("");
@@ -87,15 +89,26 @@ export default function ManualBookingForm() {
   }, []);
   
   const fetchData = async () => {
-    const [slotsRes, sessionsRes, setupsRes] = await Promise.all([
+    const [slotsRes, sessionsRes, setupsRes, pricesRes] = await Promise.all([
       supabase.from('time_slots').select('*').order('sort_order'),
       supabase.from('session_types').select('*').order('sort_order'),
       supabase.from('setups').select('*').eq('is_active', true).order('sort_order'),
+      supabase.from('price_settings').select('setup_id, current_price, session_types(name)'),
     ]);
     
     if (slotsRes.data) setTimeSlots(slotsRes.data);
     if (sessionsRes.data) setSessionTypes(sessionsRes.data);
     if (setupsRes.data) setSetups(setupsRes.data);
+    if (pricesRes.data) {
+      const map: Record<string, number> = {};
+      for (const item of pricesRes.data as any[]) {
+        const relation = item.session_types;
+        const sessionName = Array.isArray(relation) ? relation[0]?.name : relation?.name;
+        if (!item.setup_id || !sessionName) continue;
+        map[`${item.setup_id}_${sessionName}`] = item.current_price;
+      }
+      setCurrentPrices(map);
+    }
   };
   
   // Parse WhatsApp message
@@ -197,26 +210,22 @@ export default function ManualBookingForm() {
     const setup = setups.find(s => s.id === selectedSetup);
     const session = sessionTypes.find(s => s.id === selectedSession);
     if (!setup || !session) return 0;
-    
-    // Racing Sim special pricing
-    if (setup.name === 'racing') {
-      if (session.name === 'Solo') return 50;
-      if (session.name === 'Duo') return 80;
-      if (session.name === 'Squad') return 150;
-    }
-    // Arcade special pricing
-    if (setup.name === 'arcade') {
-      if (session.name === 'Solo') return 50;
-      if (session.name === 'Duo') return 80;
-      if (session.name === 'Squad') return 120;
-    }
+
+    const dynamic = currentPrices[`${setup.id}_${session.name}`];
+    if (typeof dynamic === 'number') return dynamic;
+
     // Free Session
     if (session.name === 'Free Session') return 0;
-    
-    // Standard pricing
-    const multipliers: Record<string, number> = { Solo: 1.0, Duo: 1.5, Squad: 2.0 };
-    const multiplier = multipliers[session.name] || 1.0;
-    return Math.round(setup.base_price * multiplier);
+
+    return calculateBookingPrice(setup, session);
+  };
+
+  const getSessionPrice = (session: SessionType) => {
+    if (!selectedSetupData) return 0;
+    const dynamic = currentPrices[`${selectedSetupData.id}_${session.name}`];
+    if (typeof dynamic === 'number') return dynamic;
+    if (session.name === 'Free Session') return 0;
+    return calculateBookingPrice(selectedSetupData, session);
   };
   
   const createNewUser = async (name: string, email: string, phone: string) => {
@@ -655,21 +664,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {sessionTypes.filter(s => s.name !== 'Free Session').map((session) => {
-              let price = 0;
-              if (selectedSetupData) {
-                if (selectedSetupData.name === 'racing') {
-                  if (session.name === 'Solo') price = 50;
-                  else if (session.name === 'Duo') price = 80;
-                  else if (session.name === 'Squad') price = 150;
-                } else if (selectedSetupData.name === 'arcade') {
-                  if (session.name === 'Solo') price = 50;
-                  else if (session.name === 'Duo') price = 80;
-                  else if (session.name === 'Squad') price = 120;
-                } else {
-                  const multipliers = { Solo: 1.0, Duo: 1.5, Squad: 2.0 };
-                  price = Math.round(selectedSetupData.base_price * (multipliers[session.name] || 1.0));
-                }
-              }
+              const price = getSessionPrice(session);
               
               return (
                 <button

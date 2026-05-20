@@ -56,6 +56,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { data: globalConfig } = await supabase
+      .from("global_settings")
+      .select("value")
+      .eq("key", "h_coins")
+      .single();
+
+    const freeSessionThreshold = Number(globalConfig?.value?.coins_for_free_session ?? 100);
+
     const body = (await request.json()) as RedemptionRequestBody;
     const { booking_date, time_slot_id } = body;
 
@@ -97,7 +105,7 @@ export async function POST(request: Request) {
     }
 
     const balance = (ledger ?? []).reduce((sum, row) => sum + row.amount, 0);
-    if (balance < 100) {
+    if (balance < freeSessionThreshold) {
       return NextResponse.json({ error: "You don't have enough H Coins for this redemption." }, { status: 409 });
     }
 
@@ -114,7 +122,7 @@ export async function POST(request: Request) {
           name: "Free Session",
           max_players: 1,
           price_per_hour: 0,
-          description: "Redeemed with 100 H Coins - 1 hour free play",
+          description: `Redeemed with ${freeSessionThreshold} H Coins - 1 hour free play`,
           h_coins_earned: 0,
           sort_order: 4,
         })
@@ -158,10 +166,10 @@ export async function POST(request: Request) {
       .from("h_coin_ledger")
       .insert({
         user_id: user.id,
-        amount: -100,
+        amount: -freeSessionThreshold,
         type: "redeem",
         reference_id: booking.id,
-        description: `Redeemed 100 coins for free session: ${booking.booking_code}`,
+        description: `Redeemed ${freeSessionThreshold} coins for free session: ${booking.booking_code}`,
       });
 
     if (redeemLedgerError) {
