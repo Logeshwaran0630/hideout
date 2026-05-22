@@ -27,7 +27,7 @@ export default function SetupCard({ setup, isSelected, onSelect }: SetupCardProp
       onClick={onSelect}
       className={`font-accent relative w-full rounded-xl border p-5 text-left transition-all duration-150 ${
         isSelected
-          ? "border-[#FF4500] bg-gradient-to-r from-[#FF4500]/10 to-[#FF4500]/10 shadow-lg shadow-[#FF4500]/20"
+          ? "border-[#FF4500] bg-linear-to-r from-[#FF4500]/10 to-[#FF4500]/10 shadow-lg shadow-[#FF4500]/20"
           : "border-[#2A2F38] bg-[#0A0F18] hover:border-[#22C55E]"
       }`}
       aria-pressed={isSelected}
@@ -63,7 +63,9 @@ export default function SetupCard({ setup, isSelected, onSelect }: SetupCardProp
           <div className="font-accent-bold text-[26px] uppercase text-[#FF4500]">Rs. {setup.base_price}</div>
           <div className="text-[12px] text-[#71717A]">starting price</div>
         </div>
-        <div className="text-right text-[12px] text-[#A0A6AF]">Up to {setup.max_players} players</div>
+        <div className="text-right text-[12px] text-[#A0A6AF]">
+          {setup.name === "racing" ? "30 minutes or 10 laps" : `Up to ${setup.max_players} players`}
+        </div>
       </div>
     </button>
   );

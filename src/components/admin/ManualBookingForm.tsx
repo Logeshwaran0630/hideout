@@ -446,12 +446,12 @@ The Hideout, Chennai | Open 11 AM - Midnight
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Booking Created!</h2>
           <p className="text-[#A0A6AF] mb-4">
-            Booking Code: <span className="text-[#ff5200] font-mono font-bold">{result.booking.booking_code}</span>
+            Booking Code: <span className="text-devil-orange font-mono font-bold">{result.booking.booking_code}</span>
           </p>
           
           <div className="bg-[#0A0F18] rounded-xl p-4 mb-4 text-left">
             <p className="text-[#A0A6AF] text-sm mb-2">Copy this message to send to customer:</p>
-            <div className="bg-[#050508] rounded-lg p-3 text-sm whitespace-pre-wrap text-[#A0A6AF] font-mono text-xs max-h-60 overflow-auto">
+            <div className="bg-dark-bg rounded-lg p-3 whitespace-pre-wrap text-[#A0A6AF] font-mono text-xs max-h-60 overflow-auto">
               {result.whatsappMessage}
             </div>
           </div>
@@ -474,7 +474,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
               setSelectedTimeSlot("");
               setNotes("");
               setCustomerMessage("");
-            }} className="flex-1 py-3 rounded-lg border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200] transition">
+            }} className="flex-1 py-3 rounded-lg border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange transition">
               New Booking
             </button>
           </div>
@@ -486,9 +486,9 @@ The Hideout, Chennai | Open 11 AM - Midnight
   return (
     <div className="bg-[#18181B] border border-[#2A2F38] rounded-2xl p-6">
       {/* WhatsApp Message Auto-Fill Section */}
-      <div className="bg-[#ff5200]/5 border border-[#ff5200]/20 rounded-xl p-4 mb-6">
-        <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-          <Smartphone className="w-4 h-4 text-[#ff5200]" />
+      <div className="bg-devil-orange/5 border-devil-orange/20 rounded-xl p-4 mb-6">
+        <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+          <Smartphone className="w-4 h-4 text-devil-orange" />
           Step 1: Paste Customer WhatsApp Message
         </label>
         <textarea
@@ -502,13 +502,13 @@ The Hideout, Chennai | Open 11 AM - Midnight
 
 "Hi, HID-000003 - Squad session on Arcade for 16th May 8 PM"`}
           rows={4}
-          className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none resize-none text-sm"
+          className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-devil-orange outline-none resize-none text-sm"
         />
         <button
           type="button"
           onClick={parseCustomerMessage}
           disabled={!customerMessage || parsingMessage}
-          className="mt-3 px-4 py-2 text-sm bg-[#ff5200] text-white rounded-lg hover:bg-[#cc2200] transition-colors disabled:opacity-50 flex items-center gap-2"
+          className="mt-3 flex items-center gap-2 rounded-lg bg-devil-orange px-4 py-2 text-sm text-white transition-colors hover:bg-devil-red disabled:opacity-50"
         >
           {parsingMessage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           Auto-Fill Form from Message
@@ -528,8 +528,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
           onClick={() => { setCustomerType('regular'); setError(null); setFetchedCustomer(null); }}
           className={`flex-1 py-2 rounded-lg font-semibold transition ${
             customerType === 'regular'
-              ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
-              : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+              ? 'bg-linear-to-r from-devil-orange to-devil-red text-white'
+              : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
           }`}
         >
           Regular Customer
@@ -538,8 +538,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
           onClick={() => { setCustomerType('new'); setError(null); setHId(""); setFetchedCustomer(null); }}
           className={`flex-1 py-2 rounded-lg font-semibold transition ${
             customerType === 'new'
-              ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
-              : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+              ? 'bg-linear-to-r from-devil-orange to-devil-red text-white'
+              : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
           }`}
         >
           New Customer
@@ -550,8 +550,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         {/* Regular Customer Fields */}
         {customerType === 'regular' && (
           <div>
-            <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-              <Hash className="w-4 h-4 text-[#ff5200]" />
+            <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+              <Hash className="w-4 h-4 text-devil-orange" />
               Customer H-ID *
             </label>
             <div className="flex gap-2">
@@ -560,13 +560,13 @@ The Hideout, Chennai | Open 11 AM - Midnight
                 value={hId}
                 onChange={(e) => setHId(e.target.value.toUpperCase())}
                 placeholder="HID-000001"
-                className="flex-1 px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none font-mono"
+                className="flex-1 px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-devil-orange outline-none font-mono"
               />
               <button
                 type="button"
                 onClick={() => fetchCustomerByHId()}
                 disabled={customerLoading}
-                className="px-4 py-2 rounded-lg border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200] transition"
+                className="px-4 py-2 rounded-lg border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange transition"
               >
                 {customerLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lookup"}
               </button>
@@ -585,8 +585,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         {customerType === 'new' && (
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-                <User className="w-4 h-4 text-[#ff5200]" />
+              <label className="flex items-center gap-2 text-sm font-medium text-white mb-2">
+                <User className="w-4 h-4 text-devil-orange" />
                 Customer Name *
               </label>
               <input
@@ -594,13 +594,13 @@ The Hideout, Chennai | Open 11 AM - Midnight
                 value={newCustomerName}
                 onChange={(e) => setNewCustomerName(e.target.value)}
                 required
-                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none"
+                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-devil-orange outline-none"
                 placeholder="Enter customer name"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#ff5200]" />
+              <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-devil-orange" />
                 Email Address *
               </label>
               <input
@@ -608,21 +608,21 @@ The Hideout, Chennai | Open 11 AM - Midnight
                 value={newCustomerEmail}
                 onChange={(e) => setNewCustomerEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none"
+                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-devil-orange outline-none"
                 placeholder="customer@example.com"
               />
               <p className="text-xs text-[#A0A6AF] mt-1">Customer will use this email to login with the default password</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#ff5200]" />
+              <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-devil-orange" />
                 Phone Number
               </label>
               <input
                 type="tel"
                 value={newCustomerPhone}
                 onChange={(e) => setNewCustomerPhone(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none"
+                className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-devil-orange outline-none"
                 placeholder="9876543210"
               />
               <p className="text-xs text-[#A0A6AF] mt-1">H-ID will be auto-generated</p>
@@ -632,8 +632,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         
         {/* Setup Selection */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4 text-[#ff5200]" />
+          <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Gamepad2 className="w-4 h-4 text-devil-orange" />
             Select Setup *
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -644,8 +644,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
                 onClick={() => setSelectedSetup(setup.id)}
                 className={`p-3 rounded-xl text-center transition-all ${
                   selectedSetup === setup.id
-                    ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white shadow-lg shadow-[#ff5200]/30'
-                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                    ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg shadow-devil-orange/30'
+                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
                 }`}
               >
                 <div className="text-2xl mb-1">{getSetupIcon(setup.name)}</div>
@@ -658,8 +658,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         
         {/* Session Type Selection */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#ff5200]" />
+          <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Users className="w-4 h-4 text-devil-orange" />
             Select Session *
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -673,8 +673,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
                   onClick={() => setSelectedSession(session.id)}
                   className={`p-3 rounded-xl text-center transition-all ${
                     selectedSession === session.id
-                      ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white shadow-lg shadow-[#ff5200]/30'
-                      : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                      ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg shadow-devil-orange/30'
+                      : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
                   }`}
                 >
                   <div className="font-bold">{session.name}</div>
@@ -691,8 +691,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         
         {/* Date Selection */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#ff5200]" />
+          <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-devil-orange" />
             Select Date *
           </label>
           <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
@@ -703,8 +703,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
                 onClick={() => setSelectedDate(date.value)}
                 className={`p-2 rounded-xl text-center transition-all ${
                   selectedDate === date.value
-                    ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
-                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                    ? 'bg-linear-to-r from-devil-orange to-devil-red text-white'
+                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
                 }`}
               >
                 <div className="text-xs font-medium">{date.dayName}</div>
@@ -717,8 +717,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         
         {/* Time Slot Selection */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#ff5200]" />
+          <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-devil-orange" />
             Select Time Slot *
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -729,8 +729,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
                 onClick={() => setSelectedTimeSlot(slot.id)}
                 className={`p-2 rounded-xl text-center transition-all ${
                   selectedTimeSlot === slot.id
-                    ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
-                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                    ? 'bg-linear-to-r from-devil-orange to-devil-red text-white'
+                    : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
                 }`}
               >
                 <div className="text-sm font-semibold">{slot.label}</div>
@@ -741,8 +741,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
         
         {/* Payment Mode */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-[#ff5200]" />
+          <label className="flex items-center gap-2 text-sm font-medium text-white mb-2">
+            <CreditCard className="w-4 h-4 text-devil-orange" />
             Payment Mode *
           </label>
           <div className="flex gap-3">
@@ -751,8 +751,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
               onClick={() => setPaymentMode('cash')}
               className={`flex-1 py-2 rounded-lg font-semibold transition ${
                 paymentMode === 'cash'
-                  ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
-                  : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                  ? 'bg-linear-to-r from-devil-orange to-devil-red text-white'
+                  : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
               }`}
             >
               💵 Cash
@@ -762,8 +762,8 @@ The Hideout, Chennai | Open 11 AM - Midnight
               onClick={() => setPaymentMode('upi')}
               className={`flex-1 py-2 rounded-lg font-semibold transition ${
                 paymentMode === 'upi'
-                  ? 'bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white'
-                  : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-[#ff5200]'
+                  ? 'bg-linear-to-r from-devil-orange to-devil-red text-white'
+                  : 'bg-[#0A0F18] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
               }`}
             >
               📱 UPI
@@ -776,7 +776,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
           <div className="bg-[#0A0F18] rounded-xl p-4">
             <div className="flex justify-between items-center">
               <span className="text-[#A0A6AF]">Total Price:</span>
-              <span className="text-2xl font-bold text-[#ff5200]">₹{totalPrice}</span>
+              <span className="text-2xl font-bold text-devil-orange">₹{totalPrice}</span>
             </div>
             <div className="flex justify-between items-center mt-2">
               <span className="text-[#A0A6AF] text-sm">H Coins earned:</span>
@@ -800,7 +800,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-[#ff5200] outline-none resize-none"
+            className="w-full px-4 py-2 rounded-lg bg-[#0A0F18] border border-[#2A2F38] text-white focus:border-devil-orange outline-none resize-none"
             placeholder="Any special requests or notes..."
           />
         </div>
@@ -814,7 +814,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-r from-[#ff5200] to-[#cc2200] text-white font-semibold rounded-lg hover:scale-105 transition disabled:opacity-50"
+          className="w-full py-3 bg-linear-to-r from-devil-orange to-devil-red text-white font-semibold rounded-lg hover:scale-105 transition disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Confirm Booking & Generate WhatsApp Message"}
         </button>

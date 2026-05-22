@@ -3,6 +3,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        "devil-orange": "#FF5200",
+        "devil-red": "#CC2200",
+        "ghost-teal": "#00D4A0",
+        "dark-bg": "#050508",
+        "card-bg": "rgba(5, 5, 8, 0.8)",
+        border: "rgba(255, 82, 0, 0.3)",
         hideout: {
           orange: "#FF4500",
           amber: "#F89858",

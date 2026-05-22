@@ -22,7 +22,7 @@ const setups: SetupCard[] = [
     badge: "NEXT-GEN",
     setupName: "ps5",
     title: "PlayStation 5",
-    image: "/setups/playstation%205.jpg",
+    image: "/new%20setup/ps5.png",
     description: "DualSense haptics, 4K @ 60fps, ray-traced worlds. Latest titles, always patched, always ready.",
     fallbackPrices: { Solo: 150, Duo: 250, Squad: 350 },
     badgeColor: "#00d4a0",
@@ -32,17 +32,27 @@ const setups: SetupCard[] = [
     badge: "COUCH CO-OP",
     setupName: "ps4",
     title: "PlayStation 4",
-    image: "/setups/playstaion%204.jpg",
+    image: "/new%20setup/ps4.png",
     description: "Classics that never aged - GTA V, God of War, FIFA nights. Two controllers, one couch, zero excuses.",
     fallbackPrices: { Solo: 100, Duo: 180, Squad: 250 },
     badgeColor: "#ff5200",
     accentColor: "#ff5200",
   },
   {
+    badge: "ULTIMATE RIG",
+    setupName: "pc",
+    title: "PC Gaming",
+    image: "/new%20setup/pc%20gaming.png",
+    description: "RTX gaming PC with 240Hz display, mechanical keyboard, and precision mouse.",
+    fallbackPrices: { Solo: 150, Duo: 250, Squad: 350 },
+    badgeColor: "#A855F7",
+    accentColor: "#A855F7",
+  },
+  {
     badge: "OG VIBES",
     setupName: "arcade",
     title: "Vintage Arcade",
-    image: "/setups/arcade%20cabinet.jpg",
+    image: "/new%20setup/arcade.png",
     description: "Mortal Kombat, Street Fighter, Tekken on the original cabinet. Coin-op feel without the coins.",
     fallbackPrices: { Solo: 50, Duo: 80, Squad: 120 },
     badgeColor: "#ff5200",
@@ -52,9 +62,9 @@ const setups: SetupCard[] = [
     badge: "FULL SEND",
     setupName: "racing",
     title: "Sim Racing Rig",
-    image: "/setups/racing%20simulator%20kit.avif",
+    image: "/new%20setup/racing%20sim.png",
     description: "Force-feedback wheel, pedals, bucket seat. Forza, Gran Turismo, Assetto Corsa - feel every kerb.",
-    fallbackPrices: { Solo: 50, Duo: 80, Squad: 150 },
+    fallbackPrices: { "30 Minutes": 100, "10 Laps": 100 },
     badgeColor: "#00d4a0",
     accentColor: "#00d4a0",
   },
@@ -157,7 +167,7 @@ export default function Setups() {
     () =>
       setups.map((setup) => ({
         ...setup,
-        prices: ["Solo", "Duo", "Squad"].map((sessionName) => {
+        prices: (setup.setupName === "racing" ? ["30 Minutes", "10 Laps"] : ["Solo", "Duo", "Squad"]).map((sessionName) => {
           const dynamicPrice = prices[`${setup.setupName}_${sessionName}`];
           const fallback = setup.fallbackPrices[sessionName];
           return {
@@ -219,48 +229,59 @@ export default function Setups() {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {setupCards.map((setup, index) => (
-            <ScrollReveal key={setup.title} delay={index * 100}>
-              <article className="overflow-hidden rounded-[22px] border border-[rgba(255,82,0,0.16)] bg-card-bg shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(0,212,160,0.28)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
-                <div className="relative aspect-video w-full overflow-hidden border-b border-[rgba(255,82,0,0.14)]">
-                  <Image src={setup.image} alt={setup.title} fill className="object-cover" />
-                </div>
+        {/* Horizontal scroll on mobile/tablet, 5-column row on lg+ */}
+        <div className="-mx-6 px-6 overflow-x-auto pb-6">
+          <div className="flex gap-6 min-w-max lg:grid lg:grid-cols-5 lg:min-w-0">
+            {setupCards.map((setup, index) => (
+              <div key={setup.title} className="w-[320px] lg:w-auto shrink-0">
+                <ScrollReveal delay={index * 100}>
+                  <article className="h-full min-h-95 flex flex-col overflow-hidden rounded-[22px] border border-[rgba(255,82,0,0.16)] bg-card-bg shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(0,212,160,0.28)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
+                    <div className="relative aspect-video w-full overflow-hidden border-b border-[rgba(255,82,0,0.14)]">
+                      <Image src={setup.image} alt={setup.title} fill className="object-cover" />
+                    </div>
 
-                <div className="h-0.75 w-full" style={{ backgroundColor: setup.accentColor }} />
+                    <div className="h-0.75 w-full" style={{ backgroundColor: setup.accentColor }} />
 
-                <div className="p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-bold tracking-[0.2em]" style={{ color: setup.badgeColor }}>
-                      {setup.badge}
-                    </span>
-                    {saleActive ? (
-                      <span className="rounded-full border border-devil-orange/30 bg-devil-orange/10 px-2.5 py-1 text-[10px] font-semibold tracking-[0.15em] text-devil-orange">
-                        SALE ACTIVE
-                      </span>
-                    ) : null}
-                  </div>
-                  <h3 className="mt-3 text-3xl font-title font-black tracking-tight text-white">{setup.title}</h3>
-
-                  <p className="mt-4 min-h-27 text-[0.95rem] leading-relaxed text-white/60">{setup.description}</p>
-
-                  <div className="mt-6 grid grid-cols-3 overflow-hidden rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[rgba(5,5,8,0.9)]">
-                    {setup.prices.map((price, i) => (
-                      <div
-                        key={price.label}
-                        className="px-3 py-3 text-center"
-                        style={{ borderLeft: i > 0 ? "1px solid rgba(255,82,0,0.14)" : "none" }}
-                      >
-                        <div className="text-[0.72rem] tracking-[0.18em] text-ghost-teal/80">{price.label}</div>
-                        <div className="mt-1 text-[2.05rem] font-black leading-none text-devil-orange glow-orange">{price.price}</div>
-                        {price.unit ? <div className="mt-1 text-sm text-white/45">{price.unit}</div> : null}
+                    <div className="p-6 flex flex-col h-full">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold tracking-[0.2em]" style={{ color: setup.badgeColor }}>
+                          {setup.badge}
+                        </span>
+                        {saleActive ? (
+                          <span className="rounded-full border border-devil-orange/30 bg-devil-orange/10 px-2.5 py-1 text-[10px] font-semibold tracking-[0.15em] text-devil-orange">
+                            SALE ACTIVE
+                          </span>
+                        ) : null}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </article>
-            </ScrollReveal>
-          ))}
+                      <h3 className="mt-3 text-3xl font-title font-black tracking-tight text-white">{setup.title}</h3>
+
+                      <p className="mt-4 min-h-27 text-[0.95rem] leading-relaxed text-white/60 line-clamp-3">{setup.description}</p>
+
+                          <div
+                            className={`mt-auto grid gap-2 overflow-hidden rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[rgba(5,5,8,0.9)] ${
+                              setup.setupName === "racing" ? "grid-cols-2" : "grid-cols-3"
+                            }`}
+                          >
+                            {setup.prices.map((price, i) => (
+                              <div
+                                key={price.label}
+                                className="min-w-18 px-3 py-3 text-center flex flex-col items-center justify-center"
+                                style={{ borderLeft: i > 0 ? "1px solid rgba(255,82,0,0.14)" : "none" }}
+                              >
+                                <div className="text-[0.72rem] tracking-[0.18em] text-ghost-teal/80">{price.label}</div>
+                                <div className="mt-1 flex flex-col items-center">
+                                  <span className="text-[1.4rem] font-black leading-none text-devil-orange glow-orange whitespace-nowrap">{price.price}</span>
+                                  {price.unit ? <span className="text-sm text-white/45 mt-1">{price.unit}</span> : null}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                    </div>
+                  </article>
+                </ScrollReveal>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -37,16 +37,23 @@ CREATE TABLE IF NOT EXISTS session_types (
   sort_order INT DEFAULT 0
 );
 
-INSERT INTO session_types (name, max_players, price_per_hour, description, h_coins_earned, sort_order) VALUES
-  ('Solo', 1, 199, 'One player, any console, headset included', 10, 1),
-  ('Duo', 2, 349, 'Two players, same or split consoles, 2 headsets', 15, 2),
-  ('Squad', 4, 599, 'Up to 4 players, all consoles, bonus H Coins', 25, 3)
-ON CONFLICT DO NOTHING;
-
 INSERT INTO session_types (name, max_players, price_per_hour, description, h_coins_earned, sort_order)
-SELECT 'Free Session', 1, 0, 'Redeemed with 100 H Coins - 1 hour free play', 0, 4
+SELECT seed.name, seed.max_players, seed.price_per_hour, seed.description, seed.h_coins_earned, seed.sort_order
+FROM (
+  VALUES
+    ('Solo', 1, 199, 'One player, any console, headset included', 10, 1),
+    ('Duo', 2, 349, 'Two players, same or split consoles, 2 headsets', 15, 2),
+    ('Squad', 4, 599, 'Up to 4 players, all consoles, bonus H Coins', 25, 3),
+    ('Free Session', 1, 0, 'Redeemed with 100 H Coins - 1 hour free play', 0, 4),
+    ('30 Minutes', 1, 100, '30 minutes of racing action', 5, 10),
+    ('10 Laps', 1, 100, 'Complete 10 laps on any track', 5, 11),
+    ('All-Access - 30min', 1, 200, 'Access any setup for 30 minutes. Switch freely between consoles and PC.', 10, 20),
+    ('All-Access - 1hr', 1, 379, 'Access any setup for 1 hour. Switch freely between consoles and PC.', 15, 21)
+) AS seed(name, max_players, price_per_hour, description, h_coins_earned, sort_order)
 WHERE NOT EXISTS (
-  SELECT 1 FROM session_types WHERE name = 'Free Session'
+  SELECT 1
+  FROM session_types existing
+  WHERE existing.name = seed.name
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
@@ -63,6 +70,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(time_slot_id, booking_date)
 );
+
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS duration_minutes INT;
 
 CREATE SEQUENCE IF NOT EXISTS booking_code_seq START 1024;
 

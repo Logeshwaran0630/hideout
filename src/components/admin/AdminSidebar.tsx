@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Power,
   Settings,
   Users,
   X,
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/help", label: "Admin Instruction", icon: HelpCircle },
   { href: "/admin/settings", label: "Price Settings", icon: Settings },
+  { href: "/admin/setups", label: "Setup Management", icon: Power },
 ];
 
 type AdminProfile = {

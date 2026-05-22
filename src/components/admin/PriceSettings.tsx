@@ -11,10 +11,17 @@ type PriceSetting = {
   session_types?: { id: string; name: string };
 };
 
+type AllAccessSetting = {
+  duration_minutes: number;
+  price: number;
+  h_coins_earned: number;
+};
+
 type MessageState = { type: "success" | "error"; text: string } | null;
 
 export default function PriceSettings() {
   const [priceSettings, setPriceSettings] = useState<PriceSetting[]>([]);
+  const [allAccessSettings, setAllAccessSettings] = useState<AllAccessSetting[]>([]);
   const [pendingPrices, setPendingPrices] = useState<Record<string, number>>({});
   const [hCoinsSettings, setHCoinsSettings] = useState({
     coins_per_solo: 10,
@@ -32,6 +39,7 @@ export default function PriceSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<MessageState>(null);
+  const [allAccessNotice, setAllAccessNotice] = useState<string | null>(null);
 
   const groupedPrices = useMemo(() => {
     const grouped: Record<string, PriceSetting[]> = {};
@@ -50,6 +58,7 @@ export default function PriceSettings() {
   async function fetchSettings() {
     setLoading(true);
     setMessage(null);
+    setAllAccessNotice(null);
 
     try {
       const response = await fetch("/api/admin/price-settings", { cache: "no-store" });
@@ -82,6 +91,23 @@ export default function PriceSettings() {
         start_date: data.saleSettings?.start_date || "",
         end_date: data.saleSettings?.end_date || "",
       });
+
+      const allAccessResponse = await fetch("/api/admin/all-access", { cache: "no-store" });
+      const allAccessData = await allAccessResponse.json();
+
+      if (allAccessResponse.ok) {
+        setAllAccessSettings((allAccessData.settings || []) as AllAccessSetting[]);
+      } else {
+        setAllAccessSettings([
+          { duration_minutes: 30, price: 200, h_coins_earned: 10 },
+          { duration_minutes: 60, price: 379, h_coins_earned: 15 },
+        ]);
+        setAllAccessNotice(
+          allAccessData?.error === "Relation public.all_access_settings does not exist"
+            ? "All-Access settings table is missing. Run the database migration for all_access_settings to enable pass pricing edits."
+            : allAccessData?.error || "All-Access settings could not be loaded."
+        );
+      }
     } catch (error) {
       const text = error instanceof Error ? error.message : "Failed to load settings";
       setMessage({ type: "error", text });
@@ -211,10 +237,42 @@ export default function PriceSettings() {
     setSaving(false);
   }
 
+  async function updateAllAccessSetting(durationMinutes: number, price: number, hCoinsEarned: number) {
+    const response = await fetch("/api/admin/all-access", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ durationMinutes, price, hCoinsEarned }),
+    });
+
+    if (!response.ok) {
+      const json = await response.json().catch(() => ({}));
+      throw new Error(json?.error || "Failed to save all-access setting");
+    }
+  }
+
+  async function saveAllAccessSettings() {
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      for (const setting of allAccessSettings) {
+        await updateAllAccessSetting(setting.duration_minutes, setting.price, setting.h_coins_earned);
+      }
+
+      setMessage({ type: "success", text: "All-Access settings saved successfully" });
+      await fetchSettings();
+    } catch (error) {
+      const text = error instanceof Error ? error.message : "Failed to save all-access settings";
+      setMessage({ type: "error", text });
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[#ff5200]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-devil-orange" />
       </div>
     );
   }
@@ -224,7 +282,7 @@ export default function PriceSettings() {
       <div>
         <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF4500]">SETTINGS</div>
         <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#F5F1EA]">PRICE SETTINGS</h1>
-        <p className="mt-2 text-sm text-[#A0A6AF]">Manage setup pricing, sales, and H Coins from one place.</p>
+        <p className="mt-2 text-sm text-[#A0A6AF]">Manage setup pricing, All-Access passes, sales, and H Coins from one place.</p>
       </div>
 
       {message ? (
@@ -258,9 +316,9 @@ export default function PriceSettings() {
               type="button"
               onClick={saveSaleSettings}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#ff5200] px-4 py-2 text-white transition hover:bg-[#cc2200] disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#ff5200] to-[#cc2200] px-4 py-2 text-white transition hover:scale-105 disabled:opacity-50"
             >
-              <Save className="h-4 w-4" /> Save Sale
+              <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save Sale'}
             </button>
             {saleSettings.enabled ? (
               <button
@@ -278,7 +336,7 @@ export default function PriceSettings() {
 
       <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#14181F] p-6">
         <h2 className="mb-4 flex items-center gap-2 text-[16px] font-semibold text-[#F5F1EA]">
-          <Tag className="h-5 w-5 text-[#ff5200]" /> Setup Prices
+          <Tag className="h-5 w-5 text-devil-orange" /> Setup Prices
         </h2>
 
         {Object.entries(groupedPrices).map(([setupName, prices]) => (
@@ -300,7 +358,7 @@ export default function PriceSettings() {
                   <div key={price.id} className="rounded-xl bg-[#0A0F18] p-4">
                     <div className="mb-2 text-sm text-[#A0A6AF]">{sessionLabel}</div>
                     <div className="mb-3 flex items-center gap-3">
-                      <span className="text-2xl font-bold text-[#ff5200]">Rs. {price.current_price}</span>
+                      <span className="text-2xl font-bold text-devil-orange">Rs. {price.current_price}</span>
                       {price.current_price !== price.base_price ? (
                         <span className="text-sm text-[#A0A6AF] line-through">Rs. {price.base_price}</span>
                       ) : null}
@@ -322,13 +380,13 @@ export default function PriceSettings() {
                             [price.id]: Number(e.target.value || 0),
                           }))
                         }
-                        className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-3 py-2 text-sm text-white outline-none focus:border-[#ff5200]"
+                        className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-3 py-2 text-sm text-white outline-none focus:border-devil-orange"
                       />
                       <button
                         type="button"
                         disabled={saving}
                         onClick={() => updatePrice(price.id)}
-                        className="rounded-lg bg-[#ff5200] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#cc2200] disabled:opacity-50"
+                        className="rounded-lg bg-gradient-to-r from-[#ff5200] to-[#cc2200] px-3 py-2 text-xs font-semibold text-white transition hover:scale-105 disabled:opacity-50"
                       >
                         Save
                       </button>
@@ -343,7 +401,79 @@ export default function PriceSettings() {
 
       <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#14181F] p-6">
         <h2 className="mb-4 flex items-center gap-2 text-[16px] font-semibold text-[#F5F1EA]">
-          <Percent className="h-5 w-5 text-[#ff5200]" /> Sale / Discount
+          <Percent className="h-5 w-5 text-devil-orange" /> All-Access Pass Pricing
+        </h2>
+
+        {allAccessNotice ? (
+          <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-300">
+            {allAccessNotice}
+          </div>
+        ) : null}
+
+        <div className="space-y-4">
+          {allAccessSettings.map((setting) => (
+            <div key={setting.duration_minutes} className="grid gap-4 rounded-xl bg-[#0A0F18] p-4 md:grid-cols-3">
+              <div>
+                <div className="mb-1 text-sm text-[#A0A6AF]">Duration</div>
+                <div className="text-[#F5F1EA]">
+                  {setting.duration_minutes === 30 ? "30 Minutes" : setting.duration_minutes === 60 ? "1 Hour" : `${setting.duration_minutes} Minutes`}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm text-[#A0A6AF]">Price (Rs.)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={setting.price}
+                  onChange={(e) =>
+                    setAllAccessSettings((prev) =>
+                      prev.map((item) =>
+                        item.duration_minutes === setting.duration_minutes
+                          ? { ...item, price: Number(e.target.value || 0) }
+                          : item
+                      )
+                    )
+                  }
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm text-[#A0A6AF]">H Coins Earned</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={setting.h_coins_earned}
+                  onChange={(e) =>
+                    setAllAccessSettings((prev) =>
+                      prev.map((item) =>
+                        item.duration_minutes === setting.duration_minutes
+                          ? { ...item, h_coins_earned: Number(e.target.value || 0) }
+                          : item
+                      )
+                    )
+                  }
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
+                />
+              </div>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={saveAllAccessSettings}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#ff5200] to-[#cc2200] px-4 py-2 text-white transition hover:scale-105 disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" /> Save All-Access Settings
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#14181F] p-6">
+        <h2 className="mb-4 flex items-center gap-2 text-[16px] font-semibold text-[#F5F1EA]">
+          <Percent className="h-5 w-5 text-devil-orange" /> Sale / Discount
         </h2>
 
         <div className="space-y-4">
@@ -352,7 +482,7 @@ export default function PriceSettings() {
               type="checkbox"
               checked={saleSettings.enabled}
               onChange={(e) => setSaleSettings((prev) => ({ ...prev, enabled: e.target.checked }))}
-              className="h-4 w-4 accent-[#ff5200]"
+              className="h-4 w-4 accent-devil-orange"
             />
             <span className="text-[#F5F1EA]">Enable Sale Mode</span>
           </label>
@@ -369,7 +499,7 @@ export default function PriceSettings() {
                       discount_type: e.target.value === "fixed" ? "fixed" : "percentage",
                     }))
                   }
-                  className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
                 >
                   <option value="percentage">Percentage (%)</option>
                   <option value="fixed">Fixed Amount (Rs.)</option>
@@ -387,7 +517,7 @@ export default function PriceSettings() {
                       discount_value: Number(e.target.value || 0),
                     }))
                   }
-                  className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
                 />
               </div>
               <div>
@@ -396,7 +526,7 @@ export default function PriceSettings() {
                   type="date"
                   value={saleSettings.start_date}
                   onChange={(e) => setSaleSettings((prev) => ({ ...prev, start_date: e.target.value }))}
-                  className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
                 />
               </div>
               <div>
@@ -405,7 +535,7 @@ export default function PriceSettings() {
                   type="date"
                   value={saleSettings.end_date}
                   onChange={(e) => setSaleSettings((prev) => ({ ...prev, end_date: e.target.value }))}
-                  className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
                 />
               </div>
             </div>
@@ -415,9 +545,9 @@ export default function PriceSettings() {
             type="button"
             onClick={saveSaleSettings}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#ff5200] px-4 py-2 text-white transition hover:bg-[#cc2200] disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#ff5200] to-[#cc2200] px-4 py-2 text-white transition hover:scale-105 disabled:opacity-50"
           >
-            <Save className="h-4 w-4" /> Save Sale Settings
+            <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save Sale Settings'}
           </button>
 
           {saleSettings.enabled ? (
@@ -435,7 +565,7 @@ export default function PriceSettings() {
 
       <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#14181F] p-6">
         <h2 className="mb-4 flex items-center gap-2 text-[16px] font-semibold text-[#F5F1EA]">
-          <Coins className="h-5 w-5 text-[#ff5200]" /> H Coins Settings
+          <Coins className="h-5 w-5 text-devil-orange" /> H Coins Settings
         </h2>
 
         <div className="mb-4 grid gap-4 md:grid-cols-2">
@@ -448,7 +578,7 @@ export default function PriceSettings() {
               onChange={(e) =>
                 setHCoinsSettings((prev) => ({ ...prev, coins_per_solo: Number(e.target.value || 0) }))
               }
-              className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+              className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
             />
           </div>
           <div>
@@ -460,21 +590,21 @@ export default function PriceSettings() {
               onChange={(e) =>
                 setHCoinsSettings((prev) => ({ ...prev, coins_per_duo: Number(e.target.value || 0) }))
               }
-              className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+              className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
             />
           </div>
-          <div>
-            <label className="mb-1 block text-sm text-[#A0A6AF]">Coins per Squad Booking</label>
-            <input
-              type="number"
-              min={0}
-              value={hCoinsSettings.coins_per_squad}
-              onChange={(e) =>
-                setHCoinsSettings((prev) => ({ ...prev, coins_per_squad: Number(e.target.value || 0) }))
-              }
-              className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
-            />
-          </div>
+              <div>
+                <label className="mb-1 block text-sm text-[#A0A6AF]">Coins per Squad Booking</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={hCoinsSettings.coins_per_squad}
+                  onChange={(e) =>
+                    setHCoinsSettings((prev) => ({ ...prev, coins_per_squad: Number(e.target.value || 0) }))
+                  }
+                  className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
+                />
+              </div>
           <div>
             <label className="mb-1 block text-sm text-[#A0A6AF]">Coins Needed for Free Session</label>
             <input
@@ -484,7 +614,7 @@ export default function PriceSettings() {
               onChange={(e) =>
                 setHCoinsSettings((prev) => ({ ...prev, coins_for_free_session: Number(e.target.value || 0) }))
               }
-              className="w-full rounded-lg border border-[#2A2F38] bg-[#050508] px-4 py-2 text-white outline-none focus:border-[#ff5200]"
+              className="w-full rounded-lg border border-[#2A2F38] bg-dark-bg px-4 py-2 text-white outline-none focus:border-devil-orange"
             />
           </div>
         </div>
@@ -493,9 +623,9 @@ export default function PriceSettings() {
           type="button"
           onClick={saveHCoinsSettings}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#ff5200] px-4 py-2 text-white transition hover:bg-[#cc2200] disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#ff5200] to-[#cc2200] px-4 py-2 text-white transition hover:scale-105 disabled:opacity-50"
         >
-          <Save className="h-4 w-4" /> Save H Coins Settings
+          <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save H Coins Settings'}
         </button>
       </div>
     </div>

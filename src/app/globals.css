@@ -13,15 +13,6 @@
 @import "@fontsource/rajdhani/600.css";
 @import "@fontsource/rajdhani/700.css";
 
-@theme {
-  --color-devil-orange: #ff5200;
-  --color-devil-red: #cc2200;
-  --color-ghost-teal: #00d4a0;
-  --color-dark-bg: #050508;
-  --color-card-bg: rgba(5, 5, 8, 0.8);
-  --color-border: rgba(255, 82, 0, 0.3);
-}
-
 @layer utilities {
   .font-title {
     font-family: "Bebas Neue", sans-serif;
@@ -403,6 +394,15 @@ html {
 
 .animate-pulse-text {
   animation: pulse-text 1.5s ease-in-out infinite;
+}
+
+/* Line clamp utility used by setup cards */
+.line-clamp-3 {
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ========== PRINT STYLES ========== */

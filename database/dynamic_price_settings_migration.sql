@@ -28,40 +28,27 @@ INSERT INTO price_settings (setup_id, session_type_id, base_price, current_price
 SELECT
   s.id AS setup_id,
   st.id AS session_type_id,
-  CASE
-    WHEN s.name = 'ps5' AND st.name = 'Solo' THEN 150
-    WHEN s.name = 'ps5' AND st.name = 'Duo' THEN 250
-    WHEN s.name = 'ps5' AND st.name = 'Squad' THEN 350
-    WHEN s.name = 'ps4' AND st.name = 'Solo' THEN 100
-    WHEN s.name = 'ps4' AND st.name = 'Duo' THEN 180
-    WHEN s.name = 'ps4' AND st.name = 'Squad' THEN 250
-    WHEN s.name = 'arcade' AND st.name = 'Solo' THEN 50
-    WHEN s.name = 'arcade' AND st.name = 'Duo' THEN 80
-    WHEN s.name = 'arcade' AND st.name = 'Squad' THEN 120
-    WHEN s.name = 'racing' AND st.name = 'Solo' THEN 50
-    WHEN s.name = 'racing' AND st.name = 'Duo' THEN 80
-    WHEN s.name = 'racing' AND st.name = 'Squad' THEN 150
-    ELSE COALESCE(ROUND(s.base_price * COALESCE(st.price_multiplier, 1.0))::INT, 0)
-  END AS base_price,
-  CASE
-    WHEN s.name = 'ps5' AND st.name = 'Solo' THEN 150
-    WHEN s.name = 'ps5' AND st.name = 'Duo' THEN 250
-    WHEN s.name = 'ps5' AND st.name = 'Squad' THEN 350
-    WHEN s.name = 'ps4' AND st.name = 'Solo' THEN 100
-    WHEN s.name = 'ps4' AND st.name = 'Duo' THEN 180
-    WHEN s.name = 'ps4' AND st.name = 'Squad' THEN 250
-    WHEN s.name = 'arcade' AND st.name = 'Solo' THEN 50
-    WHEN s.name = 'arcade' AND st.name = 'Duo' THEN 80
-    WHEN s.name = 'arcade' AND st.name = 'Squad' THEN 120
-    WHEN s.name = 'racing' AND st.name = 'Solo' THEN 50
-    WHEN s.name = 'racing' AND st.name = 'Duo' THEN 80
-    WHEN s.name = 'racing' AND st.name = 'Squad' THEN 150
-    ELSE COALESCE(ROUND(s.base_price * COALESCE(st.price_multiplier, 1.0))::INT, 0)
-  END AS current_price
-FROM setups s
-CROSS JOIN session_types st
-WHERE s.name IN ('ps5', 'ps4', 'arcade', 'racing')
-  AND st.name IN ('Solo', 'Duo', 'Squad')
+  seed.base_price,
+  seed.current_price
+FROM (
+  VALUES
+    ('ps5', 'Solo', 150, 150),
+    ('ps5', 'Duo', 250, 250),
+    ('ps5', 'Squad', 350, 350),
+    ('ps4', 'Solo', 100, 100),
+    ('ps4', 'Duo', 180, 180),
+    ('ps4', 'Squad', 250, 250),
+    ('arcade', 'Solo', 50, 50),
+    ('arcade', 'Duo', 80, 80),
+    ('arcade', 'Squad', 120, 120),
+    ('racing', '30 Minutes', 100, 100),
+    ('racing', '10 Laps', 100, 100)
+    ,('pc', 'Solo', 150, 150),
+    ('pc', 'Duo', 250, 250),
+    ('pc', 'Squad', 350, 350)
+) AS seed(setup_name, session_name, base_price, current_price)
+JOIN setups s ON s.name = seed.setup_name
+JOIN session_types st ON st.name = seed.session_name
 ON CONFLICT (setup_id, session_type_id)
 DO UPDATE SET
   base_price = EXCLUDED.base_price,

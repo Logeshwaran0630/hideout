@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { sendAdminAlertEmail, sendBookingConfirmationEmail } from "@/lib/email";
-import { calculateBookingPrice } from "@/lib/pricing";
+import { calculateBookingPrice, isRacingSessionType } from "@/lib/pricing";
 
 type BookingRequestBody = {
   setup_id?: string;
@@ -29,19 +29,8 @@ export async function POST(request: Request) {
     const body = (await request.json()) as BookingRequestBody;
     const { setup_id, time_slot_id, session_type_id, booking_date, calendar_event_id } = body;
 
-    if (!setup_id || !time_slot_id || !session_type_id || !isValidDate(booking_date)) {
+    if (!time_slot_id || !session_type_id || !isValidDate(booking_date)) {
       return NextResponse.json({ error: "Missing booking details" }, { status: 400 });
-    }
-
-    const { data: setup, error: setupError } = await supabase
-      .from("setups")
-      .select("id, name, display_name, base_price, max_players, is_active")
-      .eq("id", setup_id)
-      .eq("is_active", true)
-      .single();
-
-    if (setupError || !setup) {
-      return NextResponse.json({ error: "Invalid setup" }, { status: 400 });
     }
 
     const { data: sessionType, error: sessionError } = await supabase
@@ -54,8 +43,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid session type" }, { status: 400 });
     }
 
-    if (sessionType.max_players > setup.max_players) {
-      return NextResponse.json({ error: "Session type is not available for this setup" }, { status: 400 });
+    const isAllAccess = sessionType.name && sessionType.name.startsWith("All-Access");
+
+    let setup: any = null;
+    if (!isAllAccess) {
+      if (!setup_id) return NextResponse.json({ error: "Missing setup selection" }, { status: 400 });
+
+      const { data: setupData, error: setupError } = await supabase
+        .from("setups")
+        .select("id, name, display_name, base_price, max_players, is_active")
+        .eq("id", setup_id)
+        .eq("is_active", true)
+        .single();
+
+      if (setupError || !setupData) {
+        return NextResponse.json({ error: "Invalid setup" }, { status: 400 });
+      }
+
+      setup = setupData;
+
+      if (setup.name === "racing") {
+        if (!isRacingSessionType(sessionType.name)) {
+          return NextResponse.json({ error: "Session type is not available for this setup" }, { status: 400 });
+        }
+      } else if (sessionType.max_players > setup.max_players) {
+        return NextResponse.json({ error: "Session type is not available for this setup" }, { status: 400 });
+      }
     }
 
     const { data: timeSlot, error: slotError } = await supabase
@@ -68,27 +81,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid time slot" }, { status: 400 });
     }
 
-    const { data: dynamicPriceSetting } = await supabase
-      .from("price_settings")
-      .select("current_price")
-      .eq("setup_id", setup_id)
-      .eq("session_type_id", session_type_id)
-      .single();
+    let totalPrice: number;
+    let durationMinutes: number | null = null;
 
-    const totalPrice =
-      typeof dynamicPriceSetting?.current_price === "number"
-        ? dynamicPriceSetting.current_price
-        : calculateBookingPrice(setup, sessionType);
+    if (isAllAccess) {
+      // Use session type price directly for All-Access
+      totalPrice = sessionType.price_per_hour ?? 0;
+      durationMinutes = sessionType.name.includes("30min") ? 30 : 60;
+    } else {
+      const { data: dynamicPriceSetting } = await supabase
+        .from("price_settings")
+        .select("current_price")
+        .eq("setup_id", setup.id)
+        .eq("session_type_id", session_type_id)
+        .single();
+
+      totalPrice =
+        typeof dynamicPriceSetting?.current_price === "number"
+          ? dynamicPriceSetting.current_price
+          : calculateBookingPrice(setup, sessionType);
+    }
 
     const { data, error } = await supabase
       .from("bookings")
       .insert({
         user_id: user.id,
-        setup_id,
+        setup_id: isAllAccess ? null : setup?.id,
         time_slot_id,
         session_type_id,
         booking_date,
         player_count: sessionType.max_players,
+        duration_minutes: durationMinutes,
         total_price: totalPrice,
         calendar_event_id,
         status: "confirmed",
@@ -121,12 +144,14 @@ export async function POST(request: Request) {
       }
     }
 
-    await supabase.from("setup_status").upsert({
-      setup_id,
-      status: "booked",
-      current_booking_id: data.id,
-      updated_at: new Date().toISOString(),
-    });
+    if (!isAllAccess && setup) {
+      await supabase.from("setup_status").upsert({
+        setup_id: setup.id,
+        status: "booked",
+        current_booking_id: data.id,
+        updated_at: new Date().toISOString(),
+      });
+    }
 
     const { data: profile } = await supabase
       .from("users")

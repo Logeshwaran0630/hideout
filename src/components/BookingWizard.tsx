@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import SetupCard, { Setup } from "@/components/SetupCard";
 import SlotCard from "@/components/SlotCard";
 import GamingLoader from "@/components/GamingLoader";
-import { calculateBookingPrice } from "@/lib/pricing";
+import { calculateBookingPrice, isRacingSessionType } from "@/lib/pricing";
 import { createISTDateRange } from "@/lib/istTime";
 
 interface SessionType {
@@ -16,6 +16,7 @@ interface SessionType {
   name: string;
   max_players: number;
   h_coins_earned: number;
+  price_per_hour?: number;
   price_multiplier?: number | string | null;
   sort_order?: number;
 }
@@ -62,6 +63,9 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "confirmed">(1);
   const [selectedSetup, setSelectedSetup] = useState<Setup | null>(null);
   const [selectedSessionType, setSelectedSessionType] = useState<SessionType | null>(null);
+  const [bookingMode, setBookingMode] = useState<'setup' | 'allAccess'>('setup');
+  const [selectedDuration, setSelectedDuration] = useState<string>('');
+  const [allAccessPrices, setAllAccessPrices] = useState<any>({ '30min': { price: 200, coins: 10 }, '1hr': { price: 379, coins: 15 } });
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
@@ -87,12 +91,30 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   }, []);
 
   const eligibleSessionTypes = useMemo(() => {
+    if (bookingMode === 'allAccess') {
+      return sessionTypes.filter((s) => s.name.startsWith('All-Access'));
+    }
     if (!selectedSetup) return [];
-    return sessionTypes.filter((sessionType) => sessionType.max_players <= selectedSetup.max_players);
-  }, [selectedSetup, sessionTypes]);
+    if (selectedSetup.name === "racing") {
+      return sessionTypes.filter((sessionType) => isRacingSessionType(sessionType.name));
+    }
+
+    // For non-racing setups, show only Solo/Duo/Squad
+    return sessionTypes.filter((sessionType) =>
+      sessionType.name === 'Solo' || sessionType.name === 'Duo' || sessionType.name === 'Squad'
+    );
+  }, [bookingMode, selectedSetup, sessionTypes]);
 
   const totalPrice = useMemo(() => {
-    if (!selectedSetup || !selectedSessionType) return 0;
+    if (!selectedSessionType) return 0;
+
+    if (selectedSessionType.name.startsWith('All-Access')) {
+      // prefer values from all_access_settings table when available
+      const key = selectedSessionType.name.includes('30min') ? '30min' : '1hr';
+      return allAccessPrices[key]?.price ?? selectedSessionType.price_per_hour ?? 0;
+    }
+
+    if (!selectedSetup) return 0;
     const priceKey = `${selectedSetup.id}_${selectedSessionType.name}`;
     if (typeof currentPrices[priceKey] === "number") {
       return currentPrices[priceKey];
@@ -123,6 +145,24 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
 
     fetchPrices();
 
+    // fetch all-access prices
+    const fetchAllAccess = async () => {
+      try {
+        const { data } = await supabase.from('all_access_settings').select('*');
+        if (!isActive || !data) return;
+        const prices: any = { '30min': { price: 200, coins: 10 }, '1hr': { price: 379, coins: 15 } };
+        data.forEach((r: any) => {
+          if (r.duration_minutes === 30) prices['30min'] = { price: r.price, coins: r.h_coins_earned };
+          if (r.duration_minutes === 60) prices['1hr'] = { price: r.price, coins: r.h_coins_earned };
+        });
+        setAllAccessPrices(prices);
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    fetchAllAccess();
+
     return () => {
       isActive = false;
     };
@@ -135,7 +175,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   }, [dates, selectedDate, step]);
 
   useEffect(() => {
-    if (step !== 3 || !selectedSetup || !selectedDate) return;
+    if (step !== 3 || (!selectedSetup && bookingMode !== 'allAccess') || !selectedDate) return;
 
     let isActive = true;
 
@@ -156,11 +196,11 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
         return;
       }
 
-      const { data: bookingsData, error: bookingsError } = await supabase
-        .from("bookings")
-        .select("time_slot_id")
-        .eq("booking_date", selectedDate)
-        .eq("setup_id", selectedSetup.id);
+      let bookingsQuery = supabase.from("bookings").select("time_slot_id").eq("booking_date", selectedDate);
+      if (bookingMode !== 'allAccess') {
+        bookingsQuery = bookingsQuery.eq("setup_id", selectedSetup!.id);
+      }
+      const { data: bookingsData, error: bookingsError } = await bookingsQuery;
 
       if (bookingsError) {
         if (isActive) {
@@ -226,7 +266,9 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
               description: [
                 `Setup: ${selectedSetup.display_name}`,
                 `Session: ${selectedSessionType.name}`,
-                `Players: ${selectedSessionType.max_players}`,
+                selectedSetup.name === "racing"
+                  ? `Mode: ${selectedSessionType.name}`
+                  : `Players: ${selectedSessionType.max_players}`,
                 `Price: Rs. ${totalPrice}`,
                 `H-ID: ${profile?.h_id || "N/A"}`,
                 `Email: ${user.email}`,
@@ -249,7 +291,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          setup_id: selectedSetup.id,
+          setup_id: bookingMode === 'allAccess' ? null : selectedSetup?.id,
           session_type_id: selectedSessionType.id,
           time_slot_id: selectedSlot.id,
           booking_date: selectedDate,
@@ -289,15 +331,15 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
 
   const currentStepNumber = step === "confirmed" ? 4 : step;
 
-  if (step === "confirmed" && bookingResult && selectedSetup && selectedSessionType && selectedSlot) {
+  if (step === "confirmed" && bookingResult && (selectedSetup || bookingMode === 'allAccess') && selectedSessionType && selectedSlot) {
     return (
       <main className="min-h-screen bg-[#0A0F18] text-[#F5F1EA]">
         <Navbar />
         <section className="mx-auto flex max-w-4xl flex-col items-center px-6 py-16 text-center">
-          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-r from-[#FF4500] to-[#22C55E]">
+          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-r from-[#FF4500] to-[#22C55E]">
             <Check className="h-12 w-12 text-white" />
           </div>
-          <h1 className="mb-4 bg-gradient-to-r from-[#FF4500] to-[#22C55E] bg-clip-text font-heading text-5xl uppercase text-transparent">
+          <h1 className="mb-4 bg-linear-to-r from-[#FF4500] to-[#22C55E] bg-clip-text font-heading text-5xl uppercase text-transparent">
             YOU&apos;RE IN
           </h1>
           <p className="mb-8 text-[#A0A6AF]">Your slot is locked in. See you at The Hideout!</p>
@@ -331,7 +373,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-4 text-center">
               <Users className="mx-auto mb-2 h-5 w-5 text-[#FF5722]" />
               <div className="text-xs text-[#A0A6AF]">Setup</div>
-              <div className="text-sm font-semibold text-white">{selectedSetup.display_name}</div>
+              <div className="text-sm font-semibold text-white">{selectedSetup?.display_name ?? 'All-Access Pass'}</div>
             </div>
             <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-4 text-center">
               <Gift className="mx-auto mb-2 h-5 w-5 text-green-500" />
@@ -344,7 +386,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             <button
               type="button"
               onClick={() => router.push("/profile")}
-              className="rounded-xl bg-gradient-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 font-semibold text-white transition-transform hover:scale-105"
+              className="rounded-xl bg-linear-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 font-semibold text-white transition-transform hover:scale-105"
             >
               View My Bookings
             </button>
@@ -409,39 +451,137 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
         <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-6 md:p-8">
           {step === 1 ? (
             <div>
-              <h2 className="text-xl font-bold text-white">Choose your gaming setup</h2>
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                {setups.map((setup) => (
-                  <SetupCard
-                    key={setup.id}
-                    setup={setup}
-                    isSelected={selectedSetup?.id === setup.id}
-                    onSelect={() => {
-                      setSelectedSetup(setup);
-                      setSelectedSessionType(null);
-                      setSelectedSlot(null);
-                      setSelectedDate("");
-                    }}
-                  />
-                ))}
+              <h2 className="text-2xl font-bold text-white mb-4">How would you like to play?</h2>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <button
+                  onClick={() => setBookingMode('setup')}
+                  className={`p-6 rounded-2xl text-center transition-all ${
+                    bookingMode === 'setup'
+                      ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
+                      : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
+                  }`}
+                >
+                  <div className="text-4xl mb-3">🎮</div>
+                  <div className="text-xl font-bold mb-2">Specific Setup</div>
+                  <p className="text-sm opacity-80">Choose exact console or rig</p>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setBookingMode('allAccess');
+                    setSelectedSetup(null);
+                    setSelectedSessionType(null);
+                    setSelectedDuration('');
+                  }}
+                  className={`p-6 rounded-2xl text-center transition-all ${
+                    bookingMode === 'allAccess'
+                      ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
+                      : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
+                  }`}
+                >
+                  <div className="text-4xl mb-3">⏱️</div>
+                  <div className="text-xl font-bold mb-2">All-Access Pass</div>
+                  <p className="text-sm opacity-80">Pay by time, use any setup</p>
+                </button>
               </div>
+
+              {bookingMode === 'setup' ? (
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-4">Choose your gaming setup</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {setups
+                          .filter((s: any) => s.is_active !== false)
+                          .map((setup) => (
+                            <SetupCard
+                              key={setup.id}
+                              setup={setup}
+                              isSelected={selectedSetup?.id === setup.id}
+                              onSelect={() => {
+                                setSelectedSetup(setup);
+                                setSelectedSessionType(null);
+                                setSelectedSlot(null);
+                                setSelectedDate("");
+                              }}
+                            />
+                          ))}
+                      </div>
+                </div>
+              ) : (
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-4">Choose duration</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <button
+                      onClick={() => {
+                        setSelectedDuration('30min');
+                        const allAccess30 = sessionTypes.find((s) => s.name === 'All-Access - 30min');
+                        if (allAccess30) {
+                          setSelectedSessionType(allAccess30);
+                          setSelectedSetup(null);
+                          setBookingMode('allAccess');
+                        }
+                      }}
+                      className={`p-6 rounded-2xl text-center transition-all ${
+                        selectedDuration === '30min'
+                          ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
+                          : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
+                      }`}
+                    >
+                      <div className="text-3xl mb-2">⏱️ 30 Minutes</div>
+                      <div className="text-2xl font-bold">₹200</div>
+                      <p className="text-xs mt-2">+10 H Coins</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedDuration('1hr');
+                        const allAccess1hr = sessionTypes.find((s) => s.name === 'All-Access - 1hr');
+                        if (allAccess1hr) {
+                          setSelectedSessionType(allAccess1hr);
+                          setSelectedSetup(null);
+                          setBookingMode('allAccess');
+                        }
+                      }}
+                      className={`p-6 rounded-2xl text-center transition-all ${
+                        selectedDuration === '1hr'
+                          ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
+                          : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
+                      }`}
+                    >
+                      <div className="text-3xl mb-2">⏱️ 1 Hour</div>
+                      <div className="text-2xl font-bold">₹379</div>
+                      <p className="text-xs mt-2">+15 H Coins</p>
+                    </button>
+                  </div>
+                  <p className="text-sm text-[#A0A6AF] mt-4 text-center">🎮 Use any available setup (PS5, PS4, Arcade, Racing, PC)</p>
+                </div>
+              )}
+
               <button
                 type="button"
-                disabled={!selectedSetup}
+                disabled={
+                  (bookingMode === 'setup' && !selectedSetup) || (bookingMode === 'allAccess' && !selectedDuration)
+                }
                 onClick={() => setStep(2)}
-                className="mt-8 w-full rounded-lg bg-gradient-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                className="mt-8 w-full rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
               >
                 Continue
               </button>
             </div>
           ) : null}
 
-          {step === 2 && selectedSetup ? (
+          {step === 2 && (selectedSetup || bookingMode === 'allAccess') ? (
             <div>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Choose session type</h2>
-                  <p className="mt-1 text-sm text-[#A0A6AF]">{selectedSetup.display_name}</p>
+                  <h2 className="text-xl font-bold text-white">
+                    {selectedSetup.name === "racing" ? "How would you like to play?" : "Choose session type"}
+                  </h2>
+                  <p className="mt-1 text-sm text-[#A0A6AF]">
+                    {selectedSetup.name === "racing"
+                      ? "Time-based and lap-based race sessions"
+                      : selectedSetup.display_name}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -452,14 +592,26 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 </button>
               </div>
 
-              <div className="mt-5 grid gap-4 md:grid-cols-3">
+              <div className={`mt-5 grid gap-4 ${selectedSetup.name === "racing" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
                 {eligibleSessionTypes.map((sessionType) => {
                   const isSelected = selectedSessionType?.id === sessionType.id;
-                  const priceKey = `${selectedSetup.id}_${sessionType.name}`;
+                  const priceKey = `${selectedSetup?.id}_${sessionType.name}`;
                   const price =
-                    typeof currentPrices[priceKey] === "number"
+                    bookingMode === 'allAccess'
+                      ? sessionType.price_per_hour
+                      : typeof currentPrices[priceKey] === "number"
                       ? currentPrices[priceKey]
-                      : calculateBookingPrice(selectedSetup, sessionType);
+                      : calculateBookingPrice(selectedSetup as Setup, sessionType);
+                  const sessionDescription =
+                    bookingMode === 'allAccess'
+                      ? sessionType.name.includes('30min')
+                        ? '30 Minutes - All-Access'
+                        : '1 Hour - All-Access'
+                      : selectedSetup?.name === "racing"
+                      ? sessionType.name === "30 Minutes"
+                        ? "Timed race session"
+                        : "10 lap challenge"
+                      : `Up to ${sessionType.max_players} players`;
 
                   return (
                     <button
@@ -479,7 +631,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                         <div className="text-[18px] font-semibold text-[#F5F1EA]">{sessionType.name}</div>
                         <div className="font-heading text-[26px] uppercase text-[#FF4500]">Rs. {price}</div>
                       </div>
-                      <div className="mt-3 text-[13px] text-[#A0A6AF]">Up to {sessionType.max_players} players</div>
+                      <div className="mt-3 text-[13px] text-[#A0A6AF]">{sessionDescription}</div>
                       <div className="mt-2 text-[12px] text-[#22C55E]">+{sessionType.h_coins_earned} H Coins</div>
                     </button>
                   );
@@ -490,20 +642,20 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 type="button"
                 disabled={!selectedSessionType}
                 onClick={() => setStep(3)}
-                className="mt-8 w-full rounded-lg bg-gradient-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                className="mt-8 w-full rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
               >
                 Continue
               </button>
             </div>
           ) : null}
 
-          {step === 3 && selectedSetup && selectedSessionType ? (
+          {step === 3 && selectedSessionType && (selectedSetup || bookingMode === 'allAccess') ? (
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold text-white">Select date and time</h2>
                   <p className="mt-1 text-sm text-[#A0A6AF]">
-                    {selectedSetup.display_name} / {selectedSessionType.name} / Rs. {totalPrice}
+                    {bookingMode === 'allAccess' ? 'All-Access Pass' : selectedSetup?.display_name} / {selectedSessionType.name} / Rs. {totalPrice}
                   </p>
                 </div>
                 <button
@@ -596,7 +748,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   type="button"
                   disabled={!selectedSlot || loading}
                   onClick={() => setStep(4)}
-                  className="flex-1 rounded-lg bg-gradient-to-r from-[#FF4500] to-[#CC3700] px-5 py-2.5 font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                  className="flex-1 rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-5 py-2.5 font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
                 >
                   Review Booking
                 </button>
@@ -604,21 +756,31 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             </div>
           ) : null}
 
-          {step === 4 && selectedSetup && selectedSessionType && selectedSlot && selectedDate ? (
+          {step === 4 && selectedSessionType && selectedSlot && selectedDate && (selectedSetup || bookingMode === 'allAccess') ? (
             <div>
               <h2 className="text-xl font-bold text-white">Review your booking</h2>
 
               <div className="mt-6 rounded-xl border border-[#2A2F38] bg-[#14181F] p-6">
                 <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
                   <div className="text-[14px] text-[#A0A6AF]">Setup</div>
-                  <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">{selectedSetup.display_name}</div>
+                  <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">
+                    {selectedSessionType.name.startsWith('All-Access') ? '🎮 Any Setup (Switch freely)' : selectedSetup?.display_name}
+                  </div>
                 </div>
                 <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
                   <div className="text-[14px] text-[#A0A6AF]">Session</div>
                   <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">
-                    {selectedSessionType.name} ({selectedSessionType.max_players} players)
+                    {selectedSessionType.name.startsWith('All-Access')
+                      ? selectedSessionType.name.replace('All-Access - ', '')
+                      : `${selectedSessionType.name} (${selectedSessionType.max_players} players)`}
                   </div>
                 </div>
+                {selectedSessionType.name.startsWith('All-Access') && (
+                  <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
+                    <div className="text-[14px] text-[#A0A6AF]">Duration</div>
+                    <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">{selectedSessionType.name.includes('30min') ? '30 Minutes' : '1 Hour'}</div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
                   <div className="text-[14px] text-[#A0A6AF]">Date</div>
                   <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">{formatDateLabel(selectedDate)}</div>
@@ -636,6 +798,9 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
               <div className="mt-4 rounded-lg border border-[#FF4500]/20 bg-[#FF4500]/10 px-4 py-3 text-[13px] text-[#A0A6AF]">
                 <Sparkles className="mr-2 inline-block h-4 w-4 text-[#FF4500]" />
                 You&apos;ll earn {selectedSessionType.h_coins_earned} H Coins for this booking.
+                {selectedSessionType.name.startsWith('All-Access') && (
+                  <div className="text-xs text-[#A0A6AF] mt-2">🎮 You can use ANY available setup (PS5, PS4, Arcade, Racing, PC)</div>
+                )}
               </div>
 
               {error ? <div className="mt-4 rounded-lg border border-[#FF4500]/30 bg-[#FF4500]/10 px-4 py-3 text-[13px] text-[#FF4500]">{error}</div> : null}
@@ -652,7 +817,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   type="button"
                   onClick={confirmBooking}
                   disabled={loading}
-                  className="rounded-lg bg-gradient-to-r from-[#FF4500] to-[#CC3700] px-5 py-2.5 text-[14px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                  className="rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-5 py-2.5 text-[14px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">

@@ -19,7 +19,8 @@ VALUES
   ('ps5', 'PlayStation 5', 'NEXT-GEN', 'DualSense haptics, 4K @ 60fps, ray-traced worlds. Latest titles, always patched, always ready.', 'gamepad-2', 150, 4, 1),
   ('ps4', 'PlayStation 4', 'COUCH CO-OP', 'Classics that never aged - GTA V, God of War, FIFA nights. Two controllers, one couch, zero excuses.', 'gamepad-2', 100, 4, 2),
   ('arcade', 'Vintage Arcade', 'OG VIBES', 'Mortal Kombat, Street Fighter, Tekken on the original cabinet. Coin-op feel without the coins.', 'joystick', 50, 4, 3),
-  ('racing', 'Sim Racing Rig', 'FULL SEND', 'Force-feedback wheel, pedals, bucket seat. Forza, Gran Turismo, Assetto Corsa - feel every kerb.', 'gauge', 50, 2, 4)
+  ('racing', 'Sim Racing Rig', 'FULL SEND', 'Force-feedback wheel, pedals, bucket seat. Forza, Gran Turismo, Assetto Corsa - feel every kerb.', 'gauge', 100, 1, 4),
+  ('pc', 'PC Gaming', 'ULTIMATE RIG', 'High-performance gaming PC with RTX graphics, 240Hz monitor, mechanical keyboard, and precision mouse. Play Valorant, CS2, League of Legends, and more.', 'desktop-computer', 150, 4, 5)
 ON CONFLICT (name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
   badge = EXCLUDED.badge,
