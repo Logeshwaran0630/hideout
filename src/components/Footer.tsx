@@ -62,7 +62,7 @@ export default function Footer() {
             <div className="mt-4 space-y-3 text-sm text-white/60">
               <p>Chennai, Tamil Nadu</p>
               <p>Open 11 AM – Midnight</p>
-              <a href="mailto:info@thehideout.in" className="transition-colors hover:text-[#00d4a0]">
+              <a href="mailto:info@thehideout.in" className="transition-colors hover:text-[#ff5200]">
                 info@thehideout.in
               </a>
             </div>

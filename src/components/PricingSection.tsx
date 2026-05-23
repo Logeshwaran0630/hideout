@@ -44,9 +44,9 @@ export default function PricingSection() {
 
         <ScrollReveal delay={100}>
           <div className="mb-8 rounded-2xl border border-[rgba(255,82,0,0.18)] bg-card-bg p-8">
-            <p className="mb-2 text-sm uppercase tracking-wider text-white/45">Sessions Starting At</p>
+            <p className="mb-2 text-sm uppercase tracking-wider text-devil-orange">Sessions Starting At</p>
             <div className="mb-2 text-6xl font-bold text-devil-orange glow-orange md:text-7xl">₹{startingPrice}</div>
-            <p className="text-xl text-white mb-4">/onwards</p>
+            <p className="mb-4 text-xl text-devil-orange/80">/onwards</p>
             <p className="mx-auto max-w-md text-white/60">
               Pricing varies by station, group size, and time of day. For session bundles, group rates, and tournament packages — chat with us.
             </p>

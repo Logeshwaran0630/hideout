@@ -72,7 +72,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[rgba(255,82,0,0.16)] bg-[#050508]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[#1A1F28] bg-[rgba(5,5,8,0.95)] backdrop-blur-[12px]">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Logo - Fixed Size */}
         <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="The Hideout home">
@@ -85,17 +85,17 @@ export default function Navbar() {
               priority
             />
           </div>
-          <span className="hidden text-lg font-brand bg-gradient-to-r from-white to-[#ff5200] bg-clip-text text-transparent sm:inline">
+          <span className="hidden text-lg font-orbitron font-black bg-gradient-to-r from-white to-[#ff5200] bg-clip-text text-transparent sm:inline" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>
             THE HIDEOUT
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm font-accent uppercase tracking-[0.14em] text-[#FFFFFF]/90 md:flex">
+        <nav className="hidden items-center gap-8 text-sm font-sans font-semibold uppercase tracking-[0.12em] text-[#A0A6AF] md:flex">
           {links.map((link) => (
             <a
               key={link.label}
               href={link.href}
-              className="transition-colors duration-200 hover:text-[#00d4a0]"
+              className="transition-colors duration-300 hover:text-[#ff5200]"
             >
               {link.label}
             </a>
@@ -107,12 +107,12 @@ export default function Navbar() {
             <div className="h-8 w-20 animate-pulse rounded-lg bg-[rgba(255,255,255,0.05)]" />
           ) : user ? (
             <div className="flex items-center gap-3">
-              <div className="hidden items-center gap-2 rounded-full border border-[rgba(0,212,160,0.22)] bg-[rgba(0,212,160,0.08)] px-3 py-1.5 md:flex">
-                <Coins className="h-4 w-4 text-[#00d4a0]" />
-                <span className="font-mono text-sm text-[#00d4a0]">{hCoins}</span>
+              <div className="hidden items-center gap-2 rounded-md border border-[rgba(0,212,160,0.22)] bg-[rgba(0,212,160,0.08)] px-3 py-1.5 md:flex">
+                <Coins className="h-4 w-4 text-[#ff5200]" />
+                <span className="font-mono text-sm font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>{hCoins}</span>
               </div>
-              <div className="hidden items-center gap-2 rounded-full border border-[rgba(255,82,0,0.22)] bg-[rgba(255,82,0,0.08)] px-3 py-1.5 md:flex">
-                <span className="font-mono text-xs text-[#ff5200] glow-orange">{hId}</span>
+              <div className="hidden items-center gap-2 rounded-md border border-[rgba(255,82,0,0.3)] bg-[rgba(255,82,0,0.05)] px-3 py-1.5 md:flex">
+                <span className="hid-text text-xs">{hId}</span>
               </div>
               <Link
                 href="/profile"
@@ -135,7 +135,7 @@ export default function Navbar() {
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation menu"
             aria-expanded={open}
-            className="inline-flex items-center justify-center rounded-lg p-2 text-[#FFFFFF] transition-colors hover:text-[#00d4a0] md:hidden"
+            className="inline-flex items-center justify-center rounded-lg p-2 text-[#FFFFFF] transition-colors hover:text-[#ff5200] md:hidden"
           >
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -150,14 +150,14 @@ export default function Navbar() {
                 key={link.label}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="py-2 text-[#FFFFFF] hover:text-[#00d4a0]"
+                className="py-2 text-[#FFFFFF] hover:text-[#ff5200]"
               >
                 {link.label}
               </a>
             ))}
 
             {user && (
-              <Link href="/profile" onClick={() => setOpen(false)} className="py-2 text-[#FFFFFF] hover:text-[#00d4a0]">
+              <Link href="/profile" onClick={() => setOpen(false)} className="py-2 text-[#FFFFFF] hover:text-[#ff5200]">
                 My Profile
               </Link>
             )}

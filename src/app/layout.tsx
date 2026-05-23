@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-dark-bg text-white">
+      <body className="min-h-full flex flex-col bg-[#050508] text-white font-sans">
         <SiteEffects />
         <div className="relative z-10 flex min-h-full flex-col">{children}</div>
       </body>

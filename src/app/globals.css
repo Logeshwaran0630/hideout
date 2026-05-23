@@ -1,170 +1,47 @@
 @import "tailwindcss";
 @import "@fontsource/orbitron/900.css";
 @import "@fontsource/cinzel/400.css";
-@import "@fontsource/cinzel/500.css";
-@import "@fontsource/bebas-neue/400.css";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/space-grotesk/400.css";
-@import "@fontsource/space-grotesk/500.css";
-@import "@fontsource/space-grotesk/600.css";
-@import "@fontsource/rajdhani/400.css";
-@import "@fontsource/rajdhani/600.css";
-@import "@fontsource/rajdhani/700.css";
+@import "@fontsource/cinzel/600.css";
+@import "@fontsource/nunito-sans/400.css";
+@import "@fontsource/nunito-sans/600.css";
+@import "@fontsource/nunito-sans/700.css";
+@import "@fontsource/jetbrains-mono/700.css";
 
-@layer utilities {
-  .font-title {
-    font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 1px;
-  }
+/* ========== BRAND CSS VARIABLES ========== */
 
-  .font-brand {
-    font-family: "Orbitron", sans-serif;
-    font-weight: 900;
-    letter-spacing: 1px;
-  }
-
-  .font-tagline {
-    font-family: "Cinzel", serif;
-    font-weight: 500;
-    letter-spacing: 2px;
-  }
-
-  .font-body {
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-  }
-
-  .font-body-medium {
-    font-family: "Inter", sans-serif;
-    font-weight: 500;
-  }
-
-  .font-accent {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-  }
-
-  .font-accent-bold {
-    font-family: "Space Grotesk", sans-serif;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-
-  .font-heading {
-    font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 1px;
-  }
-
-  .font-orbitron {
-    font-family: "Orbitron", sans-serif;
-    font-weight: 900;
-    letter-spacing: 1px;
-  }
-
-  .font-cinzel {
-    font-family: "Cinzel", serif;
-    font-weight: 500;
-    letter-spacing: 2px;
-  }
-
-  .font-rajdhani {
-    font-family: "Rajdhani", sans-serif;
-    font-weight: 400;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #ff5200 0%, #cc2200 100%);
-    clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
-    transition: all 0.3s ease;
-    font-family: "Rajdhani", sans-serif;
-    letter-spacing: 1px;
-  }
-
-  .btn-primary:hover {
-    background: linear-gradient(135deg, #ff6600 0%, #ff3300 100%);
-    box-shadow: 0 0 20px rgba(255, 82, 0, 0.5);
-    transform: translateY(-2px);
-  }
-
-  .btn-secondary {
-    background: transparent;
-    border: 1.5px solid #00d4a0;
-    color: #00d4a0;
-    clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
-    transition: all 0.3s ease;
-    font-family: "Rajdhani", sans-serif;
-    letter-spacing: 1px;
-  }
-
-  .btn-secondary:hover {
-    background: rgba(0, 212, 160, 0.1);
-    box-shadow: 0 0 20px rgba(0, 212, 160, 0.3);
-  }
-
-  .glow-teal {
-    box-shadow: 0 0 30px rgba(0, 212, 160, 0.3);
-  }
-
-  .glow-orange {
-    text-shadow: 0 0 15px rgba(255, 82, 0, 0.5);
-  }
-
-  .glow-box {
-    box-shadow: 0 0 24px rgba(255, 82, 0, 0.35);
-  }
-
-  .card-premium {
-    background: rgba(5, 5, 8, 0.8);
-    border: 1px solid rgba(255, 82, 0, 0.18);
-    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .card-premium:hover {
-    border-color: rgba(255, 82, 0, 0.45);
-    box-shadow: 0 0 30px rgba(255, 82, 0, 0.1);
-    transform: translateY(-2px);
-  }
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background: #050508;
-  color: #ffffff;
-  font-family: "Inter", sans-serif;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #050508;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #ff5200;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #00d4a0;
-}
-
-::selection {
-  background: rgba(255, 82, 0, 0.3);
-  color: #ffffff;
-}
-
-/* ========== RESPONSIVE UTILITIES ========== */
-
-/* Fluid Typography - Mobile First */
 :root {
+  /* Brand */
+  --devil: #ff5200;
+  --devil-dark: #cc2200;
+  --devil-light: #ff6600;
+  --devil-glow: rgba(255, 82, 0, 0.3);
+  --devil-soft: rgba(255, 82, 0, 0.1);
+  --devil-border: rgba(255, 82, 0, 0.3);
+
+  /* Backgrounds */
+  --bg-main: #050508;
+  --bg-card: #0A0F18;
+  --bg-border: #1A1F28;
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A6AF;
+  --text-muted: #6B7280;
+
+  /* Status */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info-cyan: #00d4a0;
+  --info-blue: #3B82F6;
+
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, #ff5200 0%, #cc2200 100%);
+  --grad-hover: linear-gradient(135deg, #ff6600 0%, #ff3300 100%);
+  --grad-progress: linear-gradient(90deg, #ff5200 0%, #ff6600 50%, #cc2200 100%);
+  --grad-card-hover: linear-gradient(135deg, rgba(255,82,0,0.05) 0%, rgba(204,34,0,0.05) 100%);
+
+  /* Fluid Typography */
   --font-size-base: 16px;
   --font-size-sm: 0.875rem;
   --font-size-lg: 1.125rem;
@@ -183,21 +60,34 @@ body {
   }
 }
 
-/* Touch-friendly tap targets */
-button, 
-a,
-[role="button"],
-input[type="button"],
-input[type="submit"] {
-  min-height: 44px;
-  min-width: 44px;
+/* ========== GLOBAL BASE STYLES ========== */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
 }
 
-/* Prevent horizontal scroll on mobile */
 body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Nunito Sans', sans-serif;
   overflow-x: hidden;
   width: 100%;
   position: relative;
+}
+
+/* Headings use Orbitron */
+h1, h2, h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+}
+
+a {
+  color: var(--text-primary);
+}
+
+a:hover {
+  color: var(--devil);
 }
 
 img, video, canvas {
@@ -206,103 +96,179 @@ img, video, canvas {
   display: block;
 }
 
-/* Update scroll padding for fixed navbar */
-html {
-  scroll-padding-top: 80px;
+/* Touch-friendly tap targets */
+button,
+a,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
 }
 
-/* ========== SCROLL ANIMATIONS ========== */
+/* ========== CUSTOM SCROLLBAR ========== */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050508;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff5200, #cc2200);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6600;
+}
+
+::selection {
+  background: rgba(255, 82, 0, 0.3);
+  color: #ffffff;
+}
+
+/* ========== INPUT FIELDS & FORMS ========== */
+
+input,
+textarea,
+select {
+  background: #0A0F18;
+  border: 1px solid #1A1F28;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #FFFFFF;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #ff5200;
+  box-shadow: 0 0 0 3px rgba(255, 82, 0, 0.1);
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6B7280;
+}
+
+label {
+  color: var(--text-secondary);
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* ========== ACCESSIBILITY ========== */
+
+*:focus-visible {
+  outline: 2px solid #ff5200;
+  outline-offset: 2px;
+}
+
+:disabled,
+[disabled] {
+  color: #6B7280;
+  background: #1A1F28;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 82, 0, 0); }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { text-shadow: 0 0 8px rgba(255, 82, 0, 0.3); }
+  50% { text-shadow: 0 0 20px rgba(255, 82, 0, 0.7), 0 0 40px rgba(255, 82, 0, 0.3); }
+}
 
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slide-out-right {
-  to {
-    opacity: 0;
-    transform: translateX(100px);
+  to { opacity: 0; transform: translateX(100px); }
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(255, 69, 0, 0);
   }
 }
 
-/* Animation Classes */
-.animate-fade-up {
-  animation: fade-up 0.6s ease-out forwards;
+@keyframes joystick-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out forwards;
+@keyframes pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
-.animate-scale-in {
-  animation: scale-in 0.4s ease-out forwards;
-}
+/* ========== ANIMATION CLASSES ========== */
 
-.animate-slide-left {
-  animation: slide-in-left 0.5s ease-out forwards;
-}
-
-.animate-slide-right {
-  animation: slide-in-right 0.5s ease-out forwards;
-}
-
-.animate-slide-out-right {
-  animation: slide-out-right 0.3s ease-in forwards;
-}
+.animate-fade-up { animation: fade-up 0.6s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+.animate-scale-in { animation: scale-in 0.4s ease-out forwards; }
+.animate-slide-left { animation: slide-in-left 0.5s ease-out forwards; }
+.animate-slide-right { animation: slide-in-right 0.5s ease-out forwards; }
+.animate-slide-out-right { animation: slide-out-right 0.3s ease-in forwards; }
+.animate-spin-slow { animation: spin 1s linear infinite; }
+.animate-pulse-glow { animation: pulse-glow 0.8s ease-out; }
+.animate-pulse-text { animation: pulse-text 1.5s ease-in-out infinite; }
+.joystick-spin { animation: joystick-spin 2s linear infinite; }
 
 /* Stagger children animations */
-.stagger-children > * {
-  opacity: 0;
-}
-
+.stagger-children > * { opacity: 0; }
 .stagger-children.animate > *:nth-child(1) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0s; }
 .stagger-children.animate > *:nth-child(2) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.1s; }
 .stagger-children.animate > *:nth-child(3) { animation: fade-up 0.5s ease-out forwards; animation-delay: 0.2s; }
@@ -322,87 +288,271 @@ html {
   }
 }
 
-/* ========== LOADING SKELETON ========== */
+/* ========== TAILWIND UTILITY LAYER ========== */
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    #14181F 0%,
-    #2A2F38 50%,
-    #14181F 100%
-  );
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-}
+@layer utilities {
 
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
+  /* ---- Font Utilities ---- */
+
+  .font-brand,
+  .font-orbitron {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    letter-spacing: 1px;
   }
-  100% {
-    background-position: -200% 0;
+
+  .font-tagline,
+  .font-cinzel {
+    font-family: "Cinzel", serif;
+    font-weight: 400;
+    letter-spacing: 0.15em;
   }
-}
 
-/* Loading spinner animation */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+  .font-title,
+  .font-heading {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    letter-spacing: 1px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .font-body {
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 400;
   }
-}
 
-.animate-spin-slow {
-  animation: spin 1s linear infinite;
-}
-
-/* Pulse glow for success animation */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.8;
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.4);
+  .font-body-medium {
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 500;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-    box-shadow: 0 0 0 15px rgba(255, 69, 0, 0);
+
+  .font-accent {
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
   }
-}
 
-.animate-pulse-glow {
-  animation: pulse-glow 0.8s ease-out;
-}
+  .font-accent-bold {
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
 
-/* Joystick spin animation */
-@keyframes joystick-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+  .font-sans {
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 400;
+  }
 
-.joystick-spin {
-  animation: joystick-spin 2s linear infinite;
-}
+  .font-mono,
+  .font-jetbrains {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+  }
 
-/* Pulsing text */
-@keyframes pulse-text {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
+  /* ---- Button Styles ---- */
 
-.animate-pulse-text {
-  animation: pulse-text 1.5s ease-in-out infinite;
-}
+  .btn-primary {
+    background: linear-gradient(135deg, #ff5200 0%, #cc2200 100%);
+    color: #FFFFFF;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-/* Line clamp utility used by setup cards */
-.line-clamp-3 {
-  display: -webkit-box;
-  line-clamp: 3;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #ff6600 0%, #ff3300 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(255, 82, 0, 0.4), 0 0 20px rgba(255, 82, 0, 0.2);
+  }
+
+  .btn-secondary,
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid #ff5200;
+    color: #ff5200;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-secondary:hover,
+  .btn-outline:hover {
+    background: rgba(255, 82, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 82, 0, 0.2);
+  }
+
+  .btn-danger {
+    background: transparent;
+    border: 1.5px solid #EF4444;
+    color: #EF4444;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  /* ---- Glow Effects ---- */
+
+  .glow-teal {
+    box-shadow: 0 0 30px rgba(255, 82, 0, 0.3);
+  }
+
+  .glow-orange {
+    text-shadow: 0 0 12px rgba(255, 82, 0, 0.5), 0 0 40px rgba(255, 82, 0, 0.2);
+  }
+
+  .glow-box {
+    box-shadow: 0 0 24px rgba(255, 82, 0, 0.35);
+  }
+
+  .text-devil {
+    color: #ff5200 !important;
+  }
+
+  .glow-devil {
+    text-shadow: 0 0 8px rgba(255, 82, 0, 0.3), 0 0 16px rgba(255, 82, 0, 0.15) !important;
+  }
+
+  .border-devil {
+    border-color: #ff5200 !important;
+  }
+
+  .bg-devil-gradient {
+    background: linear-gradient(135deg, #ff5200 0%, #cc2200 100%) !important;
+  }
+
+  /* ---- Numeric / Code Text ---- */
+
+  .price-text {
+    color: #ff5200 !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-weight: 700 !important;
+  }
+
+  .hid-text,
+  .h-id,
+  .booking-code {
+    color: #ff5200 !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 8px rgba(255, 82, 0, 0.3), 0 0 16px rgba(255, 82, 0, 0.15) !important;
+    animation: glow-breathe 3s ease-in-out infinite;
+  }
+
+  /* ---- Card Styles ---- */
+
+  .card-premium {
+    background: #0A0F18;
+    border: 1px solid #1A1F28;
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .card-premium:hover {
+    border-color: rgba(255, 82, 0, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 0 30px rgba(255, 82, 0, 0.08);
+    background: linear-gradient(135deg, rgba(255,82,0,0.05) 0%, rgba(204,34,0,0.05) 100%);
+  }
+
+  .selected-card {
+    border: 2px solid #ff5200 !important;
+    background: rgba(255, 82, 0, 0.05) !important;
+    box-shadow: 0 0 20px rgba(255, 82, 0, 0.15) !important;
+    animation: pulse 2s infinite;
+  }
+
+  .selected-slot {
+    border: 2px solid #ff5200 !important;
+    background: rgba(255, 82, 0, 0.08) !important;
+    box-shadow: 0 0 0 2px rgba(255, 82, 0, 0.2) !important;
+    animation: pulse 2s infinite;
+  }
+
+  /* ---- Status Badges ---- */
+
+  .badge-success {
+    color: #22C55E;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .badge-warning {
+    color: #F59E0B;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .badge-error {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .badge-active {
+    color: #ff5200;
+    background: rgba(255, 82, 0, 0.1);
+    border: 1px solid rgba(255, 82, 0, 0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  /* ---- Skeleton ---- */
+
+  .skeleton {
+    background: linear-gradient(90deg, #14181F 0%, #2A2F38 50%, #14181F 100%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+  }
+
+  /* ---- Line Clamp ---- */
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 
 /* ========== PRINT STYLES ========== */
@@ -414,12 +564,12 @@ html {
   a[href^="#"] {
     display: none !important;
   }
-  
+
   body {
     background: white;
     color: black;
   }
-  
+
   a {
     text-decoration: underline;
     color: black;

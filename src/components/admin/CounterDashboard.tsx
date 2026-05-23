@@ -357,22 +357,22 @@ export default function CounterDashboard({
   }
 
   const tabButtonClass = (tab: TabKey) =>
-    `flex items-center gap-2 rounded-lg px-4 py-2 transition ${activeTab === tab ? "bg-[#FF4500] text-white" : "text-[#A0A6AF] hover:text-white"}`;
+    `flex items-center gap-2 rounded-lg px-4 py-2 transition ${activeTab === tab ? "bg-[#ff5200] text-white" : "text-[#A0A6AF] hover:text-white"}`;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF4500]">COUNTER SYSTEM</div>
+          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#ff5200]">COUNTER SYSTEM</div>
           <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#F5F1EA]">LIVE COUNTER</h1>
           <div className="mt-2 text-[14px] text-[#A0A6AF]">Operational dashboard for walk-ins, phone bookings, arrivals, and setup availability</div>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button type="button" onClick={() => void refreshLiveData()} className="flex items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#14181F] px-4 py-2 text-sm font-medium text-[#F5F1EA] transition hover:border-[#FF4500]">
+          <button type="button" onClick={() => void refreshLiveData()} className="flex items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#14181F] px-4 py-2 text-sm font-medium text-[#F5F1EA] transition hover:border-[#ff5200]">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Refresh Live Data
           </button>
-          <button type="button" onClick={() => router.push("/admin/bookings")} className="flex items-center gap-2 rounded-lg bg-[#FF4500] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#E03E00]">
+          <button type="button" onClick={() => router.push("/admin/bookings")} className="flex items-center gap-2 rounded-lg bg-[#ff5200] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#cc2200]">
             <Ticket className="h-4 w-4" />
             All Bookings
           </button>
@@ -381,7 +381,7 @@ export default function CounterDashboard({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Paid Today" value={formatMoney(totals.paidToday)} icon={Clock3} tone="text-[#4ADE80]" />
-        <MetricCard label="Arrived" value={totals.arrived} icon={CheckCircle2} tone="text-[#FF4500]" />
+        <MetricCard label="Arrived" value={totals.arrived} icon={CheckCircle2} tone="text-[#ff5200]" />
         <MetricCard label="Free Setups" value={totals.freeSetups} icon={Gamepad2} tone="text-[#60A5FA]" />
         <MetricCard label="Waiting" value={totals.waiting} icon={Users} tone="text-[#FACC15]" />
       </div>
@@ -421,7 +421,7 @@ export default function CounterDashboard({
               <tbody>
                 {bookings.length ? bookings.map((booking) => (
                   <tr key={booking.id} className="border-t border-[#2A2F38] text-[14px] text-[#F5F1EA]">
-                    <td className="px-4 py-3 font-mono text-[#FF4500]">{booking.booking_code}</td>
+                    <td className="px-4 py-3 font-mono text-[#ff5200]">{booking.booking_code}</td>
                     <td className="px-4 py-3">{booking.time_slots?.label || "-"}</td>
                     <td className="px-4 py-3">
                       <div>{booking.guest_name || booking.users?.display_name || booking.users?.email || "Customer"}</div>
@@ -463,7 +463,7 @@ export default function CounterDashboard({
             <SelectField label="Time Slot" value={walkInForm.timeSlotId} onChange={(value) => setWalkInForm({ ...walkInForm, timeSlotId: value })} options={timeSlots.map((slot) => ({ value: slot.id, label: slot.label }))} />
             <SelectField label="Payment Mode" value={walkInForm.paymentMode} onChange={(value) => setWalkInForm({ ...walkInForm, paymentMode: value })} options={[{ value: "cash", label: "Cash" }, { value: "upi", label: "UPI" }]} />
           </div>
-          <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[#FF4500] px-5 py-3 font-semibold text-white transition hover:bg-[#E03E00]">
+          <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[#ff5200] px-5 py-3 font-semibold text-white transition hover:bg-[#cc2200]">
             <UserPlus className="h-4 w-4" /> Create Walk-in Booking
           </button>
         </form>
@@ -474,14 +474,14 @@ export default function CounterDashboard({
           <h2 className="font-heading text-[28px] uppercase text-[#F5F1EA]">PHONE BOOKING</h2>
           <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
             <Field label="Lookup by H-ID or phone" value={lookupQuery} onChange={setLookupQuery} placeholder="HID-000123 or 9876543210" />
-            <button type="button" onClick={() => void handleLookup()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-5 py-3 text-[#F5F1EA] transition hover:border-[#FF4500]">
+            <button type="button" onClick={() => void handleLookup()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-5 py-3 text-[#F5F1EA] transition hover:border-[#ff5200]">
               <Search className="h-4 w-4" /> Find Customer
             </button>
           </div>
 
           {lookupUser ? (
             <div className="rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-4 text-sm text-[#A0A6AF]">
-              Found: <span className="text-[#F5F1EA]">{lookupUser.display_name || lookupUser.email || "Customer"}</span> · <span className="font-mono text-[#FF4500]">{lookupUser.h_id || lookupUser.phone || "No reference"}</span>
+              Found: <span className="text-[#F5F1EA]">{lookupUser.display_name || lookupUser.email || "Customer"}</span> · <span className="font-mono text-[#ff5200]">{lookupUser.h_id || lookupUser.phone || "No reference"}</span>
             </div>
           ) : null}
 
@@ -494,7 +494,7 @@ export default function CounterDashboard({
               <Field label="Notes" value={phoneBookingForm.notes} onChange={(value) => setPhoneBookingForm({ ...phoneBookingForm, notes: value })} placeholder="Optional notes for the counter" />
             </div>
             <div className="md:col-span-2">
-              <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[#FF4500] px-5 py-3 font-semibold text-white transition hover:bg-[#E03E00]">
+              <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[#ff5200] px-5 py-3 font-semibold text-white transition hover:bg-[#cc2200]">
                 <Phone className="h-4 w-4" /> Create Phone Booking
               </button>
             </div>
@@ -511,7 +511,7 @@ export default function CounterDashboard({
             <Field label="Preferred Setup" value={waitlistForm.preferredSetup} onChange={(value) => setWaitlistForm({ ...waitlistForm, preferredSetup: value })} placeholder="PS5 / Racing / Any" />
             <Field label="Party Size" type="number" value={String(waitlistForm.partySize)} onChange={(value) => setWaitlistForm({ ...waitlistForm, partySize: parseInt(value || "1", 10) || 1 })} />
             <Field label="Notes" value={waitlistForm.notes} onChange={(value) => setWaitlistForm({ ...waitlistForm, notes: value })} />
-            <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[#FF4500] px-5 py-3 font-semibold text-white transition hover:bg-[#E03E00]">Add to Waitlist</button>
+            <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-[#ff5200] px-5 py-3 font-semibold text-white transition hover:bg-[#cc2200]">Add to Waitlist</button>
           </form>
 
           <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#14181F] p-6">
@@ -526,7 +526,7 @@ export default function CounterDashboard({
                     <div>
                       <div className="font-medium text-[#F5F1EA]">{entry.customer_name}</div>
                       <div className="text-xs text-[#A0A6AF]">{entry.customer_phone || "No phone"}</div>
-                      <div className="mt-1 text-xs text-[#FF4500]">{entry.preferred_setup || "Any setup"} · {entry.party_size} player(s)</div>
+                      <div className="mt-1 text-xs text-[#ff5200]">{entry.preferred_setup || "Any setup"} · {entry.party_size} player(s)</div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button type="button" onClick={() => void updateWaitlist(entry.id, "notified")} className="rounded-md bg-blue-500/20 px-3 py-1 text-xs text-blue-400 transition hover:bg-blue-500/30">Notify</button>
@@ -570,7 +570,7 @@ export default function CounterDashboard({
               <SelectField label="New Time Slot" value={rescheduleTimeSlotId} onChange={setRescheduleTimeSlotId} options={timeSlots.map((slot) => ({ value: slot.id, label: slot.label }))} />
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setRescheduleTarget(null)} className="flex-1 rounded-xl border border-[#2A2F38] px-4 py-3 text-[#A0A6AF]">Cancel</button>
-                <button type="submit" className="flex-1 rounded-xl bg-[#FF4500] px-4 py-3 font-semibold text-white">Save</button>
+                <button type="submit" className="flex-1 rounded-xl bg-[#ff5200] px-4 py-3 font-semibold text-white">Save</button>
               </div>
             </div>
           </form>
@@ -601,7 +601,7 @@ function Field({ label, value, onChange, placeholder, type = "text" }: { label: 
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 text-[#F5F1EA] outline-none focus:border-[#FF4500]"
+        className="w-full rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 text-[#F5F1EA] outline-none focus:border-[#ff5200]"
       />
     </label>
   );
@@ -614,7 +614,7 @@ function SelectField({ label, value, onChange, options }: { label: string; value
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 text-[#F5F1EA] outline-none focus:border-[#FF4500]"
+        className="w-full rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 text-[#F5F1EA] outline-none focus:border-[#ff5200]"
       >
         <option value="">Select {label}</option>
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}

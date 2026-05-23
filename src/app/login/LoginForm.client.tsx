@@ -134,7 +134,7 @@ export default function LoginForm() {
   }
 
   const inputClass =
-    "w-full rounded-lg bg-[#0A0F18] border border-[#2A2F38] px-4 py-3 text-white placeholder:text-[#6B7280] focus:border-[#FF4500] focus:shadow-[0_0_0_3px_rgba(255,69,0,0.15)] outline-none transition";
+    "w-full rounded-lg bg-[#0A0F18] border border-[#2A2F38] px-4 py-3 text-white placeholder:text-[#6B7280] focus:border-[#ff5200] focus:shadow-[0_0_0_3px_rgba(255,82,0,0.15)] outline-none transition";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0A0F18] flex items-center justify-center px-6 py-12">
@@ -142,20 +142,20 @@ export default function LoginForm() {
       <motion.div
         animate={{ y: [0, -12, 0] }}
         transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#FF4500]/20 blur-[120px] will-change-transform pointer-events-none"
+        className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#ff5200]/20 blur-[120px] will-change-transform pointer-events-none"
       />
       <motion.div
         animate={{ y: [0, 14, 0] }}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-1/3 right-1/4 h-80 w-80 rounded-full bg-[#FF5722]/12 blur-[100px] will-change-transform pointer-events-none"
+        className="absolute bottom-1/3 right-1/4 h-80 w-80 rounded-full bg-[#cc2200]/12 blur-[100px] will-change-transform pointer-events-none"
       />
       <motion.div
         animate={{ scale: [1, 1.05, 1] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF4500]/8 blur-[130px] will-change-transform pointer-events-none"
+        className="absolute top-1/2 left-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff5200]/8 blur-[130px] will-change-transform pointer-events-none"
       />
       {/* Grid overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,69,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,69,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,82,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,82,0,0.03)_1px,transparent_1px)] bg-size-[50px_50px] pointer-events-none" />
 
       {/* Card */}
       <motion.div
@@ -186,7 +186,7 @@ export default function LoginForm() {
               onClick={() => { setTab("signin"); setError(null); }}
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${
                 tab === "signin"
-                  ? "bg-[#FF4500] text-white shadow-[0_0_12px_rgba(255,69,0,0.4)]"
+                  ? "bg-[#ff5200] text-white shadow-[0_0_12px_rgba(255,82,0,0.4)]"
                   : "text-[#A0A6AF] hover:text-white"
               }`}
             >
@@ -196,7 +196,7 @@ export default function LoginForm() {
               onClick={() => { setTab("signup"); setError(null); }}
               className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${
                 tab === "signup"
-                  ? "bg-[#FF4500] text-white shadow-[0_0_12px_rgba(255,69,0,0.4)]"
+                  ? "bg-[#ff5200] text-white shadow-[0_0_12px_rgba(255,82,0,0.4)]"
                   : "text-[#A0A6AF] hover:text-white"
               }`}
             >
@@ -249,7 +249,7 @@ export default function LoginForm() {
                       <button
                         type="button"
                         onClick={() => setResetView(true)}
-                        className="text-sm text-[#FF4500] hover:text-[#FF5722] transition"
+                        className="text-sm text-[#ff5200] hover:text-[#cc2200] transition"
                       >
                         Forgot password?
                       </button>
@@ -352,15 +352,15 @@ export default function LoginForm() {
                           : confirm
                           ? "border-[#4ADE80]"
                           : "border-[#2A2F38]"
-                      } px-4 py-3 text-white placeholder:text-[#6B7280] focus:border-[#FF4500] outline-none transition`}
+                      } px-4 py-3 text-white placeholder:text-[#6B7280] focus:border-[#ff5200] outline-none transition`}
                     />
                     {confirm && confirm !== password && (
                       <div className="text-xs text-[#EF4444] mt-1">Passwords don't match</div>
                     )}
                   </div>
 
-                  <div className="rounded-lg bg-[#FF4500]/8 border border-[#FF4500]/20 p-3 flex items-center gap-2 text-sm text-[#A0A6AF]">
-                    <Sparkles className="h-4 w-4 text-[#FF4500] shrink-0" />
+                    <div className="rounded-lg bg-[#ff5200]/8 border border-[#ff5200]/20 p-3 flex items-center gap-2 text-sm text-[#A0A6AF]">
+                    <Sparkles className="h-4 w-4 text-[#ff5200] shrink-0" />
                     Your unique H-ID will be generated automatically when you sign up.
                   </div>
 
@@ -427,7 +427,7 @@ export default function LoginForm() {
                     <button
                       type="button"
                       onClick={() => { setResetView(false); setResetSent(false); }}
-                      className="text-sm text-[#FF4500] hover:text-[#FF5722] transition"
+                      className="text-sm text-[#ff5200] hover:text-[#cc2200] transition"
                     >
                       ← Back to Sign In
                     </button>
@@ -451,7 +451,7 @@ export default function LoginForm() {
                       <button
                         type="button"
                         onClick={() => setResetView(false)}
-                        className="text-[#FF4500] hover:text-[#FF5722] transition"
+                        className="text-[#ff5200] hover:text-[#cc2200] transition"
                       >
                         ← Back to Sign In
                       </button>

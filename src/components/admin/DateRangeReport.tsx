@@ -339,7 +339,7 @@ export default function DateRangeReport() {
             <SummaryCard icon={Wallet} label="Cash" value={`₹${report.summary.cashTotal.toLocaleString("en-IN")}`} tone="text-blue-500" />
             <SummaryCard icon={Landmark} label="UPI" value={`₹${report.summary.upiTotal.toLocaleString("en-IN")}`} tone="text-cyan-500" />
             <SummaryCard icon={Clock} label="Pending" value={`₹${report.summary.pendingAmount.toLocaleString("en-IN")}`} tone="text-yellow-500" />
-            <SummaryCard icon={TrendingUp} label="Total Bookings" value={String(report.summary.totalBookings)} tone="text-white" subtext={`Walk-ins: ${report.summary.walkinBookings}`} />
+            <SummaryCard icon={TrendingUp} label="Total Bookings" value={String(report.summary.totalBookings)} tone="text-[#ff5200]" subtext={`Walk-ins: ${report.summary.walkinBookings}`} />
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -402,7 +402,7 @@ export default function DateRangeReport() {
                     report.setupPopularity.map((setup) => (
                       <div key={setup.name}>
                         <div className="mb-1 flex items-center justify-between text-sm">
-                          <span className="text-white">{setup.name}</span>
+                          <span className="text-[#ff5200]">{setup.name}</span>
                           <span className="text-[#A0A6AF]">{setup.bookings} bookings</span>
                         </div>
                         <div className="h-2 rounded-full bg-[#0A0F18]">
@@ -429,7 +429,7 @@ export default function DateRangeReport() {
                   ].map((item) => (
                     <div key={item.label}>
                       <div className="mb-1 flex items-center justify-between text-sm">
-                        <span className="text-white">{item.label}</span>
+                        <span className="text-[#ff5200]">{item.label}</span>
                         <span className="text-[#A0A6AF]">₹{item.value.toLocaleString("en-IN")}</span>
                       </div>
                       <div className="h-2 rounded-full bg-[#0A0F18]">

@@ -112,7 +112,7 @@ export default function DailyReportModal({
             body { font-family: Arial, sans-serif; padding: 20px; color: #111; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background: #FF4500; color: white; }
+            th { background: #ff5200; color: white; }
             .summary { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
             .card { padding: 15px; border: 1px solid #ddd; border-radius: 8px; min-width: 150px; }
           </style>
@@ -180,11 +180,11 @@ export default function DailyReportModal({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button type="button" onClick={downloadCSV} className="flex items-center gap-2 rounded-lg bg-[#FF4500] px-4 py-2 text-white transition hover:bg-[#FF4500]">
+            <button type="button" onClick={downloadCSV} className="flex items-center gap-2 rounded-lg bg-[#ff5200] px-4 py-2 text-white transition hover:bg-[#cc2200]">
               <Download className="h-4 w-4" />
               Download CSV
             </button>
-            <button type="button" onClick={handlePrint} className="flex items-center gap-2 rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF] transition hover:border-[#FF4500] hover:text-white">
+            <button type="button" onClick={handlePrint} className="flex items-center gap-2 rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF] transition hover:border-[#ff5200] hover:text-white">
               <Printer className="h-4 w-4" />
               Print Report
             </button>
@@ -206,11 +206,11 @@ export default function DailyReportModal({
               <tbody>
                 {bookings.map((booking) => (
                   <tr key={booking.id} className="border-b border-[#2A2F38]">
-                    <td className="py-3 font-mono text-[#FF4500]">{booking.booking_code}</td>
+                    <td className="py-3 font-mono text-[#ff5200]">{booking.booking_code}</td>
                     <td className="py-3 text-white">{booking.users?.display_name || booking.users?.email || '-'}</td>
                     <td className="py-3 text-[#A0A6AF]">{booking.setups?.display_name || '-'}</td>
                     <td className="py-3 text-[#A0A6AF]">{booking.time_slots?.label || '-'}</td>
-                    <td className="py-3 font-semibold text-[#FF4500]">{formatAmount(booking.total_price)}</td>
+                    <td className="py-3 font-semibold text-[#ff5200]">{formatAmount(booking.total_price)}</td>
                     <td className="py-3">
                       <span className={`rounded-full px-2 py-1 text-xs font-medium ${
                         booking.payment_status === 'paid'

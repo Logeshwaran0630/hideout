@@ -65,7 +65,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   const [selectedSessionType, setSelectedSessionType] = useState<SessionType | null>(null);
   const [bookingMode, setBookingMode] = useState<'setup' | 'allAccess'>('setup');
   const [selectedDuration, setSelectedDuration] = useState<string>('');
-  const [allAccessPrices, setAllAccessPrices] = useState<any>({ '30min': { price: 200, coins: 10 }, '1hr': { price: 379, coins: 15 } });
+  const [allAccessPrices, setAllAccessPrices] = useState<Record<string, { price: number; coins: number }>>({});
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
@@ -92,7 +92,15 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
 
   const eligibleSessionTypes = useMemo(() => {
     if (bookingMode === 'allAccess') {
-      return sessionTypes.filter((s) => s.name.startsWith('All-Access'));
+      if (selectedDuration) {
+        return sessionTypes.filter((s) => s.name === `All-Access - ${selectedDuration}`);
+      }
+
+      return sessionTypes.filter((s) => {
+        if (s.name === 'All-Access - 30min') return Boolean(allAccessPrices['30min']);
+        if (s.name === 'All-Access - 1hr') return Boolean(allAccessPrices['1hr']);
+        return false;
+      });
     }
     if (!selectedSetup) return [];
     if (selectedSetup.name === "racing") {
@@ -103,7 +111,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
     return sessionTypes.filter((sessionType) =>
       sessionType.name === 'Solo' || sessionType.name === 'Duo' || sessionType.name === 'Squad'
     );
-  }, [bookingMode, selectedSetup, sessionTypes]);
+  }, [allAccessPrices, bookingMode, selectedDuration, selectedSetup, sessionTypes]);
 
   const totalPrice = useMemo(() => {
     if (!selectedSessionType) return 0;
@@ -148,9 +156,9 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
     // fetch all-access prices
     const fetchAllAccess = async () => {
       try {
-        const { data } = await supabase.from('all_access_settings').select('*');
+        const { data } = await supabase.from('all_access_settings').select('*').eq('is_active', true);
         if (!isActive || !data) return;
-        const prices: any = { '30min': { price: 200, coins: 10 }, '1hr': { price: 379, coins: 15 } };
+        const prices: Record<string, { price: number; coins: number }> = {};
         data.forEach((r: any) => {
           if (r.duration_minutes === 30) prices['30min'] = { price: r.price, coins: r.h_coins_earned };
           if (r.duration_minutes === 60) prices['1hr'] = { price: r.price, coins: r.h_coins_earned };
@@ -330,55 +338,64 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   ];
 
   const currentStepNumber = step === "confirmed" ? 4 : step;
+  const isRedeemedBooking = step === "confirmed" && bookingResult?.total_price === 0;
 
   if (step === "confirmed" && bookingResult && (selectedSetup || bookingMode === 'allAccess') && selectedSessionType && selectedSlot) {
     return (
-      <main className="min-h-screen bg-[#0A0F18] text-[#F5F1EA]">
+      <main className="min-h-screen bg-[#050508] text-[#F5F1EA]">
         <Navbar />
         <section className="mx-auto flex max-w-4xl flex-col items-center px-6 py-16 text-center">
-          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-r from-[#FF4500] to-[#22C55E]">
+          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full" style={{ background: 'linear-gradient(135deg, #ff5200, #22C55E)' }}>
             <Check className="h-12 w-12 text-white" />
           </div>
-          <h1 className="mb-4 bg-linear-to-r from-[#FF4500] to-[#22C55E] bg-clip-text font-heading text-5xl uppercase text-transparent">
+          <h1 className="mb-4 bg-clip-text font-orbitron text-5xl uppercase text-transparent" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900, backgroundImage: 'linear-gradient(135deg, #ff5200, #22C55E)', WebkitBackgroundClip: 'text' }}>
             YOU&apos;RE IN
           </h1>
-          <p className="mb-8 text-[#A0A6AF]">Your slot is locked in. See you at The Hideout!</p>
+          <p className="mb-8 font-sans text-[#A0A6AF]">Your slot is locked in. See you at The Hideout!</p>
 
-          <div className="mb-8 w-full rounded-2xl border border-[#FF4500]/30 bg-[#14181F] p-8">
-            <div className="mb-2 text-sm font-medium uppercase tracking-wider text-[#FF4500]">BOOKING CODE</div>
-            <div className="mb-4 font-mono text-4xl font-bold tracking-wider text-[#FF4500] md:text-5xl">
+          {isRedeemedBooking ? (
+            <div className="mb-6 rounded-2xl border border-[rgba(34,197,94,0.25)] bg-[rgba(34,197,94,0.08)] px-5 py-4 text-sm font-sans text-[#22C55E]">
+              This booking was redeemed with H Coins. No H Coins were earned for this session.
+            </div>
+          ) : null}
+
+          <div className="mb-8 w-full rounded-2xl border border-[rgba(255,82,0,0.3)] bg-[#0A0F18] p-8" style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 0 40px rgba(255,82,0,0.05)' }}>
+            <div className="mb-2 text-sm font-cinzel uppercase tracking-wider text-[#ff5200]" style={{ fontFamily: 'Cinzel, serif', letterSpacing: '0.15em' }}>BOOKING CODE</div>
+            <div className="mb-4 text-4xl tracking-wider md:text-5xl booking-code">
               {bookingResult.booking_code}
             </div>
             <button
               type="button"
               onClick={copyBookingCode}
-              className="inline-flex items-center gap-2 text-[#A0A6AF] transition-colors hover:text-[#FF4500]"
+              className="inline-flex items-center gap-2 font-sans text-[#A0A6AF] transition-colors hover:text-[#ff5200]"
             >
-              {copiedBookingCode ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              {copiedBookingCode ? <Check className="h-4 w-4 text-[#22C55E]" /> : <Copy className="h-4 w-4" />}
               {copiedBookingCode ? "Copied!" : "Copy booking code"}
             </button>
           </div>
 
           <div className="mb-8 grid w-full grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-4 text-center">
-              <Calendar className="mx-auto mb-2 h-5 w-5 text-[#FF4500]" />
-              <div className="text-xs text-[#A0A6AF]">Date</div>
-              <div className="text-sm font-semibold text-white">{formatDateLabel(selectedDate)}</div>
+            <div className="rounded-xl border border-[#1A1F28] bg-[#0A0F18] p-4 text-center">
+              <Calendar className="mx-auto mb-2 h-5 w-5 text-[#ff5200]" />
+              <div className="text-xs font-sans text-[#A0A6AF]">Date</div>
+              <div className="text-sm font-sans font-bold text-white">{formatDateLabel(selectedDate)}</div>
             </div>
-            <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-4 text-center">
+            <div className="rounded-xl border border-[#1A1F28] bg-[#0A0F18] p-4 text-center">
               <Clock className="mx-auto mb-2 h-5 w-5 text-[#22C55E]" />
-              <div className="text-xs text-[#A0A6AF]">Time</div>
-              <div className="text-sm font-semibold text-white">{selectedSlot.label}</div>
+              <div className="text-xs font-sans text-[#A0A6AF]">Time</div>
+              <div className="text-sm font-sans font-bold text-white">{selectedSlot.label}</div>
             </div>
-            <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-4 text-center">
-              <Users className="mx-auto mb-2 h-5 w-5 text-[#FF5722]" />
-              <div className="text-xs text-[#A0A6AF]">Setup</div>
-              <div className="text-sm font-semibold text-white">{selectedSetup?.display_name ?? 'All-Access Pass'}</div>
+            <div className="rounded-xl border border-[#1A1F28] bg-[#0A0F18] p-4 text-center">
+              <Users className="mx-auto mb-2 h-5 w-5 text-[#cc2200]" />
+              <div className="text-xs font-sans text-[#A0A6AF]">Setup</div>
+              <div className="text-sm font-sans font-bold text-white">{selectedSetup?.display_name ?? 'All-Access Pass'}</div>
             </div>
-            <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-4 text-center">
-              <Gift className="mx-auto mb-2 h-5 w-5 text-green-500" />
-              <div className="text-xs text-[#A0A6AF]">H Coins</div>
-              <div className="text-sm font-semibold text-green-500">+{selectedSessionType.h_coins_earned}</div>
+            <div className="rounded-xl border border-[#1A1F28] bg-[#0A0F18] p-4 text-center">
+              <Gift className="mx-auto mb-2 h-5 w-5 text-[#22C55E]" />
+              <div className="text-xs font-sans text-[#A0A6AF]">H Coins</div>
+              <div className="text-sm font-sans font-bold text-[#22C55E]">
+                {isRedeemedBooking ? "0 earned" : `+${selectedSessionType.h_coins_earned}`}
+              </div>
             </div>
           </div>
 
@@ -386,7 +403,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             <button
               type="button"
               onClick={() => router.push("/profile")}
-              className="rounded-xl bg-linear-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 font-semibold text-white transition-transform hover:scale-105"
+              className="btn-primary rounded-xl px-6 py-3 font-sans font-semibold"
             >
               View My Bookings
             </button>
@@ -398,9 +415,10 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 setSelectedSessionType(null);
                 setSelectedSlot(null);
                 setSelectedDate("");
+                setSelectedDuration('');
                 setStep(1);
               }}
-              className="rounded-xl border border-[#22C55E] px-6 py-3 font-semibold text-[#22C55E] transition-all hover:bg-[#22C55E]/10"
+              className="btn-outline rounded-xl px-6 py-3 font-sans font-semibold"
             >
               Book Another Slot
             </button>
@@ -411,13 +429,13 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   }
 
   return (
-    <main className="min-h-screen bg-[#0A0F18] text-[#F5F1EA]">
+    <main className="min-h-screen bg-[#050508] text-[#F5F1EA]">
       <Navbar />
 
       <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
         <div className="mb-8">
-          <div className="text-[12px] font-medium uppercase tracking-[0.15em] text-[#FF4500]">BOOK YOUR SESSION</div>
-          <h1 className="mt-3 font-heading text-[48px] uppercase leading-none text-[#F5F1EA]">CHOOSE YOUR SLOT</h1>
+          <div className="text-[12px] font-sans font-semibold uppercase tracking-[0.15em] text-[#ff5200]">BOOK YOUR SESSION</div>
+          <h1 className="mt-3 font-orbitron text-[48px] uppercase leading-none text-[#F5F1EA]" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>CHOOSE YOUR SLOT</h1>
         </div>
 
         <div className="mb-8 flex items-center justify-between gap-2">
@@ -429,42 +447,54 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
               <div key={item.stepNumber} className="flex flex-1 items-center">
                 <div className="flex flex-col items-center text-center">
                   <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-semibold ${
-                      isComplete || isActive
-                        ? "bg-[#FF4500] text-white"
-                        : "border border-[#2A2F38] bg-[#14181F] text-[#A0A6AF]"
-                    } ${isActive ? "glow-box" : ""}`}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-sans font-bold transition-all duration-300 ${
+                      isActive
+                        ? "text-white"
+                        : isComplete
+                        ? "text-[#ff5200]"
+                        : "border border-[#1A1F28] bg-[#1A1F28] text-[#6B7280]"
+                    }`}
+                    style={
+                      isActive
+                        ? { background: 'linear-gradient(135deg, #ff5200, #cc2200)', boxShadow: '0 0 24px rgba(255,82,0,0.35)' }
+                        : isComplete
+                        ? { background: 'rgba(255,82,0,0.3)' }
+                        : {}
+                    }
                   >
                     {isComplete && !isActive ? <Check className="h-3.5 w-3.5" /> : item.stepNumber}
                   </div>
-                  <div className={`mt-2 text-[12px] ${isActive ? "text-[#F5F1EA]" : "text-[#A0A6AF]"}`}>{item.label}</div>
+                  <div className={`mt-2 text-[12px] font-sans ${isActive ? "text-[#F5F1EA] font-semibold" : "text-[#A0A6AF]"}`}>{item.label}</div>
                 </div>
 
                 {index < steps.length - 1 ? (
-                  <div className={`mx-2 h-px flex-1 ${currentStepNumber > item.stepNumber ? "bg-[#FF4500]" : "bg-[#2A2F38]"}`} />
+                  <div className={`mx-2 h-px flex-1 transition-all duration-300 ${currentStepNumber > item.stepNumber ? "bg-[#ff5200]" : "bg-[#1A1F28]"}`} />
                 ) : null}
               </div>
             );
           })}
         </div>
 
-        <div className="rounded-xl border border-[#2A2F38] bg-[#14181F] p-6 md:p-8">
+        <div className="rounded-xl border border-[#1A1F28] bg-[#0A0F18] p-6 md:p-8">
           {step === 1 ? (
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">How would you like to play?</h2>
+              <h2 className="text-2xl font-orbitron font-black text-white mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>How would you like to play?</h2>
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <button
-                  onClick={() => setBookingMode('setup')}
-                  className={`p-6 rounded-2xl text-center transition-all ${
+                  onClick={() => {
+                    setBookingMode('setup');
+                    setSelectedDuration('');
+                  }}
+                  className={`p-6 rounded-2xl text-center transition-all duration-300 ${
                     bookingMode === 'setup'
-                      ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
-                      : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
+                      ? 'border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)]'
+                      : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)] hover:translate-y-[-4px]'
                   }`}
                 >
                   <div className="text-4xl mb-3">🎮</div>
-                  <div className="text-xl font-bold mb-2">Specific Setup</div>
-                  <p className="text-sm opacity-80">Choose exact console or rig</p>
+                  <div className="text-xl font-orbitron font-black mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>Specific Setup</div>
+                  <p className="text-sm font-sans opacity-80">Choose exact console or rig</p>
                 </button>
 
                 <button
@@ -474,21 +504,21 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                     setSelectedSessionType(null);
                     setSelectedDuration('');
                   }}
-                  className={`p-6 rounded-2xl text-center transition-all ${
+                  className={`p-6 rounded-2xl text-center transition-all duration-300 ${
                     bookingMode === 'allAccess'
-                      ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
-                      : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
+                      ? 'border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)]'
+                      : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)] hover:translate-y-[-4px]'
                   }`}
                 >
                   <div className="text-4xl mb-3">⏱️</div>
-                  <div className="text-xl font-bold mb-2">All-Access Pass</div>
-                  <p className="text-sm opacity-80">Pay by time, use any setup</p>
+                  <div className="text-xl font-orbitron font-black mb-2" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>All-Access Pass</div>
+                  <p className="text-sm font-sans opacity-80">Pay by time, use any setup</p>
                 </button>
               </div>
 
               {bookingMode === 'setup' ? (
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Choose your gaming setup</h3>
+                  <h3 className="text-xl font-orbitron font-black text-white mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>Choose your gaming setup</h3>
                       <div className="grid md:grid-cols-2 gap-4">
                         {setups
                           .filter((s: any) => s.is_active !== false)
@@ -509,51 +539,61 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Choose duration</h3>
+                  <h3 className="text-xl font-orbitron font-black text-white mb-4" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>Choose duration</h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <button
-                      onClick={() => {
-                        setSelectedDuration('30min');
-                        const allAccess30 = sessionTypes.find((s) => s.name === 'All-Access - 30min');
-                        if (allAccess30) {
-                          setSelectedSessionType(allAccess30);
-                          setSelectedSetup(null);
-                          setBookingMode('allAccess');
-                        }
-                      }}
-                      className={`p-6 rounded-2xl text-center transition-all ${
-                        selectedDuration === '30min'
-                          ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
-                          : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
-                      }`}
-                    >
-                      <div className="text-3xl mb-2">⏱️ 30 Minutes</div>
-                      <div className="text-2xl font-bold">₹200</div>
-                      <p className="text-xs mt-2">+10 H Coins</p>
-                    </button>
+                    {allAccessPrices['30min'] ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDuration('30min');
+                          const allAccess30 = sessionTypes.find((s) => s.name === 'All-Access - 30min');
+                          if (allAccess30) {
+                            setSelectedSessionType(allAccess30);
+                            setSelectedSetup(null);
+                            setBookingMode('allAccess');
+                          }
+                        }}
+                        className={`p-6 rounded-2xl text-center transition-all duration-300 ${
+                          selectedDuration === '30min'
+                            ? 'border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)]'
+                            : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)]'
+                        }`}
+                      >
+                        <div className="text-3xl mb-2">⏱️ 30 Minutes</div>
+                        <div className="text-2xl font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{allAccessPrices['30min'].price}</div>
+                        <p className="text-xs mt-2 font-sans text-[#A0A6AF]">+{allAccessPrices['30min'].coins} H Coins</p>
+                      </button>
+                    ) : null}
 
-                    <button
-                      onClick={() => {
-                        setSelectedDuration('1hr');
-                        const allAccess1hr = sessionTypes.find((s) => s.name === 'All-Access - 1hr');
-                        if (allAccess1hr) {
-                          setSelectedSessionType(allAccess1hr);
-                          setSelectedSetup(null);
-                          setBookingMode('allAccess');
-                        }
-                      }}
-                      className={`p-6 rounded-2xl text-center transition-all ${
-                        selectedDuration === '1hr'
-                          ? 'bg-linear-to-r from-devil-orange to-devil-red text-white shadow-lg'
-                          : 'bg-[#18181B] border border-[#2A2F38] text-[#A0A6AF] hover:border-devil-orange'
-                      }`}
-                    >
-                      <div className="text-3xl mb-2">⏱️ 1 Hour</div>
-                      <div className="text-2xl font-bold">₹379</div>
-                      <p className="text-xs mt-2">+15 H Coins</p>
-                    </button>
+                    {allAccessPrices['1hr'] ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDuration('1hr');
+                          const allAccess1hr = sessionTypes.find((s) => s.name === 'All-Access - 1hr');
+                          if (allAccess1hr) {
+                            setSelectedSessionType(allAccess1hr);
+                            setSelectedSetup(null);
+                            setBookingMode('allAccess');
+                          }
+                        }}
+                        className={`p-6 rounded-2xl text-center transition-all duration-300 ${
+                          selectedDuration === '1hr'
+                            ? 'border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)]'
+                            : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)]'
+                        }`}
+                      >
+                        <div className="text-3xl mb-2">⏱️ 1 Hour</div>
+                        <div className="text-2xl font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{allAccessPrices['1hr'].price}</div>
+                        <p className="text-xs mt-2 font-sans text-[#A0A6AF]">+{allAccessPrices['1hr'].coins} H Coins</p>
+                      </button>
+                    ) : null}
                   </div>
-                  <p className="text-sm text-[#A0A6AF] mt-4 text-center">🎮 Use any available setup (PS5, PS4, Arcade, Racing, PC)</p>
+                  <p className="text-sm font-sans text-[#A0A6AF] mt-4 text-center">
+                    {allAccessPrices['30min'] || allAccessPrices['1hr']
+                      ? '🎮 Use any available setup (PS5, PS4, Arcade, Racing, PC)'
+                      : 'All-Access passes are currently unavailable.'}
+                  </p>
                 </div>
               )}
 
@@ -563,7 +603,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   (bookingMode === 'setup' && !selectedSetup) || (bookingMode === 'allAccess' && !selectedDuration)
                 }
                 onClick={() => setStep(2)}
-                className="mt-8 w-full rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                className="btn-primary mt-8 w-full rounded-lg px-6 py-3 text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Continue
               </button>
@@ -574,25 +614,27 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             <div>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-white">
-                    {selectedSetup.name === "racing" ? "How would you like to play?" : "Choose session type"}
+                  <h2 className="text-xl font-orbitron font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>
+                    {bookingMode === 'allAccess' ? 'Choose duration' : selectedSetup?.name === "racing" ? "How would you like to play?" : "Choose session type"}
                   </h2>
-                  <p className="mt-1 text-sm text-[#A0A6AF]">
-                    {selectedSetup.name === "racing"
+                  <p className="mt-1 text-sm font-sans text-[#A0A6AF]">
+                    {bookingMode === 'allAccess'
+                      ? 'Pick the pass length that fits your session'
+                      : selectedSetup?.name === "racing"
                       ? "Time-based and lap-based race sessions"
-                      : selectedSetup.display_name}
+                      : selectedSetup?.display_name}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex items-center gap-1 text-[#A0A6AF] transition-colors hover:text-[#FF4500]"
+                  className="flex items-center gap-1 font-sans text-[#A0A6AF] transition-colors hover:text-[#ff5200]"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
               </div>
 
-              <div className={`mt-5 grid gap-4 ${selectedSetup.name === "racing" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+              <div className={`mt-5 grid gap-4 ${bookingMode === 'allAccess' ? 'md:grid-cols-2' : selectedSetup?.name === "racing" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
                 {eligibleSessionTypes.map((sessionType) => {
                   const isSelected = selectedSessionType?.id === sessionType.id;
                   const priceKey = `${selectedSetup?.id}_${sessionType.name}`;
@@ -621,18 +663,18 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                         setSelectedSessionType(sessionType);
                         setSelectedSlot(null);
                       }}
-                      className={`rounded-xl border p-5 text-left transition-all duration-150 ${
+                      className={`rounded-xl border p-5 text-left transition-all duration-300 ${
                         isSelected
-                          ? "border-2 border-[#FF4500] bg-[#1F242C] glow-box"
-                          : "border-[#2A2F38] bg-[#0A0F18] hover:border-[#FF4500]"
+                          ? "border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)] selected-card"
+                          : "border-[#1A1F28] bg-[#050508] hover:border-[rgba(255,82,0,0.5)] hover:translate-y-[-4px]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="text-[18px] font-semibold text-[#F5F1EA]">{sessionType.name}</div>
-                        <div className="font-heading text-[26px] uppercase text-[#FF4500]">Rs. {price}</div>
+                        <div className="text-[18px] font-orbitron font-black text-[#F5F1EA]" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>{sessionType.name}</div>
+                        <div className="text-[26px] text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {price}</div>
                       </div>
-                      <div className="mt-3 text-[13px] text-[#A0A6AF]">{sessionDescription}</div>
-                      <div className="mt-2 text-[12px] text-[#22C55E]">+{sessionType.h_coins_earned} H Coins</div>
+                      <div className="mt-3 text-[13px] font-sans text-[#A0A6AF]">{sessionDescription}</div>
+                      <div className="mt-2 text-[12px] font-sans font-semibold text-[#22C55E]">+{sessionType.h_coins_earned} H Coins</div>
                     </button>
                   );
                 })}
@@ -642,7 +684,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 type="button"
                 disabled={!selectedSessionType}
                 onClick={() => setStep(3)}
-                className="mt-8 w-full rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-6 py-3 text-[16px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                className="btn-primary mt-8 w-full rounded-lg px-6 py-3 text-[16px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Continue
               </button>
@@ -653,22 +695,22 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Select date and time</h2>
-                  <p className="mt-1 text-sm text-[#A0A6AF]">
-                    {bookingMode === 'allAccess' ? 'All-Access Pass' : selectedSetup?.display_name} / {selectedSessionType.name} / Rs. {totalPrice}
+                  <h2 className="text-xl font-orbitron font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>Select date and time</h2>
+                  <p className="mt-1 text-sm font-sans text-[#A0A6AF]">
+                    {bookingMode === 'allAccess' ? 'All-Access Pass' : selectedSetup?.display_name} / {selectedSessionType.name} / <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#ff5200' }}>Rs. {totalPrice}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="flex items-center gap-1 text-[#A0A6AF] transition-colors hover:text-[#FF4500]"
+                  className="flex items-center gap-1 font-sans text-[#A0A6AF] transition-colors hover:text-[#ff5200]"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
               </div>
 
               <div>
-                <label className="text-[13px] font-medium text-[#F5F1EA]">Select Date</label>
+                <label className="text-[13px] font-sans font-semibold text-[#A0A6AF] tracking-[0.05em]">Select Date</label>
                 <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
                   {dates.map((date) => {
                     const isSelected = selectedDate === date.value;
@@ -680,21 +722,21 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                           setSelectedDate(date.value);
                           setSelectedSlot(null);
                         }}
-                        className={`min-w-23 rounded-lg border p-3 text-center transition-all duration-150 ${
+                        className={`min-w-23 rounded-lg border p-3 text-center transition-all duration-300 ${
                           isSelected
-                            ? "border-[#FF4500] bg-[#2A2F38] glow-box"
-                            : "border-[#2A2F38] bg-[#0A0F18] hover:border-[#FF4500]"
+                            ? "border-[#ff5200] bg-[rgba(255,82,0,0.08)] shadow-[0_0_0_2px_rgba(255,82,0,0.2)]"
+                            : "border-[#1A1F28] bg-[#050508] hover:border-[rgba(255,82,0,0.5)]"
                         }`}
                       >
-                        <div className="text-[11px] font-medium uppercase text-[#A0A6AF]">{date.dayName}</div>
-                        <div className="mt-1 text-[22px] font-semibold text-[#F5F1EA]">{date.dayNumber}</div>
-                        <div className="mt-1 text-[11px] text-[#A0A6AF]">{date.month}</div>
-                        {date.isToday ? <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-[#FF4500]" /> : <div className="mt-2 h-1.5" />}
+                        <div className="text-[11px] font-sans font-semibold uppercase text-[#A0A6AF]">{date.dayName}</div>
+                        <div className="mt-1 text-[22px] font-orbitron font-black text-[#F5F1EA]" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>{date.dayNumber}</div>
+                        <div className="mt-1 text-[11px] font-sans text-[#A0A6AF]">{date.month}</div>
+                        {date.isToday ? <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-[#ff5200]" /> : <div className="mt-2 h-1.5" />}
                       </button>
                     );
                   })}
                 </div>
-                <p className="mt-3 text-[13px] text-[#A0A6AF]">Showing next 14 days. Contact us for further dates.</p>
+                <p className="mt-3 text-[13px] font-sans text-[#A0A6AF]">Showing next 14 days. Contact us for further dates.</p>
               </div>
 
               {availabilityLoading ? (
@@ -702,7 +744,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   <GamingLoader />
                   <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                     {Array.from({ length: 12 }).map((_, index) => (
-                      <div key={index} className="h-16 animate-pulse rounded-xl border border-[#2A2F38] bg-[#14181F]" />
+                      <div key={index} className="h-16 animate-pulse rounded-xl border border-[#1A1F28] bg-[#0A0F18]" />
                     ))}
                   </div>
                 </div>
@@ -724,23 +766,23 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
               )}
 
               {selectedSlot ? (
-                <div className="flex flex-col gap-3 rounded-xl border border-[#2A2F38] bg-[#14181F] px-5 py-4 md:flex-row md:items-center md:justify-between">
-                  <div className="text-[#A0A6AF]">
-                    Selected: <span className="font-semibold text-[#FF4500]">{selectedSlot.label}</span>
+                <div className="flex flex-col gap-3 rounded-xl border border-[#1A1F28] bg-[#050508] px-5 py-4 md:flex-row md:items-center md:justify-between">
+                  <div className="font-sans text-[#A0A6AF]">
+                    Selected: <span className="font-semibold text-[#ff5200]">{selectedSlot.label}</span>
                   </div>
-                  <div className="text-[#A0A6AF]">
-                    Total: <span className="font-heading text-2xl uppercase text-[#FF4500]">Rs. {totalPrice}</span>
+                  <div className="font-sans text-[#A0A6AF]">
+                    Total: <span className="text-2xl text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {totalPrice}</span>
                   </div>
                 </div>
               ) : null}
 
-              {error ? <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">{error}</div> : null}
+              {error ? <div className="rounded-lg border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-4 py-3 text-sm font-sans text-[#EF4444]">{error}</div> : null}
 
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="flex-1 rounded-lg border border-[#2A2F38] px-5 py-2.5 text-[#A0A6AF] transition-colors hover:border-[#FF4500] hover:text-white"
+                  className="btn-outline flex-1 rounded-lg px-5 py-2.5 font-sans font-semibold"
                 >
                   Back
                 </button>
@@ -748,7 +790,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   type="button"
                   disabled={!selectedSlot || loading}
                   onClick={() => setStep(4)}
-                  className="flex-1 rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-5 py-2.5 font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                  className="btn-primary flex-1 rounded-lg px-5 py-2.5 font-semibold disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Review Booking
                 </button>
@@ -758,58 +800,58 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
 
           {step === 4 && selectedSessionType && selectedSlot && selectedDate && (selectedSetup || bookingMode === 'allAccess') ? (
             <div>
-              <h2 className="text-xl font-bold text-white">Review your booking</h2>
+              <h2 className="text-xl font-orbitron font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>Review your booking</h2>
 
-              <div className="mt-6 rounded-xl border border-[#2A2F38] bg-[#14181F] p-6">
-                <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
-                  <div className="text-[14px] text-[#A0A6AF]">Setup</div>
-                  <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">
+              <div className="mt-6 rounded-xl border border-[rgba(255,82,0,0.2)] bg-[#050508] p-6" style={{ boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 0 40px rgba(255,82,0,0.05)' }}>
+                <div className="flex items-center justify-between border-b border-[#1A1F28] py-3">
+                  <div className="text-[14px] font-sans text-[#A0A6AF]">Setup</div>
+                  <div className="text-right text-[15px] font-sans font-bold text-[#F5F1EA]">
                     {selectedSessionType.name.startsWith('All-Access') ? '🎮 Any Setup (Switch freely)' : selectedSetup?.display_name}
                   </div>
                 </div>
-                <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
-                  <div className="text-[14px] text-[#A0A6AF]">Session</div>
-                  <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">
+                <div className="flex items-center justify-between border-b border-[#1A1F28] py-3">
+                  <div className="text-[14px] font-sans text-[#A0A6AF]">Session</div>
+                  <div className="text-right text-[15px] font-sans font-bold text-[#F5F1EA]">
                     {selectedSessionType.name.startsWith('All-Access')
                       ? selectedSessionType.name.replace('All-Access - ', '')
                       : `${selectedSessionType.name} (${selectedSessionType.max_players} players)`}
                   </div>
                 </div>
                 {selectedSessionType.name.startsWith('All-Access') && (
-                  <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
-                    <div className="text-[14px] text-[#A0A6AF]">Duration</div>
-                    <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">{selectedSessionType.name.includes('30min') ? '30 Minutes' : '1 Hour'}</div>
+                  <div className="flex items-center justify-between border-b border-[#1A1F28] py-3">
+                    <div className="text-[14px] font-sans text-[#A0A6AF]">Duration</div>
+                    <div className="text-right text-[15px] font-sans font-bold text-[#F5F1EA]">{selectedSessionType.name.includes('30min') ? '30 Minutes' : '1 Hour'}</div>
                   </div>
                 )}
-                <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
-                  <div className="text-[14px] text-[#A0A6AF]">Date</div>
-                  <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">{formatDateLabel(selectedDate)}</div>
+                <div className="flex items-center justify-between border-b border-[#1A1F28] py-3">
+                  <div className="text-[14px] font-sans text-[#A0A6AF]">Date</div>
+                  <div className="text-right text-[15px] font-sans font-bold text-[#F5F1EA]">{formatDateLabel(selectedDate)}</div>
                 </div>
-                <div className="flex items-center justify-between border-b border-[#2A2F38] py-3">
-                  <div className="text-[14px] text-[#A0A6AF]">Time</div>
-                  <div className="text-right text-[15px] font-semibold text-[#F5F1EA]">{selectedSlot.label}</div>
+                <div className="flex items-center justify-between border-b border-[#1A1F28] py-3">
+                  <div className="text-[14px] font-sans text-[#A0A6AF]">Time</div>
+                  <div className="text-right text-[15px] font-sans font-bold text-[#F5F1EA]">{selectedSlot.label}</div>
                 </div>
                 <div className="flex items-center justify-between py-3">
-                  <div className="text-[16px] font-semibold text-[#F5F1EA]">Total</div>
-                  <div className="font-heading text-[28px] uppercase text-[#FF4500]">Rs. {totalPrice}</div>
+                  <div className="text-[16px] font-sans font-bold text-[#F5F1EA]">Total</div>
+                  <div className="text-[28px] text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {totalPrice}</div>
                 </div>
               </div>
 
-              <div className="mt-4 rounded-lg border border-[#FF4500]/20 bg-[#FF4500]/10 px-4 py-3 text-[13px] text-[#A0A6AF]">
-                <Sparkles className="mr-2 inline-block h-4 w-4 text-[#FF4500]" />
+              <div className="mt-4 rounded-lg border border-[rgba(255,82,0,0.2)] bg-[rgba(255,82,0,0.05)] px-4 py-3 text-[13px] font-sans text-[#A0A6AF]">
+                <Sparkles className="mr-2 inline-block h-4 w-4 text-[#ff5200]" />
                 You&apos;ll earn {selectedSessionType.h_coins_earned} H Coins for this booking.
                 {selectedSessionType.name.startsWith('All-Access') && (
                   <div className="text-xs text-[#A0A6AF] mt-2">🎮 You can use ANY available setup (PS5, PS4, Arcade, Racing, PC)</div>
                 )}
               </div>
 
-              {error ? <div className="mt-4 rounded-lg border border-[#FF4500]/30 bg-[#FF4500]/10 px-4 py-3 text-[13px] text-[#FF4500]">{error}</div> : null}
+              {error ? <div className="mt-4 rounded-lg border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-4 py-3 text-[13px] font-sans text-[#EF4444]">{error}</div> : null}
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
                 <button
                   type="button"
                   onClick={() => setStep(3)}
-                  className="rounded-lg border border-[#2A2F38] px-5 py-2.5 text-[14px] text-[#A0A6AF] transition-colors hover:border-[#FF4500] hover:text-[#F5F1EA]"
+                  className="btn-outline rounded-lg px-5 py-2.5 text-[14px] font-sans font-semibold"
                 >
                   Change Slot
                 </button>
@@ -817,7 +859,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   type="button"
                   onClick={confirmBooking}
                   disabled={loading}
-                  className="rounded-lg bg-linear-to-r from-[#FF4500] to-[#CC3700] px-5 py-2.5 text-[14px] font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-40 hover:scale-105"
+                  className="btn-primary rounded-lg px-5 py-2.5 text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">

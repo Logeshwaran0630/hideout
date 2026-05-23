@@ -168,7 +168,7 @@ export default function BookingTicket({
 
           <div className="text-center">
             <div className="text-xs uppercase tracking-[0.22em] text-[#A0A6AF]">Booking Code</div>
-            <div className="mt-1 font-mono text-3xl font-bold tracking-[0.14em] text-devil-orange glow-orange">
+            <div className="mt-1 font-mono text-3xl font-bold tracking-[0.14em] text-[#ff5200] glow-orange">
               {booking.booking_code}
             </div>
             {isPast && (
@@ -214,7 +214,7 @@ export default function BookingTicket({
 
           <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#0A0F18] p-4 text-center">
             <div className="text-xs uppercase tracking-[0.18em] text-[#A0A6AF]">H-ID</div>
-            <div className="mt-1 font-mono text-xl font-bold text-devil-orange glow-orange">{hId}</div>
+            <div className="mt-1 font-mono text-xl font-bold text-[#ff5200] glow-orange">{hId}</div>
             <div className="mt-2 text-xs text-[#A0A6AF]">Customer: {customerName}</div>
           </div>
 
@@ -235,7 +235,7 @@ export default function BookingTicket({
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-devil-orange">₹{booking.total_price}</div>
+            <div className="text-2xl font-bold text-[#ff5200]">₹{booking.total_price}</div>
             <div className="text-xs text-[#A0A6AF]">Total Amount</div>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function BookingTicket({
         <button
           type="button"
           onClick={handlePrint}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF] transition hover:border-devil-orange hover:text-white"
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF] transition hover:border-[#ff5200] hover:text-white"
         >
           <Printer className="h-4 w-4" />
           Print Ticket
@@ -260,7 +260,7 @@ export default function BookingTicket({
           <button
             type="button"
             onClick={onClose}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF] transition hover:border-devil-orange hover:text-white"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#2A2F38] px-4 py-2 text-[#A0A6AF] transition hover:border-[#ff5200] hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             Close

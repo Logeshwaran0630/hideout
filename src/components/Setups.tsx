@@ -230,19 +230,19 @@ export default function Setups() {
         ) : null}
 
         {/* Horizontal scroll on mobile/tablet, 5-column row on lg+ */}
-        <div className="-mx-6 px-6 overflow-x-auto pb-6">
-          <div className="flex gap-6 min-w-max lg:grid lg:grid-cols-5 lg:min-w-0">
+        <div className="-mx-6 overflow-x-auto px-6 pb-6">
+          <div className="flex min-w-max items-stretch gap-6 lg:grid lg:min-w-0 lg:grid-cols-5 lg:items-stretch">
             {setupCards.map((setup, index) => (
-              <div key={setup.title} className="w-[320px] lg:w-auto shrink-0">
+              <div key={setup.title} className="h-full w-[320px] shrink-0 lg:w-auto">
                 <ScrollReveal delay={index * 100}>
-                  <article className="h-full min-h-95 flex flex-col overflow-hidden rounded-[22px] border border-[rgba(255,82,0,0.16)] bg-card-bg shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(0,212,160,0.28)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
+                  <article className="flex h-full min-h-95 flex-col overflow-visible rounded-[22px] border border-[rgba(255,82,0,0.16)] bg-card-bg shadow-[0_0_0_1px_rgba(255,255,255,0.02)_inset] transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(0,212,160,0.28)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
                     <div className="relative aspect-video w-full overflow-hidden border-b border-[rgba(255,82,0,0.14)]">
                       <Image src={setup.image} alt={setup.title} fill className="object-cover" />
                     </div>
 
                     <div className="h-0.75 w-full" style={{ backgroundColor: setup.accentColor }} />
 
-                    <div className="p-6 flex flex-col h-full">
+                    <div className="flex h-full flex-col p-6 pb-7">
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-xs font-bold tracking-[0.2em]" style={{ color: setup.badgeColor }}>
                           {setup.badge}
@@ -253,24 +253,24 @@ export default function Setups() {
                           </span>
                         ) : null}
                       </div>
-                      <h3 className="mt-3 text-3xl font-title font-black tracking-tight text-white">{setup.title}</h3>
+                      <h3 className="mt-3 min-h-16 text-3xl font-title font-black leading-[0.95] tracking-tight text-white">{setup.title}</h3>
 
-                      <p className="mt-4 min-h-27 text-[0.95rem] leading-relaxed text-white/60 line-clamp-3">{setup.description}</p>
+                      <p className="mt-4 min-h-18 text-[0.95rem] leading-relaxed text-white/60 line-clamp-3 wrap-break-word hyphens-auto">{setup.description}</p>
 
                           <div
-                            className={`mt-auto grid gap-2 overflow-hidden rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[rgba(5,5,8,0.9)] ${
+                            className={`mt-auto grid gap-2 overflow-visible rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[rgba(5,5,8,0.9)] ${
                               setup.setupName === "racing" ? "grid-cols-2" : "grid-cols-3"
                             }`}
                           >
                             {setup.prices.map((price, i) => (
                               <div
                                 key={price.label}
-                                className="min-w-18 px-3 py-3 text-center flex flex-col items-center justify-center"
+                                className="flex min-w-23 flex-col items-center justify-center px-2.5 py-3 text-center"
                                 style={{ borderLeft: i > 0 ? "1px solid rgba(255,82,0,0.14)" : "none" }}
                               >
                                 <div className="text-[0.72rem] tracking-[0.18em] text-ghost-teal/80">{price.label}</div>
                                 <div className="mt-1 flex flex-col items-center">
-                                  <span className="text-[1.4rem] font-black leading-none text-devil-orange glow-orange whitespace-nowrap">{price.price}</span>
+                                  <span className="whitespace-nowrap text-[1.35rem] font-black leading-none text-devil-orange glow-devil">{price.price}</span>
                                   {price.unit ? <span className="text-sm text-white/45 mt-1">{price.unit}</span> : null}
                                 </div>
                               </div>

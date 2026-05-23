@@ -46,8 +46,8 @@ export default function AdminScanPage() {
     <div className="min-h-screen bg-[#0A0F18] py-20 px-6">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#FF4500]/20">
-            <Ticket className="h-10 w-10 text-[#FF4500]" />
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#ff5200]/20">
+            <Ticket className="h-10 w-10 text-[#ff5200]" />
           </div>
           <h1 className="text-3xl font-bold text-white">Find Booking</h1>
           <p className="mt-2 text-[#A0A6AF]">Enter booking code to mark payment</p>
@@ -55,8 +55,8 @@ export default function AdminScanPage() {
 
         <div className="mb-6 rounded-xl border border-[#2A2F38] bg-[#14181F] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF4500]/10">
-              <Camera className="h-5 w-5 text-[#FF4500]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ff5200]/10">
+              <Camera className="h-5 w-5 text-[#ff5200]" />
             </div>
             <div className="flex-1">
               <div className="font-medium text-white">Scan QR Code</div>
@@ -68,7 +68,7 @@ export default function AdminScanPage() {
 
         <div className="bg-[#14181F] border border-[#2A2F38] rounded-2xl p-6">
           <div className="mb-4 flex items-center gap-2 border-b border-[#2A2F38] pb-3">
-            <Keyboard className="h-4 w-4 text-[#FF4500]" />
+            <Keyboard className="h-4 w-4 text-[#ff5200]" />
             <span className="font-medium text-white">Manual Entry</span>
           </div>
 
@@ -82,13 +82,13 @@ export default function AdminScanPage() {
                 value={bookingCode}
                 onChange={(e) => setBookingCode(e.target.value)}
                 placeholder="HBK-001027 or 001027"
-                className="flex-1 rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 font-mono text-white outline-none focus:border-[#FF4500]"
+                className="flex-1 rounded-xl border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 font-mono text-white outline-none focus:border-[#ff5200]"
                 autoFocus
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-xl bg-gradient-to-r from-[#FF4500] to-[#FF4500] px-6 py-3 font-semibold text-white transition hover:scale-105 disabled:opacity-50"
+                className="rounded-xl bg-linear-to-r from-[#ff5200] to-[#cc2200] px-6 py-3 font-semibold text-white transition hover:scale-105 disabled:opacity-50"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
               </button>
@@ -102,13 +102,13 @@ export default function AdminScanPage() {
           )}
 
           <div className="mt-4 text-center text-xs text-[#A0A6AF]">
-            Enter full code like <span className="text-[#FF4500]">HBK-001027</span> or just the number <span className="text-[#FF4500]">001027</span>
+            Enter full code like <span className="text-[#ff5200]">HBK-001027</span> or just the number <span className="text-[#ff5200]">001027</span>
           </div>
         </div>
 
         <button
           onClick={() => router.push('/admin')}
-          className="w-full mt-4 rounded-lg border border-[#2A2F38] py-2 text-[#A0A6AF] transition hover:border-[#FF4500] hover:text-white"
+          className="w-full mt-4 rounded-lg border border-[#2A2F38] py-2 text-[#A0A6AF] transition hover:border-[#ff5200] hover:text-white"
         >
           ← Back to Dashboard
         </button>

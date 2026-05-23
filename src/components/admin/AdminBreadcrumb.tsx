@@ -26,7 +26,7 @@ export default function AdminBreadcrumb() {
         <div key={crumb.href} className="flex items-center gap-2">
           <ChevronRight className="w-3 h-3 text-[#A0A6AF]" />
           {crumb.isLast ? (
-            <span className="text-[#FF4500] font-medium">{crumb.label}</span>
+            <span className="text-[#ff5200] font-medium">{crumb.label}</span>
           ) : (
             <Link href={crumb.href} className="text-[#A0A6AF] hover:text-white transition-colors">
               {crumb.label}

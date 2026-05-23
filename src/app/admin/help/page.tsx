@@ -142,13 +142,13 @@ export default async function AdminHelpPage() {
     <div className="mx-auto max-w-6xl">
       <div className="mb-8">
         <div className="mb-2 flex items-center gap-3">
-          <HelpCircle className="h-8 w-8 text-[#FF4500]" />
+          <HelpCircle className="h-8 w-8 text-[#ff5200]" />
           <h1 className="text-3xl font-bold text-white">Admin Instruction</h1>
         </div>
         <p className="text-[#A0A6AF]">Complete guide to managing The Hideout booking system</p>
       </div>
 
-      <div className="mb-8 rounded-2xl border border-[#FF4500]/20 bg-gradient-to-r from-[#FF4500]/10 to-[#FF4500]/10 p-6">
+      <div className="mb-8 rounded-2xl border border-[#ff5200]/20 bg-linear-to-r from-[#ff5200]/10 to-[#ff5200]/10 p-6">
         <h2 className="mb-4 text-xl font-bold text-white">Quick Reference</h2>
         <div className="grid gap-4 md:grid-cols-4">
           {[
@@ -158,7 +158,7 @@ export default async function AdminHelpPage() {
             ["4", "H Coins", "Adjust user balances"],
           ].map(([number, title, description]) => (
             <div key={title} className="text-center">
-              <div className="text-2xl font-bold text-[#FF4500]">{number}</div>
+              <div className="text-2xl font-bold text-[#ff5200]">{number}</div>
               <div className="text-sm text-white">{title}</div>
               <div className="text-xs text-[#A0A6AF]">{description}</div>
             </div>
@@ -168,13 +168,13 @@ export default async function AdminHelpPage() {
 
       <div className="mb-8 rounded-2xl border border-[#2A2F38] bg-[#14181F] p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Ticket className="h-5 w-5 text-[#FF4500]" />
+          <Ticket className="h-5 w-5 text-[#ff5200]" />
           <h2 className="text-xl font-bold text-white">Standard Workflow</h2>
         </div>
         <div className="space-y-4">
           {workflowSteps.map((step, index) => (
             <div key={step.title} className="flex items-start gap-4">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FF4500] text-sm font-bold text-white">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#ff5200] text-sm font-bold text-white">
                 {index + 1}
               </div>
               <div>
@@ -192,8 +192,8 @@ export default async function AdminHelpPage() {
           return (
             <div key={section.title} className="rounded-2xl border border-[#2A2F38] bg-[#14181F] p-6">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF4500]/10">
-                  <Icon className="h-5 w-5 text-[#FF4500]" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ff5200]/10">
+                  <Icon className="h-5 w-5 text-[#ff5200]" />
                 </div>
                 <h3 className="text-lg font-bold text-white">{section.title}</h3>
               </div>

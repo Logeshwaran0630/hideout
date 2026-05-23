@@ -10,8 +10,8 @@ type AnimatedBorderProps = {
 export default function AnimatedBorder({ children, className = "" }: AnimatedBorderProps) {
   return (
     <div className={`group relative ${className}`}>
-      <div className="pointer-events-none absolute -inset-[1px] rounded-2xl bg-[linear-gradient(120deg,#FF4500,#FF5722,#CC3700,#FF4500)] bg-[length:200%_200%] opacity-0 blur-lg transition duration-500 group-hover:opacity-90 group-hover:animate-[borderFlow_2.5s_linear_infinite]" />
-      <div className="pointer-events-none absolute -inset-[1px] rounded-2xl bg-[linear-gradient(120deg,#FF4500,#FF5722,#CC3700,#FF4500)] bg-[length:200%_200%] opacity-0 transition duration-500 group-hover:opacity-80 group-hover:animate-[borderFlow_2.5s_linear_infinite]" />
+      <div className="pointer-events-none absolute -inset-px rounded-2xl bg-[linear-gradient(120deg,#ff5200,#cc2200,#a71d00,#ff5200)] bg-size-[200%_200%] opacity-0 blur-lg transition duration-500 group-hover:opacity-90 group-hover:animate-[borderFlow_2.5s_linear_infinite]" />
+      <div className="pointer-events-none absolute -inset-px rounded-2xl bg-[linear-gradient(120deg,#ff5200,#cc2200,#a71d00,#ff5200)] bg-size-[200%_200%] opacity-0 transition duration-500 group-hover:opacity-80 group-hover:animate-[borderFlow_2.5s_linear_infinite]" />
       <div className="relative rounded-2xl bg-[#14181F]">{children}</div>
     </div>
   );

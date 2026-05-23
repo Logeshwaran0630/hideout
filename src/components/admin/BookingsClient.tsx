@@ -154,18 +154,18 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking.id} className="border-b border-[#2A2F38] transition-colors hover:bg-[#14181F]">
-                <td className="px-4 py-4 font-mono text-[13px] text-[#FF3A3A]">{booking.booking_code}</td>
+                <td className="px-4 py-4 font-mono text-[13px] text-[#ff5200]">{booking.booking_code}</td>
                 <td className="px-4 py-4 text-[14px] text-[#F5F1EA]">{formatDate(booking.booking_date)}</td>
                 <td className="px-4 py-4 text-[14px] text-[#A0A6AF]">{booking.time_slots?.label}</td>
                 <td className="px-4 py-4">
-                  <div className="font-mono text-[12px] text-[#FF3A3A]">{booking.users?.h_id}</div>
+                  <div className="font-mono text-[12px] text-[#ff5200]">{booking.users?.h_id}</div>
                   <div className="text-[12px] text-[#71717A]">{booking.users?.display_name || booking.users?.email}</div>
                 </td>
                 <td className="px-4 py-4 text-[14px] font-semibold text-[#F5F1EA]">{booking.setups?.display_name || '-'}</td>
                 <td className="px-4 py-4">
                   <span className="rounded-full border border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#FF3A3A]">{booking.session_types?.name}</span>
                 </td>
-                <td className="px-4 py-4 text-[14px] font-semibold text-[#F5F1EA]">₹{booking.total_price}</td>
+                <td className="px-4 py-4 text-[14px] font-semibold text-[#ff5200]">₹{booking.total_price}</td>
                 <td className="px-4 py-4">
                   <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${statusBadgeClasses[booking.status] || statusBadgeClasses.completed}`}>{booking.status}</span>
                 </td>
@@ -232,14 +232,14 @@ function ViewModal({ booking, onClose }: { booking: BookingRow; onClose: () => v
           <button type="button" onClick={onClose} className="rounded-md p-2 text-[#A0A6AF] hover:text-[#F5F1EA]"><X className="h-4 w-4" /></button>
         </div>
         <div className="mt-4 space-y-3 text-[14px] text-[#A0A6AF]">
-          <div><span className="text-[#F5F1EA]">Code:</span> <span className="font-mono text-[#FF3A3A]">{booking.booking_code}</span></div>
+          <div><span className="text-[#F5F1EA]">Code:</span> <span className="font-mono text-[#ff5200]">{booking.booking_code}</span></div>
           <div><span className="text-[#F5F1EA]">Date:</span> {booking.booking_date}</div>
           <div><span className="text-[#F5F1EA]">Time:</span> {booking.time_slots?.label}</div>
           <div><span className="text-[#F5F1EA]">User:</span> {booking.users?.display_name || booking.users?.email}</div>
-          <div><span className="text-[#F5F1EA]">H-ID:</span> <span className="font-mono text-[#FF3A3A]">{booking.users?.h_id}</span></div>
+          <div><span className="text-[#F5F1EA]">H-ID:</span> <span className="font-mono text-[#ff5200]">{booking.users?.h_id}</span></div>
           <div><span className="text-[#F5F1EA]">Setup:</span> {booking.setups?.display_name || '-'}</div>
           <div><span className="text-[#F5F1EA]">Session:</span> {booking.session_types?.name}</div>
-          <div><span className="text-[#F5F1EA]">Price:</span> ₹{booking.total_price}</div>
+          <div><span className="text-[#F5F1EA]">Price:</span> <span className="font-semibold text-[#ff5200]">₹{booking.total_price}</span></div>
           <div><span className="text-[#F5F1EA]">Status:</span> {booking.status}</div>
         </div>
       </div>

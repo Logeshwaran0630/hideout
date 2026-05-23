@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import BookingTicket from "./BookingTicket";
+import RedeemModal from "./RedeemModal";
 
 interface Profile {
   id: string;
@@ -108,6 +109,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [bookingActionMessage, setBookingActionMessage] = useState<string | null>(null);
   const [bookingActionError, setBookingActionError] = useState<string | null>(null);
+  const [isRedeemOpen, setIsRedeemOpen] = useState(false);
 
   const profileData = useMemo(() => (profile ? { ...profile, role: profile.role || "user" } : null), [profile]);
   const isAdmin = profileData?.role === "admin";
@@ -251,36 +253,36 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
   const coinsNeeded = Math.max(100 - coinBalance, 0);
 
   return (
-    <div className="font-body min-h-screen bg-dark-bg text-white">
+    <div className="font-sans min-h-screen bg-[#050508] text-white">
       <div className="border-b border-[rgba(255,82,0,0.16)] bg-[#0A0F18]/50">
         <div className="mx-auto max-w-6xl px-6 py-8">
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.15em] text-devil-orange">Your Account</p>
-          <h1 className="font-title text-4xl uppercase md:text-5xl">My Hideout</h1>
+          <p className="mb-2 text-xs font-sans font-semibold uppercase tracking-[0.15em] text-[#ff5200]">Your Account</p>
+          <h1 className="font-orbitron text-4xl uppercase md:text-5xl" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>My Hideout</h1>
         </div>
       </div>
 
       <div className="mx-auto grid max-w-6xl gap-6 px-6 py-8 lg:grid-cols-[360px_1fr]">
         <div className="space-y-6">
-          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-card-bg p-6">
+          <div className="rounded-2xl border border-[rgba(255,82,0,0.18)] bg-[#0A0F18] p-6">
             <div className="mb-6 flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-devil-orange to-devil-red text-2xl font-bold text-white">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-2xl font-bold text-white" style={{ background: 'linear-gradient(135deg, #ff5200, #cc2200)' }}>
                 {(profileData.display_name || profileData.email).charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-lg font-semibold text-white">{profileData.display_name || "Hideout Player"}</p>
-                <p className="text-sm text-white/60">{profileData.email}</p>
+                <p className="text-lg font-sans font-bold text-white">{profileData.display_name || "Hideout Player"}</p>
+                <p className="text-sm font-sans text-white/60">{profileData.email}</p>
               </div>
             </div>
 
             <div className="mb-5 border-t border-[rgba(255,82,0,0.16)] pt-4">
-              <p className="mb-2 text-xs uppercase tracking-[0.15em] text-white/50">Your H-ID</p>
+              <p className="mb-2 text-xs font-cinzel uppercase tracking-[0.15em] text-[#ff5200]" style={{ fontFamily: 'Cinzel, serif' }}>Your H-ID</p>
               <div className="flex items-center gap-3">
-                <span className="font-mono text-3xl tracking-wider text-devil-orange glow-orange">{profileData.h_id}</span>
-                <button onClick={copyHId} className="text-white/60 transition-colors hover:text-ghost-teal" title="Copy H-ID">
-                  {copied ? <Check size={16} className="text-[#4ADE80]" /> : <Copy size={16} />}
+                <span className="hid-text text-3xl tracking-wider">{profileData.h_id}</span>
+                <button onClick={copyHId} className="text-white/60 transition-colors hover:text-[#ff5200]" title="Copy H-ID">
+                  {copied ? <Check size={16} className="text-[#22C55E]" /> : <Copy size={16} />}
                 </button>
               </div>
-              <p className="mt-2 text-xs text-white/40">Use this ID when booking via WhatsApp.</p>
+              <p className="mt-2 text-xs font-sans text-white/40">Use this ID when booking via WhatsApp.</p>
             </div>
 
             <div className="space-y-2 text-sm text-white/60">
@@ -304,22 +306,22 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
             </button>
           </div>
 
-          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-card-bg p-6">
+          <div className="rounded-2xl border border-[rgba(255,82,0,0.18)] bg-[#0A0F18] p-6">
             <div className="mb-4 flex items-center gap-2">
-              <CircleDollarSign size={20} className="text-devil-orange" />
-              <span className="text-base font-semibold text-white">H Coins</span>
+              <CircleDollarSign size={20} className="text-[#ff5200]" />
+              <span className="text-base font-sans font-bold text-[#ff5200]">H Coins</span>
             </div>
             <div className="mb-4 flex items-end gap-2">
-              <span className="font-title text-5xl text-devil-orange glow-orange">{coinBalance}</span>
-              <span className="mb-1 text-lg text-white/60">coins</span>
+              <span className="font-orbitron text-5xl text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, textShadow: '0 0 8px rgba(255,82,0,0.3), 0 0 16px rgba(255,82,0,0.15)' }}>{coinBalance}</span>
+              <span className="mb-1 text-lg font-sans text-[#ff5200]/80">coins</span>
             </div>
             <div className="mb-2">
-              <div className="mb-1.5 flex justify-between text-xs text-white/55">
+              <div className="mb-1.5 flex justify-between text-xs font-sans text-white/55">
                 <span>{coinsNeeded > 0 ? `${coinsNeeded} more coins to free session` : "Ready for free session!"}</span>
-                <span className="text-ghost-teal">{Math.round(coinProgress)}%</span>
+                <span className="text-[#00d4a0]">{Math.round(coinProgress)}%</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-[#2A2F38]">
-                <div className="h-full rounded-full bg-linear-to-r from-devil-orange to-devil-red transition-all duration-500" style={{ width: `${coinProgress}%` }} />
+              <div className="h-2 w-full rounded-full bg-[#1A1F28]">
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${coinProgress}%`, background: 'linear-gradient(90deg, #ff5200 0%, #ff6600 50%, #cc2200 100%)' }} />
               </div>
             </div>
             <p className="mt-3 text-xs text-white/40">Earn H Coins every time you book a session.</p>
@@ -331,14 +333,14 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-card-bg p-6">
+          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#0A0F18] p-6">
             <div className="mb-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-devil-orange" />
-                <span className="text-base font-semibold text-white">Upcoming Bookings</span>
+                <Calendar className="h-5 w-5 text-[#ff5200]" />
+                <span className="text-base font-sans font-bold text-white">Upcoming Bookings</span>
               </div>
               {upcomingBookings.length > 0 && (
-                <Link href="/slots" className="text-xs font-medium text-devil-orange underline-offset-4 hover:underline">
+                <Link href="/slots" className="text-xs font-sans font-semibold text-[#ff5200] underline-offset-4 hover:text-[#ff6600] hover:underline">
                   + Book more
                 </Link>
               )}
@@ -398,8 +400,8 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                           <div className="text-sm text-white/85">
                             {setup?.display_name || "Setup"} · {sessionType?.name || "Session"}
                           </div>
-                          <div className="font-mono text-xs text-white/40">{booking.booking_code}</div>
-                          <div className="text-sm font-semibold text-devil-orange">₹{booking.total_price}</div>
+                          <div className="booking-code text-xs">{booking.booking_code}</div>
+                          <div className="text-sm font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{booking.total_price}</div>
                           {canCancel ? (
                             <p className="text-[11px] text-white/40">
                               {refundEligible ? "Cancel now for an H Coins refund." : "Cancel now, but no H Coins refund within 2 hours of the slot."}
@@ -411,7 +413,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                         <div className="flex shrink-0 flex-col gap-2">
                           <button
                             onClick={() => setSelectedBooking({ booking, isPast: false })}
-                            className="rounded-lg border border-devil-orange px-3 py-1.5 text-xs text-devil-orange transition hover:bg-[rgba(255,82,0,0.1)]"
+                            className="btn-outline rounded-lg px-3 py-1.5 text-xs"
                           >
                             View Ticket
                           </button>
@@ -419,7 +421,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                             type="button"
                             disabled={!canCancel || cancellingBookingId === booking.id}
                             onClick={() => handleCancelBooking(booking.id)}
-                            className="rounded-lg border border-[#EF4444] px-3 py-1.5 text-xs text-[#EF4444] transition hover:bg-[rgba(239,68,68,0.1)] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="btn-danger rounded-lg px-3 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {cancellingBookingId === booking.id ? "Cancelling..." : canCancel ? "Cancel Booking" : "Cannot Cancel"}
                           </button>
@@ -429,7 +431,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                   );
                 })}
 
-                <Link href="/slots" className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-[#2A2F38] py-2.5 text-sm font-medium text-white/65 transition-all hover:border-devil-orange hover:text-white">
+                <Link href="/slots" className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-[#1A1F28] py-2.5 text-sm font-sans font-semibold text-[#ff5200] transition-all hover:border-[#ff5200] hover:bg-[rgba(255,82,0,0.06)] hover:text-[#ff6600] hover:underline">
                   <Gamepad2 size={14} />
                   Book Another Slot
                 </Link>
@@ -437,10 +439,10 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
             )}
           </div>
 
-          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-card-bg p-6">
+          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#0A0F18] p-6">
             <div className="mb-4 flex items-center gap-2">
               <History className="h-5 w-5 text-white/55" />
-              <span className="text-base font-semibold text-white">Past Bookings</span>
+              <span className="text-base font-sans font-bold text-white">Past Bookings</span>
             </div>
 
             {loading ? (
@@ -463,23 +465,23 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1.5">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-xs text-white/45">{booking.booking_code}</span>
-                            <span className="rounded-full border border-[rgba(74,222,128,0.2)] bg-[rgba(74,222,128,0.08)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#4ADE80]">
+                            <span className="booking-code text-xs">{booking.booking_code}</span>
+                            <span className="rounded-full border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-2 py-0.5 text-[10px] font-sans font-semibold uppercase tracking-[0.15em] text-[#22C55E]">
                               Completed
                             </span>
                           </div>
-                          <div className="text-sm text-white/85">
+                          <div className="text-sm text-white/85 font-sans">
                             {setup?.display_name || "Setup"} · {sessionType?.name || "Session"}
                           </div>
-                          <div className="text-xs text-white/45">
+                          <div className="text-xs font-sans text-white/45">
                             {formatDate(booking.booking_date)} · {timeSlot?.label || "Time TBD"}
                           </div>
-                          <div className="text-sm font-semibold text-devil-orange">₹{booking.total_price}</div>
+                          <div className="text-sm font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{booking.total_price}</div>
                         </div>
                         <button
                           type="button"
                           onClick={() => setSelectedBooking({ booking, isPast: true })}
-                          className="shrink-0 rounded-lg border border-[#2A2F38] px-3 py-1.5 text-xs text-white/65 transition hover:border-devil-orange hover:text-devil-orange"
+                          className="btn-outline shrink-0 rounded-lg px-3 py-1.5 text-xs"
                         >
                           View Ticket
                         </button>
@@ -491,25 +493,42 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
             )}
           </div>
 
-          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-card-bg p-6">
-            <span className="mb-4 block text-base font-semibold text-white">Quick Actions</span>
+          <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#0A0F18] p-6">
+              <span className="mb-4 block text-base font-sans font-bold text-white">Quick Actions</span>
             <div className="grid grid-cols-2 gap-3">
               <Link href="/slots" className="group flex flex-col items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#0A0F18] p-4 text-center transition-all hover:border-devil-orange">
                 <Gamepad2 size={20} className="text-devil-orange" />
-                <span className="text-xs font-medium text-white">Book a Slot</span>
+                <span className="text-xs font-medium text-devil-orange">Book a Slot</span>
               </Link>
-              <div className="flex cursor-not-allowed flex-col items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#0A0F18] p-4 text-center opacity-50">
-                <Gift size={20} className="text-white/45" />
-                <span className="text-xs font-medium text-white/50">Redeem Coins</span>
-                <span className="text-[10px] text-white/35">Coming soon</span>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsRedeemOpen(true)}
+                disabled={coinBalance < 100}
+                className="flex flex-col items-center gap-2 rounded-lg border border-[#2A2F38] bg-[#0A0F18] p-4 text-center transition-all hover:border-devil-orange disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Gift size={20} className="text-devil-orange/70" />
+                <span className="text-xs font-medium text-devil-orange">Redeem Coins</span>
+                <span className="text-[10px] text-white/35">{coinBalance >= 100 ? "1-hour solo session" : "Need 100 coins"}</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
+      {profileData ? (
+        <RedeemModal
+          isOpen={isRedeemOpen}
+          onClose={() => setIsRedeemOpen(false)}
+          onSuccess={() => {
+            setIsRedeemOpen(false);
+            router.refresh();
+          }}
+          currentBalance={coinBalance}
+        />
+      ) : null}
+
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black/95 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto p-4" style={{ background: 'rgba(5,5,8,0.85)', backdropFilter: 'blur(8px)' }}>
           <div className="relative w-full max-w-md">
             <button
               type="button"

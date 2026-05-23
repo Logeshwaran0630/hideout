@@ -10,10 +10,23 @@ export async function GET() {
       .select('*')
       .order('sort_order');
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('GET setups error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    return NextResponse.json({ setups });
+    return NextResponse.json(
+      { setups },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (err) {
+    console.error('GET setups catch:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -23,7 +36,9 @@ export async function PUT(request: Request) {
     const supabase = await createServerSupabaseClient();
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { data: adminUser } = await supabase
       .from('users')
@@ -31,49 +46,32 @@ export async function PUT(request: Request) {
       .eq('id', user.id)
       .single();
 
-    if (adminUser?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (adminUser?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const body = await request.json();
-    const { setupId, isActive, maintenanceReason } = body;
+    const { setupId, isActive } = body;
 
     if (!setupId) {
       return NextResponse.json({ error: 'Setup ID required' }, { status: 400 });
     }
 
-    // First check if setup exists
-    const { data: existingSetup, error: fetchError } = await supabase
-      .from('setups')
-      .select('id, is_active')
-      .eq('id', setupId)
-      .single();
-
-    if (fetchError || !existingSetup) {
-      return NextResponse.json({ error: 'Setup not found' }, { status: 404 });
-    }
-
-    // Update the setup
-    const { error: updateError } = await supabase
+    const { data: updatedRows, error } = await supabase
       .from('setups')
       .update({
         is_active: isActive,
-        maintenance_reason: maintenanceReason || null,
         updated_at: new Date().toISOString()
       })
-      .eq('id', setupId);
+      .eq('id', setupId)
+      .select();
 
-    if (updateError) {
-      console.error('Setup update error:', updateError);
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    if (error) {
+      console.error('PUT setups error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Return the updated setup
-    const { data: updatedSetup } = await supabase
-      .from('setups')
-      .select('*')
-      .eq('id', setupId)
-      .single();
-
-    return NextResponse.json({ success: true, setup: updatedSetup });
+    return NextResponse.json({ success: true, setup: updatedRows?.[0] ?? null });
   } catch (err) {
     console.error('Setup API error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

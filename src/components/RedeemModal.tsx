@@ -43,7 +43,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookedSlotIds, setBookedSlotIds] = useState<string[]>([]);
-  const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [slotsLoading, setSlotsLoading] = useState(true);
   const [loadingRedeem, setLoadingRedeem] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingCode, setBookingCode] = useState("");
@@ -70,7 +70,9 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
     setStep("select");
     setSelectedDate("");
     setSelectedSlot(null);
+    setTimeSlots([]);
     setBookedSlotIds([]);
+    setSlotsLoading(true);
     setError(null);
     setBookingCode("");
   }, [isOpen]);
@@ -100,40 +102,65 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !selectedDate) return;
+    if (!isOpen) return;
 
     let active = true;
 
-    async function fetchAvailability() {
-      setLoadingAvailability(true);
+    async function fetchTimeSlots() {
+      setSlotsLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/bookings?date=${selectedDate}`, {
-        cache: "no-store",
-      });
+      try {
+        const { data, error } = await supabase.from("time_slots").select("*").order("sort_order");
 
-      if (!response.ok) {
-        throw new Error("Availability failed");
+        if (!active) return;
+
+        if (error) {
+          console.error("Time slots error:", error);
+          setError("Failed to load time slots");
+        } else if (data) {
+          setTimeSlots(data as TimeSlot[]);
+          console.log("Time slots loaded:", data.length);
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error("Time slots fetch error:", err);
+        setError("Failed to load time slots");
+      } finally {
+        if (active) {
+          setSlotsLoading(false);
+        }
       }
-
-      const payload = (await response.json()) as {
-        time_slots: TimeSlot[];
-        booked_slot_ids: string[];
-      };
-
-      if (!active) return;
-
-      setTimeSlots(payload.time_slots ?? []);
-      setBookedSlotIds(payload.booked_slot_ids ?? []);
-      setSelectedSlot(null);
-      setLoadingAvailability(false);
     }
 
-    fetchAvailability().catch(() => {
-      if (!active) return;
-      setLoadingAvailability(false);
-      setError("Couldn't load available slots. Please try again.");
-    });
+    async function fetchBookedSlots() {
+      if (!selectedDate) {
+        setBookedSlotIds([]);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("bookings")
+          .select("time_slot_id")
+          .eq("booking_date", selectedDate)
+          .eq("status", "confirmed");
+
+        if (!active) return;
+
+        if (error) {
+          console.error("Booked slots error:", error);
+        } else if (data) {
+          setBookedSlotIds(data.map((booking: { time_slot_id: string | null }) => booking.time_slot_id).filter((id): id is string => Boolean(id)));
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error("Booked slots fetch error:", err);
+      }
+    }
+
+    fetchTimeSlots();
+    fetchBookedSlots();
 
     return () => {
       active = false;
@@ -146,7 +173,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
     setLoadingRedeem(true);
     setError(null);
 
-    const response = await fetch("/api/redemptions", {
+    const response = await fetch("/api/redemptions/redeem", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -181,6 +208,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
   if (!isOpen) return null;
 
+  const canRedeem = currentBalance >= coinsForFreeSession;
   const coinProgress = Math.min((currentBalance / coinsForFreeSession) * 100, 100);
 
   return (
@@ -188,15 +216,15 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#2A2F38] bg-[#14181F] text-[#F5F1EA] shadow-2xl">
         {step === "success" ? (
           <div className="p-8 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#FF4500] bg-[rgba(255,69,0,0.14)] glow-box">
-              <CheckCircle2 className="h-8 w-8 text-[#FF4500]" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#ff5200] bg-[rgba(255,82,0,0.14)] glow-box">
+              <CheckCircle2 className="h-8 w-8 text-[#ff5200]" />
             </div>
             <h2 className="mt-5 font-heading text-[32px] uppercase text-[#F5F1EA]">FREE SESSION REDEEMED</h2>
             <p className="mt-2 text-[14px] text-[#A0A6AF]">Your booking is confirmed and {coinsForFreeSession} H Coins were deducted.</p>
 
             <div className="mt-6 rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-5">
               <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#A0A6AF]">Booking Code</div>
-              <div className="mt-2 font-mono text-[28px] tracking-widest text-[#FF4500]">{bookingCode}</div>
+              <div className="mt-2 font-mono text-[28px] tracking-widest text-[#ff5200]">{bookingCode}</div>
             </div>
 
             <button type="button" onClick={finish} className="btn-primary mt-6 w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#F5F1EA]">
@@ -207,7 +235,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
           <>
             <div className="flex items-center justify-between border-b border-[#2A2F38] p-6">
               <div className="flex items-center gap-3">
-                <Gift className="h-6 w-6 text-[#FF4500]" />
+                <Gift className="h-6 w-6 text-[#ff5200]" />
                 <div>
                   <h2 className="text-[22px] font-semibold text-[#F5F1EA]">Redeem Free Session</h2>
                   <p className="mt-1 text-[13px] text-[#A0A6AF]">{coinsForFreeSession} H Coins gets you one solo hour.</p>
@@ -222,10 +250,10 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
               <div className="rounded-xl border border-[rgba(255,69,0,0.24)] bg-[rgba(255,69,0,0.08)] p-4">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-[13px] text-[#A0A6AF]">H Coins Balance</span>
-                  <span className="font-heading text-[28px] uppercase text-[#FF4500]">{currentBalance}</span>
+                  <span className="font-heading text-[28px] uppercase text-[#ff5200]">{currentBalance}</span>
                 </div>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#2A2F38]">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#FF4500] to-[#FF5722] transition-all duration-500" style={{ width: `${coinProgress}%` }} />
+                  <div className="h-full rounded-full bg-linear-to-r from-[#ff5200] to-[#cc2200] transition-all duration-500" style={{ width: `${coinProgress}%` }} />
                 </div>
                 <p className="mt-2 text-[12px] text-[#A0A6AF]">
                   {currentBalance >= coinsForFreeSession ? "You have enough coins to redeem a free session." : `Need ${coinsForFreeSession - currentBalance} more coins to redeem.`}
@@ -233,16 +261,16 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
               </div>
 
               <div className="mt-6 flex items-center justify-center gap-3">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "select" ? "bg-[#FF4500] text-[#0A0F18]" : "bg-[#2A2F38] text-[#A0A6AF]"}`}>1</div>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "select" ? "bg-[#ff5200] text-[#0A0F18]" : "bg-[#2A2F38] text-[#A0A6AF]"}`}>1</div>
                 <div className="h-px w-16 bg-[#2A2F38]" />
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "confirm" ? "bg-[#FF4500] text-[#0A0F18]" : "bg-[#2A2F38] text-[#A0A6AF]"}`}>2</div>
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-[13px] font-semibold ${step === "confirm" ? "bg-[#ff5200] text-[#0A0F18]" : "bg-[#2A2F38] text-[#A0A6AF]"}`}>2</div>
               </div>
 
               {step === "select" ? (
                 <div className="mt-6 space-y-6">
                   <div>
                     <div className="flex items-center gap-2 text-[13px] font-medium text-[#F5F1EA]">
-                      <Calendar className="h-4 w-4 text-[#FF4500]" />
+                      <Calendar className="h-4 w-4 text-[#ff5200]" />
                       Select Date
                     </div>
                     <div className="mt-4 grid grid-cols-4 gap-2 md:grid-cols-7">
@@ -253,7 +281,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                           onClick={() => setSelectedDate(date.value)}
                           className={`rounded-lg border p-2 text-center transition-all duration-150 ${
                             selectedDate === date.value
-                              ? "border-[#FF4500] bg-[#2A2F38] glow-box"
+                                ? "border-[#ff5200] bg-[#2A2F38] glow-box"
                               : "border-[#2A2F38] bg-[#0A0F18] text-[#A0A6AF] hover:border-[#22C55E]"
                           }`}
                         >
@@ -269,11 +297,11 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                   {selectedDate ? (
                     <div>
                       <div className="flex items-center gap-2 text-[13px] font-medium text-[#F5F1EA]">
-                        <Clock className="h-4 w-4 text-[#FF4500]" />
+                        <Clock className="h-4 w-4 text-[#ff5200]" />
                         Select Time Slot
                       </div>
 
-                      {loadingAvailability ? (
+                      {slotsLoading ? (
                         <div className="mt-4 grid gap-2 md:grid-cols-2">
                           {Array.from({ length: 6 }).map((_, index) => (
                             <div key={index} className="h-14 animate-pulse rounded-lg border border-[#2A2F38] bg-[#0A0F18]" />
@@ -293,7 +321,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                                 onClick={() => setSelectedSlot(slot)}
                                 className={`rounded-lg border px-4 py-3 text-left text-[13px] transition-all duration-150 ${
                                   isSelected
-                                    ? "border-[#FF4500] bg-[#2A2F38] text-[#F5F1EA] glow-box"
+                                    ? "border-[#ff5200] bg-[#2A2F38] text-[#F5F1EA] glow-box"
                                     : isBooked
                                       ? "cursor-not-allowed border-[#2A2F38] bg-[#0A0F18] text-[#71717A] opacity-50"
                                       : "border-[#2A2F38] bg-[#0A0F18] text-[#A0A6AF] hover:border-[#4ADE80] hover:text-[#F5F1EA]"
@@ -339,7 +367,9 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                     ].map((item) => (
                       <div key={item.label} className="flex items-center justify-between border-b border-[#2A2F38] py-3 last:border-b-0">
                         <span className="text-[13px] text-[#A0A6AF]">{item.label}</span>
-                        <span className="text-right text-[14px] font-semibold text-[#F5F1EA]">{item.value}</span>
+                        <span className={`text-right text-[14px] font-semibold ${item.label === "Price" || item.label === "Coins" ? "text-[#ff5200]" : "text-[#F5F1EA]"}`}>
+                          {item.value}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -362,8 +392,8 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                     <button
                       type="button"
                       onClick={handleConfirmRedeem}
-                      disabled={loadingRedeem}
-                      className="flex-1 rounded-lg bg-gradient-to-r from-[#FF4500] to-[#FF5722] px-5 py-3 text-[14px] font-semibold text-[#F5F1EA] transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={loadingRedeem || !canRedeem}
+                      className="flex-1 rounded-lg bg-linear-to-r from-[#ff5200] to-[#cc2200] px-5 py-3 text-[14px] font-semibold text-[#F5F1EA] transition-all disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {loadingRedeem ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Redeeming...</span> : "Confirm Redemption"}
                     </button>

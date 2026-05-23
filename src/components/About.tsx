@@ -10,9 +10,9 @@ export default function About() {
       <div className="mx-auto max-w-6xl">
         <ScrollReveal>
           <div className="mb-12 text-center">
-            <span className="text-sm uppercase tracking-wider text-[#FF4500]">About Us</span>
+            <span className="text-sm uppercase tracking-wider text-[#ff5200]">About Us</span>
             <h2 className="mt-2 font-display text-4xl font-black uppercase tracking-tight md:text-5xl">Welcome to The Hideout</h2>
-            <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-[#FF4500] to-[#FF5722]" />
+            <div className="neon-divider mx-auto mt-4 h-1 w-20 rounded-full bg-linear-to-r from-[#ff5200] to-[#cc2200]" />
           </div>
         </ScrollReveal>
 
