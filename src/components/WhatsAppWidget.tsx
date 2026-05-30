@@ -4,7 +4,50 @@ import { useEffect, useState } from "react";
 import { Calendar, Flag, HelpCircle, MessageCircle, Send, Trophy, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919876543210";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "917358206762";
+
+const bookingTemplate = `Hi Hideout Team! 👋
+
+I want to book a slot at The Hideout.
+
+📅 Date: _____
+⏰ Time: _____
+👥 Session Type: _____
+
+My H-ID: _____
+
+Please confirm availability. Thanks!`;
+
+const questionTemplate = `Hi Hideout Team! 👋
+
+I have a question about The Hideout.
+
+❓ My question: _____
+
+My H-ID: _____ (if registered)
+
+Please get back to me.`;
+
+const issueTemplate = `Hi Hideout Team! 👋
+
+I'm experiencing an issue.
+
+⚠️ Issue description: _____
+
+My H-ID: _____
+
+Please help resolve this.`;
+
+const tournamentTemplate = `Hi Hideout Team! 👋
+
+I'm interested in tournaments at The Hideout! 🏆
+
+🎮 Game interested in: _____
+👥 Team size: _____
+
+My H-ID: _____
+
+Please share tournament schedule and prize details.`;
 
 interface QuickAction {
   icon: React.ReactNode;
@@ -65,29 +108,21 @@ export default function WhatsAppWidget() {
   }, []);
 
   const generateMessage = (action: string) => {
-    const currentHId = userHId
-      ? userHId.startsWith("HID-")
-        ? userHId
-        : `HID-${userHId}`
-      : null;
-
-    const baseMessage = `*THE HIDEOUT - BOOKING REQUEST*\n\n`;
-
     const templates: Record<string, string> = {
-      booking: `${baseMessage}${isLoggedIn ? `*H-ID:* ${currentHId}\n\n` : `*Not logged in* - Please sign up at hideout.vercel.app\n\n`}*I want to book:*\n\nExample format:\n${currentHId || "HID-XXXXXX"} [DATE] [TIME] [SESSION]\n\nExamples:\n- ${currentHId || "HID-000001"} tomorrow 7pm duo\n- ${currentHId || "HID-000001"} may 16 8pm squad\n- ${currentHId || "HID-000001"} friday 3pm solo\n\n--------------------\n\n*My booking:*\n${currentHId || "HID-______"} ________ __ __\n\n--------------------\n\nThe Hideout, Chennai\nOpen 11 AM - Midnight\n\nPlease confirm my booking. Thanks!`,
-      example: `${baseMessage}*Example Messages You Can Send:*\n\n1. HID-000001 tomorrow 7pm duo\n2. HID-000001 may 16 8pm squad\n3. HID-000001 friday 3pm solo\n\n--------------------\n\n*Date words:* today, tomorrow, [day name] e.g., monday, [date] e.g., may 16\n\n*Time:* 7pm, 8pm, 3pm, 9pm etc.\n\n*Session:* solo (1 player), duo (2 players), squad (4 players)\n\n--------------------\n\n*Your H-ID:* ${currentHId || "Sign up to get H-ID"}\n\nSend your booking request and we'll confirm!`,
-      help: `${baseMessage}*Need Help?*\n\nTo book a slot, send:\n${currentHId || "HID-XXXXXX"} [date] [time] [session]\n\n*Examples:*\n- ${currentHId || "HID-000001"} tomorrow 7pm duo\n- ${currentHId || "HID-000001"} may 16 8pm squad\n- ${currentHId || "HID-000001"} friday 3pm solo\n\n--------------------\n\nVisit our website: hideout.vercel.app\nCall us: +91 XXXXX XXXXX\n\nWe'll respond shortly!`,
-      myhid: `${baseMessage}*Your H-ID Information*\n\n${isLoggedIn ? `*Your H-ID:* ${currentHId}\n\nYou can use this ID to book slots:\nSend: ${currentHId} tomorrow 7pm duo\n\n--------------------\n\n*Don't have an H-ID?*\nSign up at hideout.vercel.app\n\nIt's free and takes 1 minute!` : `*You are not logged in*\n\nPlease sign up at hideout.vercel.app to get your unique H-ID.\n\nIt's free and takes 1 minute!\n\nAfter signup, you can book slots via WhatsApp.`}`,
+      booking: bookingTemplate,
+      question: questionTemplate,
+      issue: issueTemplate,
+      tournament: tournamentTemplate,
     };
 
-    return templates[action] || templates.booking;
+    return templates[action] || bookingTemplate;
   };
 
   const quickActions: QuickAction[] = [
     { icon: <Calendar className="h-4 w-4" />, label: "Book a Slot", message: generateMessage("booking") },
-    { icon: <HelpCircle className="h-4 w-4" />, label: "How to Book", message: generateMessage("example") },
-    { icon: <Flag className="h-4 w-4" />, label: "Need Help?", message: generateMessage("help") },
-    { icon: <Trophy className="h-4 w-4" />, label: "My H-ID", message: generateMessage("myhid") },
+    { icon: <HelpCircle className="h-4 w-4" />, label: "Ask a Question", message: generateMessage("question") },
+    { icon: <Flag className="h-4 w-4" />, label: "Report an Issue", message: generateMessage("issue") },
+    { icon: <Trophy className="h-4 w-4" />, label: "Tournaments", message: generateMessage("tournament") },
   ];
 
   const openWhatsApp = (message: string) => {

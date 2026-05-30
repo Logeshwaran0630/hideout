@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { cancelCalendarEvent, createCalendarEvent } from "@/lib/googleCalendar";
 import { sendBookingConfirmationEmail } from "@/lib/email";
 import type { Booking, User } from "@/lib/emailService";
+import { assertTimeSlotIsBookable } from "@/lib/timeSlotAvailability";
 
 type RescheduleRequestBody = {
   bookingId?: string;
@@ -80,6 +81,11 @@ export async function POST(request: Request) {
 
     if (slotError || !newTimeSlot) {
       return NextResponse.json({ error: "Invalid time slot" }, { status: 400 });
+    }
+
+    const availability = await assertTimeSlotIsBookable(supabase, body.newDate, body.newTimeSlotId);
+    if (!availability.allowed) {
+      return NextResponse.json({ error: availability.message }, { status: 400 });
     }
 
     const { data: conflict } = await supabase

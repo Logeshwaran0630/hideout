@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { createCalendarEvent } from "@/lib/googleCalendar";
 import { sendBookingConfirmationEmail } from "@/lib/email";
+import { assertTimeSlotIsBookable } from "@/lib/timeSlotAvailability";
 
 type RedemptionRequestBody = {
   booking_date?: string;
@@ -90,6 +91,11 @@ export async function POST(request: Request) {
 
     if (timeSlotError || !timeSlot) {
       return NextResponse.json({ error: "Invalid time slot" }, { status: 400 });
+    }
+
+    const availability = await assertTimeSlotIsBookable(supabase, booking_date, time_slot_id);
+    if (!availability.allowed) {
+      return NextResponse.json({ error: availability.message }, { status: 400 });
     }
 
     const { data: existingBooking } = await supabase

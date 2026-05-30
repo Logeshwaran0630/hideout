@@ -312,7 +312,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
               <span className="text-base font-sans font-bold text-[#ff5200]">H Coins</span>
             </div>
             <div className="mb-4 flex items-end gap-2">
-              <span className="font-orbitron text-5xl text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, textShadow: '0 0 8px rgba(255,82,0,0.3), 0 0 16px rgba(255,82,0,0.15)' }}>{coinBalance}</span>
+              <span className="hcoin-balance text-[#ff5200]">{coinBalance}</span>
               <span className="mb-1 text-lg font-sans text-[#ff5200]/80">coins</span>
             </div>
             <div className="mb-2">
@@ -401,7 +401,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                             {setup?.display_name || "Setup"} · {sessionType?.name || "Session"}
                           </div>
                           <div className="booking-code text-xs">{booking.booking_code}</div>
-                          <div className="text-sm font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{booking.total_price}</div>
+                          <div className="price-text text-sm font-bold">₹{booking.total_price}</div>
                           {canCancel ? (
                             <p className="text-[11px] text-white/40">
                               {refundEligible ? "Cancel now for an H Coins refund." : "Cancel now, but no H Coins refund within 2 hours of the slot."}
@@ -476,7 +476,7 @@ export default function ProfileClient({ profile }: { profile: Profile | null }) 
                           <div className="text-xs font-sans text-white/45">
                             {formatDate(booking.booking_date)} · {timeSlot?.label || "Time TBD"}
                           </div>
-                          <div className="text-sm font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{booking.total_price}</div>
+                          <div className="price-text text-sm font-bold">₹{booking.total_price}</div>
                         </div>
                         <button
                           type="button"

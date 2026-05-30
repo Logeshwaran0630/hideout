@@ -1,7 +1,11 @@
 @import "tailwindcss";
+@import "@fontsource/bebas-neue/400.css";
 @import "@fontsource/orbitron/900.css";
 @import "@fontsource/cinzel/400.css";
 @import "@fontsource/cinzel/600.css";
+@import "@fontsource/rajdhani/400.css";
+@import "@fontsource/rajdhani/600.css";
+@import "@fontsource/rajdhani/700.css";
 @import "@fontsource/nunito-sans/400.css";
 @import "@fontsource/nunito-sans/600.css";
 @import "@fontsource/nunito-sans/700.css";
@@ -70,7 +74,7 @@ html {
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Rajdhani', sans-serif;
   overflow-x: hidden;
   width: 100%;
   position: relative;
@@ -348,6 +352,13 @@ label {
     font-weight: 700;
   }
 
+  button:not(.no-style),
+  .btn-primary,
+  .btn-outline,
+  a[class*="btn"] {
+    cursor: pointer;
+  }
+
   /* ---- Button Styles ---- */
 
   .btn-primary {
@@ -446,18 +457,76 @@ label {
 
   .price-text {
     color: #ff5200 !important;
-    font-family: "JetBrains Mono", monospace !important;
-    font-weight: 700 !important;
+    font-family: "Bebas Neue", sans-serif !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.08em !important;
   }
 
+  .number-bebas,
+  .number-bebas-lg,
+  .number-bebas-xl,
+  .number-font,
+  .price-number,
+  .amount-number,
+  .balance-number,
+  .booking-number,
+  .stat-number,
+  .hcoin-balance,
   .hid-text,
   .h-id,
   .booking-code {
     color: #ff5200 !important;
-    font-family: "JetBrains Mono", monospace !important;
-    font-weight: 700 !important;
+    font-family: "Bebas Neue", sans-serif !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.08em !important;
     text-shadow: 0 0 8px rgba(255, 82, 0, 0.3), 0 0 16px rgba(255, 82, 0, 0.15) !important;
     animation: glow-breathe 3s ease-in-out infinite;
+  }
+
+  .number-bebas-lg,
+  .hcoin-balance {
+    font-size: 2rem !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .price-large {
+    font-size: 2rem !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .price-medium {
+    font-size: 1.5rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .stat-red {
+    color: #ef4444 !important;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.3), 0 0 16px rgba(239, 68, 68, 0.15) !important;
+  }
+
+  .stat-green {
+    color: #22c55e !important;
+    text-shadow: 0 0 8px rgba(34, 197, 94, 0.3), 0 0 16px rgba(34, 197, 94, 0.15) !important;
+  }
+
+  .stat-yellow {
+    color: #eab308 !important;
+    text-shadow: 0 0 8px rgba(234, 179, 8, 0.3), 0 0 16px rgba(234, 179, 8, 0.15) !important;
+  }
+
+  .stat-blue {
+    color: #3B82F6 !important;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3), 0 0 16px rgba(59, 130, 246, 0.15) !important;
+  }
+
+  .stat-cyan {
+    color: #06B6D4 !important;
+    text-shadow: 0 0 8px rgba(6, 182, 212, 0.3), 0 0 16px rgba(6, 182, 212, 0.15) !important;
+  }
+
+  .number-bebas-xl {
+    font-size: 3rem !important;
+    letter-spacing: 0.14em !important;
   }
 
   /* ---- Card Styles ---- */

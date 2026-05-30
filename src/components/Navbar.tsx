@@ -109,7 +109,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <div className="hidden items-center gap-2 rounded-md border border-[rgba(0,212,160,0.22)] bg-[rgba(0,212,160,0.08)] px-3 py-1.5 md:flex">
                 <Coins className="h-4 w-4 text-[#ff5200]" />
-                <span className="font-mono text-sm font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>{hCoins}</span>
+                <span className="price-text text-sm font-bold">{hCoins}</span>
               </div>
               <div className="hidden items-center gap-2 rounded-md border border-[rgba(255,82,0,0.3)] bg-[rgba(255,82,0,0.05)] px-3 py-1.5 md:flex">
                 <span className="hid-text text-xs">{hId}</span>

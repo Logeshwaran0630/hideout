@@ -87,14 +87,14 @@ export default function UsersClient({ users, bookingCounts, coinLedger }: { user
           <tbody>
             {derived.map((user) => (
               <tr key={user.id} className="border-b border-[#2A2F38] transition-colors hover:bg-[#0A0F18]">
-                <td className="px-4 py-4 font-mono text-[13px] text-[#FF4500]">{user.h_id}</td>
+                <td className="px-4 py-4 hid-text text-[13px]">{user.h_id}</td>
                 <td className="px-4 py-4">
                   <div className="text-[14px] font-semibold text-[#F5F1EA]">{user.display_name || 'Hideout Player'}</div>
                   <div className="text-[12px] text-[#A0A6AF]">{user.email}</div>
                 </td>
                 <td className="px-4 py-4 text-[13px] text-[#A0A6AF]">{formatDate(user.created_at)}</td>
                 <td className="px-4 py-4 text-[14px] font-semibold text-[#F5F1EA]">{user.bookings}</td>
-                <td className="px-4 py-4 text-[14px] font-semibold text-[#FF4500]">{user.coins}</td>
+                <td className="px-4 py-4 price-text text-[14px] font-semibold">{user.coins}</td>
                 <td className="px-4 py-4">
                   <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${user.role === 'admin' ? 'border-[#FF4500] bg-[rgba(255,69,0,0.15)] text-[#FF4500]' : 'border-[#2A2F38] bg-[#14181F] text-[#A0A6AF]'}`}>{user.role === 'admin' ? 'ADMIN' : 'USER'}</span>
                 </td>
@@ -116,9 +116,9 @@ export default function UsersClient({ users, bookingCounts, coinLedger }: { user
               <h2 className="font-heading text-[32px] uppercase text-[#F5F1EA]">ADJUST H COINS</h2>
               <button type="button" onClick={() => setSelectedUser(null)} className="rounded-md p-2 text-[#A0A6AF] hover:text-[#F5F1EA]"><X className="h-4 w-4" /></button>
             </div>
-            <div className="mt-4 font-mono text-[13px] text-[#FF4500]">{selectedUser.h_id}</div>
+            <div className="mt-4 hid-text text-[13px]">{selectedUser.h_id}</div>
             <div className="text-[14px] text-[#F5F1EA]">{selectedUser.display_name || selectedUser.email}</div>
-            <div className="mt-4 font-heading text-[48px] uppercase text-[#FF4500]">{derived.find((entry) => entry.id === selectedUser.id)?.coins ?? 0}<span className="text-[18px] text-[#A0A6AF]"> H Coins</span></div>
+            <div className="mt-4 number-bebas-xl uppercase text-[#FF4500]">{derived.find((entry) => entry.id === selectedUser.id)?.coins ?? 0}<span className="text-[18px] text-[#A0A6AF]"> H Coins</span></div>
             <label className="mt-6 block">
               <div className="text-[13px] font-medium text-[#F5F1EA]">Amount to add or deduct</div>
               <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="e.g. 10 or -10" className="mt-2 w-full rounded-lg border border-[#2A2F38] bg-[#0A0F18] px-4 py-3 text-[#F5F1EA] outline-none focus:border-[#FF4500]" />

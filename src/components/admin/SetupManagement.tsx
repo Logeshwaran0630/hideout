@@ -141,7 +141,7 @@ export default function SetupManagement() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{setting.price}</div>
+                  <div className="price-text text-2xl">₹{setting.price}</div>
                   <div className="text-xs font-sans text-[#22C55E]">+{setting.h_coins_earned} H Coins</div>
                 </div>
               </div>

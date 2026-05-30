@@ -138,7 +138,7 @@ export default function ScanBookingClient({ booking }: ScanBookingClientProps) {
             {/* Amount */}
             <div className="bg-[#0A0F18] rounded-xl p-4 text-center">
               <div className="text-xs text-[#A0A6AF]">Total Amount</div>
-              <div className="text-3xl font-bold text-[#FF4500]">Rs. {booking.total_price.toLocaleString('en-IN')}</div>
+              <div className="price-text text-3xl font-bold">Rs. {booking.total_price.toLocaleString('en-IN')}</div>
             </div>
 
             {/* Error Display */}

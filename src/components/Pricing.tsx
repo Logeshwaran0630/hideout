@@ -37,7 +37,7 @@ export default function Pricing() {
                     )}
                     <h3 className="font-heading text-2xl font-bold text-[#F5F1EA]">{plan.name}</h3>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-[#FF4500]">₹{plan.price}</span>
+                      <span className="price-text text-4xl font-bold">₹{plan.price}</span>
                       <span className="text-[#A0A6AF]">/hr</span>
                     </div>
                     <p className="mt-2 text-sm text-[#A0A6AF]">Up to {plan.players} player(s)</p>

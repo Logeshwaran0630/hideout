@@ -60,7 +60,7 @@ export default function SetupCard({ setup, isSelected, onSelect }: SetupCardProp
 
       <div className="mt-5 flex items-end justify-between gap-3 border-t border-[#1A1F28] pt-4">
         <div>
-          <div className="text-[26px] uppercase text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {setup.base_price}</div>
+          <div className="price-text text-[26px] uppercase">Rs. {setup.base_price}</div>
           <div className="text-[12px] text-[#6B7280] font-sans">starting price</div>
         </div>
         <div className="text-right text-[12px] text-[#A0A6AF] font-sans">

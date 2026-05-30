@@ -111,7 +111,9 @@ export default function BookingTicket({
             .header h2 { margin: 0; font-size: 28px; letter-spacing: 0.1em; font-family: 'Orbitron', sans-serif; }
             .header p { margin: 6px 0 0; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.8; }
             .body { padding: 20px; }
-            .code { font-size: 26px; font-family: monospace; color: #ff5200; text-align: center; margin-bottom: 18px; letter-spacing: 0.08em; }
+            .code, .amount, .coin, .hid { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; }
+            .code { font-size: 26px; color: #ff5200; text-align: center; margin-bottom: 18px; }
+            .amount { color: #ff5200; }
             .detail { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #2A2F38; }
             .detail span:first-child { color: #A0A6AF; }
             .footer { background: #0A0F18; padding: 14px 16px; text-align: center; font-size: 12px; color: #A0A6AF; }
@@ -129,9 +131,9 @@ export default function BookingTicket({
               <div class="detail"><span>Time</span><span>${formatTimeRange(timeSlot)}</span></div>
               <div class="detail"><span>Setup</span><span>${setup?.display_name || "Standard"}</span></div>
               <div class="detail"><span>Session</span><span>${sessionType?.name || "Standard"}</span></div>
-              <div class="detail"><span>H Coins</span><span>+${earnedCoins}</span></div>
-              <div class="detail"><span>H-ID</span><span>${hId}</span></div>
-              <div class="detail"><span>Amount</span><span>₹${booking.total_price}</span></div>
+              <div class="detail"><span>H Coins</span><span class="coin">+${earnedCoins}</span></div>
+              <div class="detail"><span>H-ID</span><span class="hid">${hId}</span></div>
+              <div class="detail"><span>Amount</span><span class="amount">₹${booking.total_price}</span></div>
             </div>
             <div class="footer">Show this ticket at the counter</div>
           </div>
@@ -168,7 +170,7 @@ export default function BookingTicket({
 
           <div className="text-center">
             <div className="text-xs uppercase tracking-[0.22em] text-[#A0A6AF]">Booking Code</div>
-            <div className="mt-1 font-mono text-3xl font-bold tracking-[0.14em] text-[#ff5200] glow-orange">
+            <div className="booking-code mt-1 text-3xl tracking-[0.14em] glow-orange">
               {booking.booking_code}
             </div>
             {isPast && (
@@ -214,7 +216,7 @@ export default function BookingTicket({
 
           <div className="rounded-2xl border border-[rgba(255,82,0,0.16)] bg-[#0A0F18] p-4 text-center">
             <div className="text-xs uppercase tracking-[0.18em] text-[#A0A6AF]">H-ID</div>
-            <div className="mt-1 font-mono text-xl font-bold text-[#ff5200] glow-orange">{hId}</div>
+            <div className="hid-text mt-1 text-xl glow-orange">{hId}</div>
             <div className="mt-2 text-xs text-[#A0A6AF]">Customer: {customerName}</div>
           </div>
 
@@ -235,7 +237,7 @@ export default function BookingTicket({
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-[#ff5200]">₹{booking.total_price}</div>
+            <div className="price-text text-2xl">₹{booking.total_price}</div>
             <div className="text-xs text-[#A0A6AF]">Total Amount</div>
           </div>
         </div>

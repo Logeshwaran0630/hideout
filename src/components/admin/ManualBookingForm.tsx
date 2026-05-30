@@ -389,27 +389,45 @@ export default function ManualBookingForm() {
       });
     }
     
-    // Generate WhatsApp message
-    const whatsappMessage = `
-*THE HIDEOUT - BOOKING CONFIRMED*
+    const bookingMessage = `
+  *THE HIDEOUT - BOOKING CONFIRMED*
 
-Booking Code: *${booking.booking_code}*
-${customerType === 'regular' ? `H-ID: ${customerHId}` : `Customer: ${customerName}`}
-${customerPhone ? `Phone: ${customerPhone}` : ''}
-${customerType === 'new' ? `Email: ${newCustomerEmail}\nPassword: hideout@123\n` : ''}
+  Booking Code: *_____*
+  Customer Name: _____
+  Phone: _____
 
-Date: ${new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-Time: ${timeSlot?.label}
-Setup: ${setup?.display_name}
-Session: *${session?.name}* (${session?.max_players} players)
-Amount: ${price === 0 ? 'FREE' : `₹${price}`}
-Payment: ${paymentMode.toUpperCase()}
-${session?.h_coins_earned && price > 0 ? `H Coins Earned: +${session.h_coins_earned}` : ''}
+  Date: _____
+  Time: _____
+  Setup: _____
+  Session: *_____*
+  Amount: ₹_____
 
-Show this code at the counter.
+  Payment: _____
 
-The Hideout, Chennai | Open 11 AM - Midnight
+  Show this code at the counter.
+
+  The Hideout, Chennai | Open 11 AM - Midnight
     `.trim();
+
+    const allAccessMessage = `
+  *THE HIDEOUT - ALL-ACCESS PASS CONFIRMED*
+
+  Booking Code: *_____*
+  Customer Name: _____
+  Phone: _____
+
+  Duration: _____ minutes
+  Price: ₹_____
+
+  ✅ You can use ANY available setup (PS5, PS4, Arcade, Racing, PC)
+  ⏱️ Timer starts when you check in
+
+  Show this code at the counter.
+
+  The Hideout, Chennai | Open 11 AM - Midnight
+    `.trim();
+
+    const whatsappMessage = session?.name?.toLowerCase().includes('all-access') ? allAccessMessage : bookingMessage;
     
     setResult({ booking, whatsappMessage, customerName, customerHId });
     setLoading(false);
@@ -446,7 +464,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Booking Created!</h2>
           <p className="text-[#A0A6AF] mb-4">
-            Booking Code: <span className="text-devil-orange font-mono font-bold">{result.booking.booking_code}</span>
+            Booking Code: <span className="booking-code font-bold">{result.booking.booking_code}</span>
           </p>
           
           <div className="bg-[#0A0F18] rounded-xl p-4 mb-4 text-left">
@@ -776,7 +794,7 @@ The Hideout, Chennai | Open 11 AM - Midnight
           <div className="bg-[#0A0F18] rounded-xl p-4">
             <div className="flex justify-between items-center">
               <span className="text-[#A0A6AF]">Total Price:</span>
-              <span className="text-2xl font-bold text-devil-orange">₹{totalPrice}</span>
+              <span className="price-text text-2xl font-bold">₹{totalPrice}</span>
             </div>
             <div className="flex justify-between items-center mt-2">
               <span className="text-[#A0A6AF] text-sm">H Coins earned:</span>

@@ -3,6 +3,7 @@
 import { AlertCircle, Calendar, CheckCircle2, Clock, Gift, Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { loadTimeSlotAvailability } from "@/lib/timeSlotAvailability";
 
 type RedeemModalProps = {
   isOpen: boolean;
@@ -43,6 +44,8 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [bookedSlotIds, setBookedSlotIds] = useState<string[]>([]);
+  const [isHoliday, setIsHoliday] = useState(false);
+  const [holidayReason, setHolidayReason] = useState("");
   const [slotsLoading, setSlotsLoading] = useState(true);
   const [loadingRedeem, setLoadingRedeem] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +75,8 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
     setSelectedSlot(null);
     setTimeSlots([]);
     setBookedSlotIds([]);
+    setIsHoliday(false);
+    setHolidayReason("");
     setSlotsLoading(true);
     setError(null);
     setBookingCode("");
@@ -106,21 +111,60 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
     let active = true;
 
-    async function fetchTimeSlots() {
+    async function loadSchedule() {
       setSlotsLoading(true);
       setError(null);
 
       try {
-        const { data, error } = await supabase.from("time_slots").select("*").order("sort_order");
+        const [{ data, error }, availability] = await Promise.all([
+          supabase.from("time_slots").select("*").order("sort_order"),
+          selectedDate ? loadTimeSlotAvailability(supabase, selectedDate) : Promise.resolve({ isHoliday: false, holidayReason: null, overrides: {} }),
+        ]);
 
         if (!active) return;
 
         if (error) {
           console.error("Time slots error:", error);
           setError("Failed to load time slots");
-        } else if (data) {
-          setTimeSlots(data as TimeSlot[]);
-          console.log("Time slots loaded:", data.length);
+          return;
+        }
+
+        const slots = (data ?? []) as TimeSlot[];
+        setTimeSlots(slots);
+
+        if (!selectedDate) {
+          setBookedSlotIds([]);
+          setIsHoliday(false);
+          setHolidayReason("");
+          return;
+        }
+
+        setIsHoliday(availability.isHoliday);
+        setHolidayReason(availability.holidayReason ?? "");
+
+        const { data: bookedData, error: bookedError } = await supabase
+          .from("bookings")
+          .select("time_slot_id")
+          .eq("booking_date", selectedDate)
+          .eq("status", "confirmed");
+
+        if (!active) return;
+
+        if (bookedError) {
+          console.error("Booked slots error:", bookedError);
+        }
+
+        const bookedIds = (bookedData ?? [])
+          .map((booking: { time_slot_id: string | null }) => booking.time_slot_id)
+          .filter((id): id is string => Boolean(id));
+        const disabledIds = Object.entries(availability.overrides)
+          .filter(([, enabled]) => !enabled)
+          .map(([slotId]) => slotId);
+
+        if (availability.isHoliday) {
+          setBookedSlotIds(slots.map((slot) => slot.id));
+        } else {
+          setBookedSlotIds(Array.from(new Set([...bookedIds, ...disabledIds])));
         }
       } catch (err) {
         if (!active) return;
@@ -133,34 +177,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
       }
     }
 
-    async function fetchBookedSlots() {
-      if (!selectedDate) {
-        setBookedSlotIds([]);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("bookings")
-          .select("time_slot_id")
-          .eq("booking_date", selectedDate)
-          .eq("status", "confirmed");
-
-        if (!active) return;
-
-        if (error) {
-          console.error("Booked slots error:", error);
-        } else if (data) {
-          setBookedSlotIds(data.map((booking: { time_slot_id: string | null }) => booking.time_slot_id).filter((id): id is string => Boolean(id)));
-        }
-      } catch (err) {
-        if (!active) return;
-        console.error("Booked slots fetch error:", err);
-      }
-    }
-
-    fetchTimeSlots();
-    fetchBookedSlots();
+    void loadSchedule();
 
     return () => {
       active = false;
@@ -224,7 +241,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
 
             <div className="mt-6 rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-5">
               <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-[#A0A6AF]">Booking Code</div>
-              <div className="mt-2 font-mono text-[28px] tracking-widest text-[#ff5200]">{bookingCode}</div>
+              <div className="booking-code mt-2 text-[28px] tracking-widest">{bookingCode}</div>
             </div>
 
             <button type="button" onClick={finish} className="btn-primary mt-6 w-full rounded-lg px-5 py-3 text-[14px] font-semibold text-[#F5F1EA]">
@@ -250,7 +267,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
               <div className="rounded-xl border border-[rgba(255,69,0,0.24)] bg-[rgba(255,69,0,0.08)] p-4">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-[13px] text-[#A0A6AF]">H Coins Balance</span>
-                  <span className="font-heading text-[28px] uppercase text-[#ff5200]">{currentBalance}</span>
+                  <span className="hcoin-balance text-[#ff5200]">{currentBalance}</span>
                 </div>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#2A2F38]">
                   <div className="h-full rounded-full bg-linear-to-r from-[#ff5200] to-[#cc2200] transition-all duration-500" style={{ width: `${coinProgress}%` }} />
@@ -286,7 +303,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                           }`}
                         >
                           <div className="text-[10px] font-medium">{date.dayName}</div>
-                          <div className="mt-1 text-[18px] font-semibold text-[#F5F1EA]">{date.dayNumber}</div>
+                          <div className="number-bebas-lg mt-1 text-[#F5F1EA]">{date.dayNumber}</div>
                           <div className="mt-1 text-[10px]">{date.monthName}</div>
                         </button>
                       ))}
@@ -367,7 +384,7 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                     ].map((item) => (
                       <div key={item.label} className="flex items-center justify-between border-b border-[#2A2F38] py-3 last:border-b-0">
                         <span className="text-[13px] text-[#A0A6AF]">{item.label}</span>
-                        <span className={`text-right text-[14px] font-semibold ${item.label === "Price" || item.label === "Coins" ? "text-[#ff5200]" : "text-[#F5F1EA]"}`}>
+                        <span className={`text-right text-[14px] font-semibold ${item.label === "Price" || item.label === "Coins" ? "price-text" : "text-[#F5F1EA]"}`}>
                           {item.value}
                         </span>
                       </div>
@@ -382,6 +399,12 @@ export default function RedeemModal({ isOpen, onClose, onSuccess, currentBalance
                     <div className="flex items-center gap-2 rounded-lg border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-4 py-3 text-[13px] text-[#EF4444]">
                       <AlertCircle className="h-4 w-4" />
                       {error}
+                    </div>
+                  ) : null}
+
+                  {isHoliday ? (
+                    <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] text-red-400">
+                      Centre closed for this date{holidayReason ? `: ${holidayReason}` : "."}
                     </div>
                   ) : null}
 

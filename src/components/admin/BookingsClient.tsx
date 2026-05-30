@@ -154,18 +154,18 @@ export default function BookingsClient({ bookings, filters }: { bookings: Bookin
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking.id} className="border-b border-[#2A2F38] transition-colors hover:bg-[#14181F]">
-                <td className="px-4 py-4 font-mono text-[13px] text-[#ff5200]">{booking.booking_code}</td>
+                <td className="px-4 py-4 booking-code text-[13px]">{booking.booking_code}</td>
                 <td className="px-4 py-4 text-[14px] text-[#F5F1EA]">{formatDate(booking.booking_date)}</td>
                 <td className="px-4 py-4 text-[14px] text-[#A0A6AF]">{booking.time_slots?.label}</td>
                 <td className="px-4 py-4">
-                  <div className="font-mono text-[12px] text-[#ff5200]">{booking.users?.h_id}</div>
+                  <div className="hid-text text-[12px]">{booking.users?.h_id}</div>
                   <div className="text-[12px] text-[#71717A]">{booking.users?.display_name || booking.users?.email}</div>
                 </td>
                 <td className="px-4 py-4 text-[14px] font-semibold text-[#F5F1EA]">{booking.setups?.display_name || '-'}</td>
                 <td className="px-4 py-4">
                   <span className="rounded-full border border-[rgba(255,58,58,0.3)] bg-[rgba(255,58,58,0.1)] px-2 py-0.5 text-[12px] font-medium text-[#FF3A3A]">{booking.session_types?.name}</span>
                 </td>
-                <td className="px-4 py-4 text-[14px] font-semibold text-[#ff5200]">₹{booking.total_price}</td>
+                <td className="px-4 py-4 price-text text-[14px] font-semibold">₹{booking.total_price}</td>
                 <td className="px-4 py-4">
                   <span className={`rounded-full border px-2 py-0.5 text-[12px] font-medium ${statusBadgeClasses[booking.status] || statusBadgeClasses.completed}`}>{booking.status}</span>
                 </td>
@@ -232,14 +232,14 @@ function ViewModal({ booking, onClose }: { booking: BookingRow; onClose: () => v
           <button type="button" onClick={onClose} className="rounded-md p-2 text-[#A0A6AF] hover:text-[#F5F1EA]"><X className="h-4 w-4" /></button>
         </div>
         <div className="mt-4 space-y-3 text-[14px] text-[#A0A6AF]">
-          <div><span className="text-[#F5F1EA]">Code:</span> <span className="font-mono text-[#ff5200]">{booking.booking_code}</span></div>
+          <div><span className="text-[#F5F1EA]">Code:</span> <span className="booking-code">{booking.booking_code}</span></div>
           <div><span className="text-[#F5F1EA]">Date:</span> {booking.booking_date}</div>
           <div><span className="text-[#F5F1EA]">Time:</span> {booking.time_slots?.label}</div>
           <div><span className="text-[#F5F1EA]">User:</span> {booking.users?.display_name || booking.users?.email}</div>
-          <div><span className="text-[#F5F1EA]">H-ID:</span> <span className="font-mono text-[#ff5200]">{booking.users?.h_id}</span></div>
+          <div><span className="text-[#F5F1EA]">H-ID:</span> <span className="hid-text">{booking.users?.h_id}</span></div>
           <div><span className="text-[#F5F1EA]">Setup:</span> {booking.setups?.display_name || '-'}</div>
           <div><span className="text-[#F5F1EA]">Session:</span> {booking.session_types?.name}</div>
-          <div><span className="text-[#F5F1EA]">Price:</span> <span className="font-semibold text-[#ff5200]">₹{booking.total_price}</span></div>
+          <div><span className="text-[#F5F1EA]">Price:</span> <span className="price-text font-semibold">₹{booking.total_price}</span></div>
           <div><span className="text-[#F5F1EA]">Status:</span> {booking.status}</div>
         </div>
       </div>
@@ -259,7 +259,7 @@ function CancelModal({ booking, onClose, onCancelled }: { booking: BookingRow; o
           </button>
         </div>
         <p className="mt-4 text-[15px] text-[#A0A6AF]">
-          This will cancel booking <span className="font-mono text-[#FF3A3A]">{booking.booking_code}</span>. The slot will be freed. This cannot be undone.
+          This will cancel booking <span className="booking-code text-[#FF3A3A]">{booking.booking_code}</span>. The slot will be freed. This cannot be undone.
         </p>
         <div className="mt-6 flex gap-3">
           <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-[#2A2F38] px-4 py-3 text-[14px] text-[#A0A6AF] hover:text-[#F5F1EA]">Keep Booking</button>
@@ -312,7 +312,7 @@ function MarkPaidModal({ booking, onClose, onSuccess }: { booking: BookingRow; o
         <div className="mt-4 rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-4">
           <div className="flex items-center justify-between gap-3">
             <span className="text-[13px] text-[#A0A6AF]">Booking</span>
-            <span className="font-mono text-[13px] text-[#FF3A3A]">{booking.booking_code}</span>
+            <span className="booking-code text-[13px] text-[#FF3A3A]">{booking.booking_code}</span>
           </div>
           <div className="mt-2 flex items-center justify-between gap-3">
             <span className="text-[13px] text-[#A0A6AF]">Customer</span>

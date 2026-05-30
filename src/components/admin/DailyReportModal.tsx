@@ -206,7 +206,7 @@ export default function DailyReportModal({
               <tbody>
                 {bookings.map((booking) => (
                   <tr key={booking.id} className="border-b border-[#2A2F38]">
-                    <td className="py-3 font-mono text-[#ff5200]">{booking.booking_code}</td>
+                    <td className="py-3 booking-code">{booking.booking_code}</td>
                     <td className="py-3 text-white">{booking.users?.display_name || booking.users?.email || '-'}</td>
                     <td className="py-3 text-[#A0A6AF]">{booking.setups?.display_name || '-'}</td>
                     <td className="py-3 text-[#A0A6AF]">{booking.time_slots?.label || '-'}</td>

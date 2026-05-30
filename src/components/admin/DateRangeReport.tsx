@@ -219,6 +219,7 @@ export default function DateRangeReport() {
             .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
             .card { border: 1px solid #ddd; border-radius: 12px; padding: 14px; }
             .label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #666; }
+            .value, .amount { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; }
             .value { font-size: 20px; font-weight: 700; margin-top: 6px; }
             table { width: 100%; border-collapse: collapse; margin-top: 16px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -249,10 +250,10 @@ export default function DateRangeReport() {
                       <td>${formatDisplayDate(day.date)}</td>
                       <td>${day.dayName}</td>
                       <td>${day.bookings}</td>
-                      <td>₹${day.revenue.toLocaleString("en-IN")}</td>
-                      <td>₹${day.cash.toLocaleString("en-IN")}</td>
-                      <td>₹${day.upi.toLocaleString("en-IN")}</td>
-                      <td>₹${day.pending.toLocaleString("en-IN")}</td>
+                      <td class="amount">₹${day.revenue.toLocaleString("en-IN")}</td>
+                      <td class="amount">₹${day.cash.toLocaleString("en-IN")}</td>
+                      <td class="amount">₹${day.upi.toLocaleString("en-IN")}</td>
+                      <td class="amount">₹${day.pending.toLocaleString("en-IN")}</td>
                     </tr>
                   `
                 )
@@ -473,7 +474,7 @@ function SummaryCard({
       <div className="mb-2 flex items-center gap-2 text-sm text-[#A0A6AF]">
         <Icon className={`h-4 w-4 ${tone}`} /> {label}
       </div>
-      <div className={`text-2xl font-bold ${tone}`}>{value}</div>
+      <div className={`price-text text-2xl font-bold ${tone}`}>{value}</div>
       {subtext ? <div className="mt-1 text-xs text-[#A0A6AF]">{subtext}</div> : null}
     </div>
   );

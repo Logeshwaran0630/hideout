@@ -51,7 +51,7 @@ export default function Footer() {
               <li><a href="#games" className="transition-colors hover:text-[#ff5200]">Games</a></li>
               <li><a href="#pricing" className="transition-colors hover:text-[#ff5200]">Pricing</a></li>
               <li><Link href="/slots" className="transition-colors hover:text-[#ff5200]">Book a Slot</Link></li>
-              <li><a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="transition-colors hover:text-[#ff5200]">WhatsApp</a></li>
+              <li><a href="https://wa.me/917358206762" target="_blank" rel="noreferrer" className="transition-colors hover:text-[#ff5200]">WhatsApp</a></li>
             </ul>
           </div>
 

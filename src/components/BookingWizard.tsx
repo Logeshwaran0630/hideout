@@ -10,6 +10,7 @@ import SlotCard from "@/components/SlotCard";
 import GamingLoader from "@/components/GamingLoader";
 import { calculateBookingPrice, isRacingSessionType } from "@/lib/pricing";
 import { createISTDateRange } from "@/lib/istTime";
+import { loadTimeSlotAvailability } from "@/lib/timeSlotAvailability";
 
 interface SessionType {
   id: string;
@@ -70,6 +71,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [dateHolidayMap, setDateHolidayMap] = useState<Record<string, { isHoliday: boolean; reason: string }>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingResult, setBookingResult] = useState<any>(null);
@@ -183,6 +185,35 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
   }, [dates, selectedDate, step]);
 
   useEffect(() => {
+    if (step !== 3 || dates.length === 0) return;
+
+    let isActive = true;
+
+    const loadDateHolidays = async () => {
+      const dateValues = dates.map((date) => date.value);
+      const { data } = await supabase
+        .from("holiday_schedule")
+        .select("date, reason, is_closed")
+        .in("date", dateValues);
+
+      if (!isActive) return;
+
+      const nextMap: Record<string, { isHoliday: boolean; reason: string }> = {};
+      (data ?? []).forEach((row: { date: string; reason: string | null; is_closed: boolean | null }) => {
+        nextMap[row.date] = { isHoliday: Boolean(row.is_closed), reason: row.reason || "Holiday" };
+      });
+
+      setDateHolidayMap(nextMap);
+    };
+
+    loadDateHolidays();
+
+    return () => {
+      isActive = false;
+    };
+  }, [dates, step]);
+
+  useEffect(() => {
     if (step !== 3 || (!selectedSetup && bookingMode !== 'allAccess') || !selectedDate) return;
 
     let isActive = true;
@@ -204,6 +235,8 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
         return;
       }
 
+      const availability = await loadTimeSlotAvailability(supabase, selectedDate);
+
       let bookingsQuery = supabase.from("bookings").select("time_slot_id").eq("booking_date", selectedDate);
       if (bookingMode !== 'allAccess') {
         bookingsQuery = bookingsQuery.eq("setup_id", selectedSetup!.id);
@@ -219,8 +252,13 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
       }
 
       const bookedIds = new Set((bookingsData ?? []).map((booking: { time_slot_id: string }) => booking.time_slot_id));
+      const disabledIds = new Set(Object.entries(availability.overrides).filter(([, enabled]) => !enabled).map(([slotId]) => slotId));
+      if (availability.isHoliday) {
+        setError(availability.holidayReason ? `Centre is closed on this date: ${availability.holidayReason}` : "Centre is closed on this date.");
+      }
+
       const nextSlots: TimeSlot[] = (slotsData ?? []).map((slot) => {
-        const state: TimeSlot["state"] = bookedIds.has(slot.id)
+        const state: TimeSlot["state"] = bookedIds.has(slot.id) || disabledIds.has(slot.id)
           ? "booked"
           : isSlotPast(selectedDate, slot.start_time)
             ? "past"
@@ -489,7 +527,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   className={`p-6 rounded-2xl text-center transition-all duration-300 ${
                     bookingMode === 'setup'
                       ? 'border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)]'
-                      : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)] hover:translate-y-[-4px]'
+                            : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)] hover:-translate-y-1'
                   }`}
                 >
                   <div className="text-4xl mb-3">🎮</div>
@@ -507,7 +545,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                   className={`p-6 rounded-2xl text-center transition-all duration-300 ${
                     bookingMode === 'allAccess'
                       ? 'border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)]'
-                      : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)] hover:translate-y-[-4px]'
+                      : 'border border-[#1A1F28] bg-[#050508] text-[#A0A6AF] hover:border-[rgba(255,82,0,0.5)] hover:-translate-y-1'
                   }`}
                 >
                   <div className="text-4xl mb-3">⏱️</div>
@@ -560,7 +598,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                         }`}
                       >
                         <div className="text-3xl mb-2">⏱️ 30 Minutes</div>
-                        <div className="text-2xl font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{allAccessPrices['30min'].price}</div>
+                        <div className="price-text text-2xl font-bold">₹{allAccessPrices['30min'].price}</div>
                         <p className="text-xs mt-2 font-sans text-[#A0A6AF]">+{allAccessPrices['30min'].coins} H Coins</p>
                       </button>
                     ) : null}
@@ -584,7 +622,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                         }`}
                       >
                         <div className="text-3xl mb-2">⏱️ 1 Hour</div>
-                        <div className="text-2xl font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>₹{allAccessPrices['1hr'].price}</div>
+                        <div className="price-text text-2xl font-bold">₹{allAccessPrices['1hr'].price}</div>
                         <p className="text-xs mt-2 font-sans text-[#A0A6AF]">+{allAccessPrices['1hr'].coins} H Coins</p>
                       </button>
                     ) : null}
@@ -666,12 +704,12 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                       className={`rounded-xl border p-5 text-left transition-all duration-300 ${
                         isSelected
                           ? "border-2 border-[#ff5200] bg-[rgba(255,82,0,0.05)] shadow-[0_0_20px_rgba(255,82,0,0.15)] selected-card"
-                          : "border-[#1A1F28] bg-[#050508] hover:border-[rgba(255,82,0,0.5)] hover:translate-y-[-4px]"
+                          : "border-[#1A1F28] bg-[#050508] hover:border-[rgba(255,82,0,0.5)] hover:-translate-y-1"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="text-[18px] font-orbitron font-black text-[#F5F1EA]" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>{sessionType.name}</div>
-                        <div className="text-[26px] text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {price}</div>
+                        <div className="price-text text-[26px]">Rs. {price}</div>
                       </div>
                       <div className="mt-3 text-[13px] font-sans text-[#A0A6AF]">{sessionDescription}</div>
                       <div className="mt-2 text-[12px] font-sans font-semibold text-[#22C55E]">+{sessionType.h_coins_earned} H Coins</div>
@@ -697,7 +735,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 <div>
                   <h2 className="text-xl font-orbitron font-black text-white" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>Select date and time</h2>
                   <p className="mt-1 text-sm font-sans text-[#A0A6AF]">
-                    {bookingMode === 'allAccess' ? 'All-Access Pass' : selectedSetup?.display_name} / {selectedSessionType.name} / <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: '#ff5200' }}>Rs. {totalPrice}</span>
+                    {bookingMode === 'allAccess' ? 'All-Access Pass' : selectedSetup?.display_name} / {selectedSessionType.name} / <span className="price-text">Rs. {totalPrice}</span>
                   </p>
                 </div>
                 <button
@@ -710,7 +748,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
               </div>
 
               <div>
-                <label className="text-[13px] font-sans font-semibold text-[#A0A6AF] tracking-[0.05em]">Select Date</label>
+                <label className="text-[13px] font-sans font-semibold text-[#A0A6AF] tracking-wider">Select Date</label>
                 <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
                   {dates.map((date) => {
                     const isSelected = selectedDate === date.value;
@@ -729,9 +767,15 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                         }`}
                       >
                         <div className="text-[11px] font-sans font-semibold uppercase text-[#A0A6AF]">{date.dayName}</div>
-                        <div className="mt-1 text-[22px] font-orbitron font-black text-[#F5F1EA]" style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>{date.dayNumber}</div>
+                        <div className="number-bebas-lg mt-1 text-[#F5F1EA]">{date.dayNumber}</div>
                         <div className="mt-1 text-[11px] font-sans text-[#A0A6AF]">{date.month}</div>
-                        {date.isToday ? <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-[#ff5200]" /> : <div className="mt-2 h-1.5" />}
+                        {dateHolidayMap[date.value]?.isHoliday ? (
+                          <div className="mx-auto mt-2 h-2 w-2 rounded-full bg-red-500" title={dateHolidayMap[date.value]?.reason || "Holiday"} />
+                        ) : date.isToday ? (
+                          <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-[#ff5200]" />
+                        ) : (
+                          <div className="mt-2 h-1.5" />
+                        )}
                       </button>
                     );
                   })}
@@ -771,7 +815,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                     Selected: <span className="font-semibold text-[#ff5200]">{selectedSlot.label}</span>
                   </div>
                   <div className="font-sans text-[#A0A6AF]">
-                    Total: <span className="text-2xl text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {totalPrice}</span>
+                    Total: <span className="price-text text-2xl">Rs. {totalPrice}</span>
                   </div>
                 </div>
               ) : null}
@@ -833,7 +877,7 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <div className="text-[16px] font-sans font-bold text-[#F5F1EA]">Total</div>
-                  <div className="text-[28px] text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {totalPrice}</div>
+                  <div className="price-text text-[28px]">Rs. {totalPrice}</div>
                 </div>
               </div>
 

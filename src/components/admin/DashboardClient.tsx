@@ -43,14 +43,28 @@ function formatMoney(value: number) {
   return `Rs. ${value.toLocaleString("en-IN")}`;
 }
 
-function StatCard({ label, value, bottom, icon: Icon, valueColor }: { label: string; value: string | number; bottom: string; icon: React.ComponentType<{ className?: string }>; valueColor: string; }) {
+function StatCard({
+  label,
+  value,
+  bottom,
+  icon: Icon,
+  valueColor,
+  iconColor,
+}: {
+  label: string;
+  value: string | number;
+  bottom: string;
+  icon: React.ComponentType<{ className?: string }>;
+  valueColor: string;
+  iconColor: string;
+}) {
   return (
     <div className="rounded-xl border border-[#1A1F28] bg-[#0A0F18] p-6 transition-all duration-300 hover:border-[rgba(255,82,0,0.3)]">
       <div className="flex items-start justify-between gap-4">
         <div className="text-[13px] font-sans font-semibold text-[#A0A6AF]">{label}</div>
-        <Icon className="h-4.5 w-4.5 text-[#A0A6AF]" />
+        <Icon className={`h-4.5 w-4.5 ${iconColor}`} />
       </div>
-      <div className={`mt-3 font-orbitron text-[40px] font-black uppercase ${valueColor}`} style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900 }}>{value}</div>
+      <div className={`mt-3 number-bebas-xl uppercase ${valueColor}`}>{value}</div>
       <div className="mt-2 text-[12px] font-sans text-[#6B7280]">{bottom}</div>
     </div>
   );
@@ -129,11 +143,11 @@ export default function DashboardClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Today's Revenue" value={formatMoney(stats.todayRevenue)} bottom="Paid bookings collected today" icon={IndianRupee} valueColor="text-[#22C55E]" />
-        <StatCard label="Pending Payments" value={formatMoney(stats.pendingAmount)} bottom="Confirmed bookings still unpaid" icon={Clock3} valueColor="text-[#F59E0B]" />
-        <StatCard label="Completed Bookings" value={stats.completedCount} bottom="Bookings already marked paid" icon={CalendarDays} valueColor="text-[#ff5200]" />
-        <StatCard label="Cash Collected" value={formatMoney(stats.cashTotal)} bottom="All paid bookings with cash" icon={Wallet} valueColor="text-[#3B82F6]" />
-        <StatCard label="UPI Collected" value={formatMoney(stats.upiTotal)} bottom="All paid bookings with UPI" icon={Landmark} valueColor="text-[#00d4a0]" />
+        <StatCard label="Today's Revenue" value={formatMoney(stats.todayRevenue)} bottom="Paid bookings collected today" icon={IndianRupee} valueColor="stat-green" iconColor="text-green-500" />
+        <StatCard label="Pending Payments" value={formatMoney(stats.pendingAmount)} bottom="Confirmed bookings still unpaid" icon={Clock3} valueColor="stat-yellow" iconColor="text-yellow-500" />
+        <StatCard label="Completed Bookings" value={stats.completedCount} bottom="Bookings already marked paid" icon={CalendarDays} valueColor="stat-green" iconColor="text-green-500" />
+        <StatCard label="Cash Collected" value={formatMoney(stats.cashTotal)} bottom="All paid bookings with cash" icon={Wallet} valueColor="stat-blue" iconColor="text-blue-500" />
+        <StatCard label="UPI Collected" value={formatMoney(stats.upiTotal)} bottom="All paid bookings with UPI" icon={Landmark} valueColor="stat-cyan" iconColor="text-cyan-500" />
       </div>
 
       <section className="mt-10">
@@ -155,7 +169,7 @@ export default function DashboardClient({
                 </div>
                 <div className="hidden h-10 w-px bg-[#1A1F28] md:block" />
                 <div className="flex items-center justify-between gap-3 md:justify-end">
-                  <div className="text-[15px] font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {booking.total_price}</div>
+                  <div className="price-text text-[15px] font-bold">Rs. {booking.total_price}</div>
                   <div className="flex flex-wrap items-center gap-2">
                     <PaymentBadge status={booking.payment_status} />
                     <PaymentModeBadge mode={booking.payment_mode} />
@@ -194,7 +208,7 @@ export default function DashboardClient({
                 </div>
                 <div className="hidden h-10 w-px bg-[#1A1F28] md:block" />
                 <div className="flex items-center justify-between gap-3 md:justify-end">
-                  <div className="text-[15px] font-bold text-[#ff5200]" style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>Rs. {booking.total_price}</div>
+                  <div className="price-text text-[15px] font-bold">Rs. {booking.total_price}</div>
                   <Link href={`/admin/bookings?id=${booking.id}`} className="rounded-md border border-[#1A1F28] px-3 py-1 text-[13px] font-sans text-[#A0A6AF] transition-colors hover:border-[#ff5200] hover:text-[#F5F1EA]">View</Link>
                 </div>
               </div>

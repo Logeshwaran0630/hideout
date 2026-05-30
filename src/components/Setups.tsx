@@ -270,7 +270,7 @@ export default function Setups() {
                               >
                                 <div className="text-[0.72rem] tracking-[0.18em] text-ghost-teal/80">{price.label}</div>
                                 <div className="mt-1 flex flex-col items-center">
-                                  <span className="whitespace-nowrap text-[1.35rem] font-black leading-none text-devil-orange glow-devil">{price.price}</span>
+                                  <span className="price-text whitespace-nowrap text-[1.35rem] font-black leading-none glow-devil">{price.price}</span>
                                   {price.unit ? <span className="text-sm text-white/45 mt-1">{price.unit}</span> : null}
                                 </div>
                               </div>

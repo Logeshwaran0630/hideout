@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createCalendarEvent } from "@/lib/googleCalendar";
+import { assertTimeSlotIsBookable } from "@/lib/timeSlotAvailability";
 
 type WalkInRequestBody = {
   customerName?: string;
@@ -52,6 +53,11 @@ export async function POST(request: Request) {
 
     if (!setup || !sessionType || !timeSlot) {
       return NextResponse.json({ error: "Invalid selection" }, { status: 400 });
+    }
+
+    const availability = await assertTimeSlotIsBookable(supabase, body.bookingDate, body.timeSlotId);
+    if (!availability.allowed) {
+      return NextResponse.json({ error: availability.message }, { status: 400 });
     }
 
     const { data: existingBooking } = await supabase

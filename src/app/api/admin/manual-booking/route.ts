@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createCalendarEvent } from '@/lib/googleCalendar';
 import { sendAdminAlertEmail, sendBookingConfirmationEmail } from '@/lib/email';
+import { assertTimeSlotIsBookable } from '@/lib/timeSlotAvailability';
 
 function generateUuid() {
   return crypto.randomUUID();
@@ -132,6 +133,11 @@ export async function POST(request: Request) {
     
     if (!timeSlot || !sessionType) {
       return NextResponse.json({ error: 'Invalid slot or session type' }, { status: 400 });
+    }
+
+    const availability = await assertTimeSlotIsBookable(supabase, bookingDate, timeSlotId);
+    if (!availability.allowed) {
+      return NextResponse.json({ error: availability.message }, { status: 400 });
     }
     
     // Check if slot is already booked for the selected setup

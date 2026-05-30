@@ -358,9 +358,9 @@ export default function PriceSettings() {
                   <div key={price.id} className="rounded-xl bg-[#0A0F18] p-4">
                     <div className="mb-2 text-sm text-[#A0A6AF]">{sessionLabel}</div>
                     <div className="mb-3 flex items-center gap-3">
-                      <span className="text-2xl font-bold text-devil-orange">Rs. {price.current_price}</span>
+                      <span className="price-text text-2xl font-bold">Rs. {price.current_price}</span>
                       {price.current_price !== price.base_price ? (
-                        <span className="text-sm text-[#A0A6AF] line-through">Rs. {price.base_price}</span>
+                        <span className="price-text text-sm line-through text-[#A0A6AF]">Rs. {price.base_price}</span>
                       ) : null}
                       {price.current_price !== price.base_price ? (
                         <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-green-500">

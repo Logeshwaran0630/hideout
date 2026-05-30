@@ -421,7 +421,7 @@ export default function CounterDashboard({
               <tbody>
                 {bookings.length ? bookings.map((booking) => (
                   <tr key={booking.id} className="border-t border-[#2A2F38] text-[14px] text-[#F5F1EA]">
-                    <td className="px-4 py-3 font-mono text-[#ff5200]">{booking.booking_code}</td>
+                    <td className="px-4 py-3 booking-code">{booking.booking_code}</td>
                     <td className="px-4 py-3">{booking.time_slots?.label || "-"}</td>
                     <td className="px-4 py-3">
                       <div>{booking.guest_name || booking.users?.display_name || booking.users?.email || "Customer"}</div>
@@ -481,7 +481,7 @@ export default function CounterDashboard({
 
           {lookupUser ? (
             <div className="rounded-xl border border-[#2A2F38] bg-[#0A0F18] p-4 text-sm text-[#A0A6AF]">
-              Found: <span className="text-[#F5F1EA]">{lookupUser.display_name || lookupUser.email || "Customer"}</span> · <span className="font-mono text-[#ff5200]">{lookupUser.h_id || lookupUser.phone || "No reference"}</span>
+              Found: <span className="text-[#F5F1EA]">{lookupUser.display_name || lookupUser.email || "Customer"}</span> · <span className="hid-text">{lookupUser.h_id || lookupUser.phone || "No reference"}</span>
             </div>
           ) : null}
 
