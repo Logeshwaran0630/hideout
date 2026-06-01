@@ -42,6 +42,18 @@ export default function Hero() {
           <Link href="#pricing" className="btn-secondary px-8 py-3 text-lg font-bold uppercase tracking-[0.12em]">
             View Pricing
           </Link>
+          <a
+            href="https://wa.me/919344839372?text=Hi%20Hideout!%20I%20want%20to%20book%20a%20slot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg border-2 border-[#ff5200] px-8 py-3 text-lg font-bold text-[#ff5200] transition hover:bg-[#ff5200]/10"
+          >
+            💬 Chat to Book
+          </a>
+        </div>
+
+        <div className="mt-8 flex items-center justify-center gap-2 text-sm text-[#A0A6AF]">
+          <span>📍 No. 5, Eswari Avenue, Kovilpathagai, AVADI, Chennai - 600062</span>
         </div>
       </div>
     </section>

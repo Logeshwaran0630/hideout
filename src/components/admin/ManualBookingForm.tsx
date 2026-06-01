@@ -406,6 +406,8 @@ export default function ManualBookingForm() {
 
   Show this code at the counter.
 
+  Questions? Message us on WhatsApp: wa.me/919344839372
+
   The Hideout, Chennai | Open 11 AM - Midnight
     `.trim();
 
@@ -423,6 +425,8 @@ export default function ManualBookingForm() {
   ⏱️ Timer starts when you check in
 
   Show this code at the counter.
+
+  Questions? Message us on WhatsApp: wa.me/919344839372
 
   The Hideout, Chennai | Open 11 AM - Midnight
     `.trim();

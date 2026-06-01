@@ -31,7 +31,7 @@ export default function NotFound() {
         </div>
         <div className="mt-8 text-sm text-[#A0A6AF]">
           Need help?{" "}
-          <a href="https://wa.me/919876543210" className="text-[#ff5200] hover:underline">
+          <a href="https://wa.me/919344839372" target="_blank" rel="noopener noreferrer" className="text-[#ff5200] hover:underline">
             Chat with us
           </a>
         </div>

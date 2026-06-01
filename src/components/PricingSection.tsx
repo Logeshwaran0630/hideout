@@ -56,7 +56,7 @@ export default function PricingSection() {
         <ScrollReveal delay={200}>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <a 
-              href="https://wa.me/919876543210?text=Hi%20Hideout!%20I%20want%20pricing%20details"
+              href="https://wa.me/919344839372?text=Hi%20Hideout!%20I%20want%20pricing%20details"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary px-6 py-3 font-semibold"

@@ -51,7 +51,7 @@ export default function Footer() {
               <li><a href="#games" className="transition-colors hover:text-[#ff5200]">Games</a></li>
               <li><a href="#pricing" className="transition-colors hover:text-[#ff5200]">Pricing</a></li>
               <li><Link href="/slots" className="transition-colors hover:text-[#ff5200]">Book a Slot</Link></li>
-              <li><a href="https://wa.me/917358206762" target="_blank" rel="noreferrer" className="transition-colors hover:text-[#ff5200]">WhatsApp</a></li>
+              <li><a href="https://wa.me/919344839372" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-[#ff5200]">WhatsApp</a></li>
             </ul>
           </div>
 
@@ -59,10 +59,22 @@ export default function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-white">
               Find Us
             </h3>
-            <div className="mt-4 space-y-3 text-sm text-white/60">
-              <p>Chennai, Tamil Nadu</p>
-              <p>Open 11 AM – Midnight</p>
-              <a href="mailto:info@thehideout.in" className="transition-colors hover:text-[#ff5200]">
+            <div className="mt-4 space-y-2 text-sm text-[#A0A6AF]">
+              <p className="leading-relaxed">
+                No. 5, Eswari Avenue,<br />
+                Kovilpathagai, AVADI,<br />
+                Chennai - 600062
+              </p>
+              <a
+                href="https://maps.app.goo.gl/74HoqaH1YRUGZdWE8"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[#ff5200] hover:underline"
+              >
+                📍 Open in Google Maps
+              </a>
+              <p className="mt-2">🕐 Open 11 AM – Midnight</p>
+              <a href="mailto:info@thehideout.in" className="block transition hover:text-[#ff5200]">
                 info@thehideout.in
               </a>
             </div>

@@ -402,14 +402,13 @@ export default function BookingWizard({ setups, sessionTypes, user, profile }: B
             <div className="mb-4 text-4xl tracking-wider md:text-5xl booking-code">
               {bookingResult.booking_code}
             </div>
-            <button
-              type="button"
-              onClick={copyBookingCode}
-              className="inline-flex items-center gap-2 font-sans text-[#A0A6AF] transition-colors hover:text-[#ff5200]"
-            >
+            <button type="button" onClick={copyBookingCode} className="inline-flex items-center gap-2 font-sans text-[#A0A6AF] transition-colors hover:text-[#ff5200]">
               {copiedBookingCode ? <Check className="h-4 w-4 text-[#22C55E]" /> : <Copy className="h-4 w-4" />}
               {copiedBookingCode ? "Copied!" : "Copy booking code"}
             </button>
+            <p className="mt-4 text-center text-xs text-[#A0A6AF]">
+              📍 No. 5, Eswari Avenue, Kovilpathagai, AVADI, Chennai - 600062
+            </p>
           </div>
 
           <div className="mb-8 grid w-full grid-cols-2 gap-4 md:grid-cols-4">

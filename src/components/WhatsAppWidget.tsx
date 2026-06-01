@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Calendar, Flag, HelpCircle, MessageCircle, Send, Trophy, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "917358206762";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919344839372";
 
 const bookingTemplate = `Hi Hideout Team! 👋
 

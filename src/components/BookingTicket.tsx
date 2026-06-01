@@ -135,7 +135,10 @@ export default function BookingTicket({
               <div class="detail"><span>H-ID</span><span class="hid">${hId}</span></div>
               <div class="detail"><span>Amount</span><span class="amount">₹${booking.total_price}</span></div>
             </div>
-            <div class="footer">Show this ticket at the counter</div>
+            <div class="footer">
+              <div>No. 5, Eswari Avenue, Kovilpathagai, AVADI, Chennai - 600062</div>
+              <div style="margin-top: 6px;">Show this ticket at the counter</div>
+            </div>
           </div>
         </body>
       </html>
@@ -244,6 +247,9 @@ export default function BookingTicket({
 
         <div className="border-t border-[#2A2F38] bg-[#0A0F18] px-6 py-3 text-center">
           <div className="text-xs text-[#A0A6AF]">
+            📍 No. 5, Eswari Avenue, Kovilpathagai, AVADI, Chennai - 600062
+          </div>
+          <div className="mt-2 text-xs text-[#A0A6AF]">
             {isPast ? "Thank you for gaming at The Hideout!" : "Show this ticket at the counter • Scan QR code for quick check-in"}
           </div>
         </div>
